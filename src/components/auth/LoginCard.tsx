@@ -4,19 +4,17 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Lock, Phone, KeyRound, Fingerprint, Loader2, ScanLine } from "lucide-react";
+import { User, Lock, Phone, Fingerprint, Loader2, ScanLine } from "lucide-react";
 import { fadeUp } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "";
 
-type TabId = "credentials" | "quick" | "esign" | "otp";
+type TabId = "credentials" | "esign";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "credentials", label: "Нэр, нууц үг" },
-  { id: "quick", label: "Хялбар нэвтрэлт" },
   { id: "esign", label: "Тоон гарын үсэг" },
-  { id: "otp", label: "OTP" },
 ];
 
 async function gql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
@@ -83,18 +81,12 @@ export function LoginCard() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
 
   const isEmail = (v: string) => v.includes("@");
 
   const reset = () => {
     setError("");
     setNotice("");
-  };
-
-  const onSuccess = () => {
-    router.push("/");
   };
 
   const loginCredentials = async () => {
@@ -116,52 +108,7 @@ export function LoginCard() {
         }
       );
       saveSession(data.clientPortalUserLoginWithCredentials);
-      onSuccess();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Нэвтрэхэд алдаа гарлаа");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const requestOtp = async (target: string) => {
-    if (!target) {
-      setError("Утасны дугаараа оруулна уу");
-      return false;
-    }
-    setLoading(true);
-    reset();
-    try {
-      await gql(
-        `mutation($identifier: String!) { clientPortalUserRequestOTP(identifier: $identifier) }`,
-        { identifier: target }
-      );
-      setNotice("Баталгаажуулах код таны утас руу илгээгдлээ");
-      return true;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Код илгээхэд алдаа гарлаа");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loginOtp = async () => {
-    if (!otpCode) {
-      setError("Баталгаажуулах кодоо оруулна уу");
-      return;
-    }
-    setLoading(true);
-    reset();
-    try {
-      const data = await gql<{ clientPortalUserLoginWithOTP: unknown }>(
-        `mutation($identifier: String!, $otp: String!) {
-          clientPortalUserLoginWithOTP(identifier: $identifier, otp: $otp)
-        }`,
-        { identifier: phone, otp: otpCode }
-      );
-      saveSession(data.clientPortalUserLoginWithOTP);
-      onSuccess();
+      router.push("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Нэвтрэхэд алдаа гарлаа");
     } finally {
@@ -197,7 +144,7 @@ export function LoginCard() {
 
         <div className="flex flex-1 flex-col">
           {/* Tabs */}
-          <div className="grid grid-cols-2 gap-1 rounded-2xl bg-navy-deep/60 p-1 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-1 rounded-2xl bg-navy-deep/60 p-1">
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -262,36 +209,13 @@ export function LoginCard() {
                         нууц үг мартсан?
                       </button>
                     </div>
-                    <SubmitButton loading={loading} label="Нэвтрэх" />
-                  </form>
-                )}
-
-                {tab === "quick" && (
-                  <form
-                    className="flex flex-col gap-4"
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const ok = await requestOtp(phone);
-                      if (ok) {
-                        setOtpSent(true);
-                        setTab("otp");
-                      }
-                    }}
-                  >
-                    <div className="relative">
-                      <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                      <input
-                        className={inputCls}
-                        placeholder="Утасны дугаар"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        inputMode="tel"
-                      />
-                    </div>
-                    <p className="text-xs leading-relaxed text-slate-500">
-                      Нууц үггүйгээр зөвхөн утасны дугаараараа нэвтэрнэ. Таны утас руу баталгаажуулах код очино.
-                    </p>
-                    <SubmitButton loading={loading} label="Үргэлжлүүлэх" />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="btn-glow rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] hover:bg-brand-dark disabled:opacity-60"
+                    >
+                      {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Нэвтрэх"}
+                    </button>
                   </form>
                 )}
 
@@ -327,56 +251,6 @@ export function LoginCard() {
                     </button>
                   </div>
                 )}
-
-                {tab === "otp" && (
-                  <form
-                    className="flex flex-col gap-4"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      void loginOtp();
-                    }}
-                  >
-                    <div className="relative">
-                      <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                      <input
-                        className={inputCls}
-                        placeholder="Утасны дугаар"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        inputMode="tel"
-                        disabled={otpSent}
-                      />
-                    </div>
-                    {otpSent && (
-                      <div className="relative">
-                        <KeyRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                        <input
-                          className={inputCls}
-                          placeholder="Баталгаажуулах код"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value)}
-                          inputMode="numeric"
-                          autoComplete="one-time-code"
-                        />
-                      </div>
-                    )}
-                    {otpSent ? (
-                      <SubmitButton loading={loading} label="Нэвтрэх" />
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={loading}
-                        onClick={async () => {
-                          const ok = await requestOtp(phone);
-                          if (ok) setOtpSent(true);
-                        }}
-                        className="btn-glow rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] hover:bg-brand-dark disabled:opacity-60"
-                      >
-                        {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : "Код авах"}
-                      </button>
-                    )}
-                  </form>
-                )}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -399,17 +273,5 @@ export function LoginCard() {
         Бүртгэлгүй юу? <span className="font-semibold text-sky">+976 7777-9000</span> дугаарт холбогдоно уу
       </p>
     </motion.div>
-  );
-}
-
-function SubmitButton({ loading, label }: { loading: boolean; label: string }) {
-  return (
-    <button
-      type="submit"
-      disabled={loading}
-      className="btn-glow rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] hover:bg-brand-dark disabled:opacity-60"
-    >
-      {loading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : label}
-    </button>
   );
 }
