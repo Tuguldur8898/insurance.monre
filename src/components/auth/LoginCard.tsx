@@ -8,7 +8,7 @@ import { User, Lock, Phone, Fingerprint, Loader2, ScanLine } from "lucide-react"
 import { fadeUp } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-const ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "";
+const ENDPOINT = "/api/graphql";
 
 type TabId = "credentials" | "esign";
 

@@ -18,7 +18,7 @@ import {
 import { fadeUp } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-const ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "";
+const ENDPOINT = "/api/graphql";
 
 type CPUser = {
   _id: string;
