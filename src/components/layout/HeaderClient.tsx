@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { CmsMenuItem } from "@/lib/cms";
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "https://insure.gerege.mn";
+const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "https://ins.monre";
 
 export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
   const [scrolled, setScrolled] = useState(false);
@@ -29,11 +29,11 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
     >
       <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky to-brand text-white shadow-[0_4px_16px_rgba(37,99,235,0.4)]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky to-brand text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]">
             <ShieldCheck className="h-5 w-5" />
           </span>
-          <span className="text-lg font-extrabold tracking-tight text-navy">
-            MONRE <span className="text-brand">INSURANCE</span>
+          <span className="text-lg font-extrabold tracking-tight text-white">
+            INS<span className="text-sky">.MONRE</span>
           </span>
         </Link>
 
@@ -42,7 +42,7 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
             <Link
               key={item._id}
               href={item.url ?? "/"}
-              className="text-sm font-semibold text-navy/80 transition-colors hover:text-brand"
+              className="text-sm font-semibold text-slate-200/80 transition-colors hover:text-sky"
             >
               {item.label}
             </Link>
@@ -62,7 +62,7 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
           aria-label="Цэс нээх"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-navy md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-white md:hidden"
         >
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -83,7 +83,7 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
                   key={item._id}
                   href={item.url ?? "/"}
                   onClick={() => setOpen(false)}
-                  className="rounded-xl px-4 py-3 text-base font-semibold text-navy transition-colors hover:bg-ice"
+                  className="rounded-xl px-4 py-3 text-base font-semibold text-slate-100 transition-colors hover:bg-white/10"
                 >
                   {item.label}
                 </Link>

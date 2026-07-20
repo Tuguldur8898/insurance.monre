@@ -7,10 +7,7 @@ export default async function Home() {
   const page = await getPageBySlug("home");
 
   const cf = page?.customFieldsData ?? {};
-  const heading =
-    typeof cf.heroHeading === "string" && cf.heroHeading
-      ? cf.heroHeading
-      : page?.name ?? "INSURE PLATFORM";
+  const heading = "INS.MONRE";
   const tagline =
     typeof cf.heroSubtitle === "string" && cf.heroSubtitle
       ? cf.heroSubtitle

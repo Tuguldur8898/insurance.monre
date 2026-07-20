@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monre Insurance — Дижитал даатгалын платформ",
+  title: "ins.monre — Дижитал даатгалын платформ",
   description:
-    "Monre Insurance нь таны дижитал ирээдүйг хамгаалах найдвартай, орчин үеийн даатгалын платформ юм.",
+    "ins.monre нь таны дижитал ирээдүйг хамгаалах найдвартай, орчин үеийн даатгалын платформ юм.",
 };
 
 export function generateStaticParams() {
