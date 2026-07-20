@@ -32,6 +32,10 @@ export default async function CmsPage({ params }: PageProps) {
 
   if (!page) notFound();
 
+  const contentHtml = (page.content ?? "")
+    .replace(/976-7011-6240/g, "+976 7777-9000")
+    .replace(/insure\.gerege\.mn/g, "ins.monre");
+
   return (
     <section className="hero-bg relative min-h-screen pt-36 pb-24">
       <div className="starfield" aria-hidden="true" />
@@ -48,10 +52,10 @@ export default async function CmsPage({ params }: PageProps) {
 
         <FadeIn delay={0.1} className="mt-10">
           <GlassCard deep className="p-8 md:p-12">
-            {page.content ? (
+            {contentHtml ? (
               <article
                 className="prose max-w-none text-slate-200/85 leading-relaxed [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-white [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-white [&_p]:mt-4 [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:mt-1.5 [&_strong]:text-white"
-                dangerouslySetInnerHTML={{ __html: page.content }}
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
               />
             ) : (
               <p className="text-slate-400">Агуулга удахгүй нэмэгдэнэ.</p>

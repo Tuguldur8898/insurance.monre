@@ -64,14 +64,14 @@ export function HeroSection({
         className="relative mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-8 px-6 pb-10"
       >
         <a
-          href="tel:97670116240"
+          href="tel:+97677779000"
           className="group flex items-center gap-3 transition-transform duration-200 hover:scale-[1.02]"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky text-navy-deep shadow-[0_0_20px_rgba(56,189,248,0.55)]">
             <Phone className="h-4 w-4" />
           </span>
           <span className="text-base font-semibold text-slate-200/85 group-hover:text-sky">
-            976-7011-6240
+            +976 7777-9000
           </span>
         </a>
         <a
