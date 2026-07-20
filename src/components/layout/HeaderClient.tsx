@@ -8,8 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { CmsMenuItem } from "@/lib/cms";
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "https://ins.monre";
-
 export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -48,14 +46,12 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
               {item.label}
             </Link>
           ))}
-          <a
-            href={LOGIN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/login"
             className="btn-glow rounded-full bg-brand px-6 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] hover:bg-brand-dark"
           >
             Нэвтрэх
-          </a>
+          </Link>
         </nav>
 
         <button
@@ -89,14 +85,13 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
                   {item.label}
                 </Link>
               ))}
-              <a
-                href={LOGIN_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
                 className="mt-2 rounded-full bg-brand px-4 py-3 text-center text-base font-bold text-white"
               >
                 Нэвтрэх
-              </a>
+              </Link>
             </div>
           </motion.nav>
         )}
