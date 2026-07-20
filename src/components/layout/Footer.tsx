@@ -25,7 +25,7 @@ export async function Footer() {
             </span>
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
-            Таны дижital ирээдүйг хамгаалах найдвартай даатгалын платформ.
+            Таны дижитал ирээдүйг хамгаалах найдвартай даатгалын платформ.
           </p>
         </div>
 

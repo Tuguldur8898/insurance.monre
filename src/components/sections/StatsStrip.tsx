@@ -4,19 +4,19 @@ import { StatsCard } from "./StatsCard";
 
 const STATS = [
   {
-    icon: ShieldCheck,
+    icon: <ShieldCheck className="h-6 w-6" />,
     value: "100%",
     label: "Найдвартай хамгаалалт",
     text: "Таны өгөгдөл, хөрөнгө бүрэн хамгаалагдсан.",
   },
   {
-    icon: Zap,
+    icon: <Zap className="h-6 w-6" />,
     value: "24/7",
     label: "Тасралтгүй үйлчилгээ",
     text: "Хэдийд ч, хаанаас ч хандан үйлчлүүлэх боломж.",
   },
   {
-    icon: Users,
+    icon: <Users className="h-6 w-6" />,
     value: "1000+",
     label: "Итгэл үнэмшилтэй харилцагч",
     text: "Монголын хэрэглэгчдийн итгэдэг платформ.",
