@@ -1,8 +1,5 @@
 import { getPageBySlug } from "@/lib/cms";
 import { HeroSection } from "@/components/sections/HeroSection";
-import { StatsStrip } from "@/components/sections/StatsStrip";
-import { AboutSection } from "@/components/sections/AboutSection";
-import { ContactSection } from "@/components/sections/ContactSection";
 
 export const revalidate = 300;
 
@@ -19,12 +16,5 @@ export default async function Home() {
       ? cf.heroSubtitle
       : page?.description ?? "Таны дижитал ирээдүйг хамгаална";
 
-  return (
-    <>
-      <HeroSection heading={heading} tagline={tagline} />
-      <StatsStrip />
-      <AboutSection />
-      <ContactSection />
-    </>
-  );
+  return <HeroSection heading={heading} tagline={tagline} />;
 }
