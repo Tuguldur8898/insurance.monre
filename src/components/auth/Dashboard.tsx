@@ -27,6 +27,7 @@ import {
   AtSign,
 } from "lucide-react";
 import { SignaturePanel } from "./SignaturePanel";
+import { DocumentsPanel } from "./DocumentsPanel";
 import { cn } from "@/lib/utils";
 
 const ENDPOINT = "/api/graphql";
@@ -292,6 +293,9 @@ export function Dashboard() {
 
   const inputCls =
     "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition-all focus:border-sky/60 focus:ring-2 focus:ring-sky/20";
+
+  const docsScopeKey = user.companyRegistrationNumber || user._id;
+  const docsScopeLabel = user.companyRegistrationNumber ? "Байгууллагын" : "Хувийн";
 
   return (
     <div className="hero-bg relative flex min-h-screen flex-col">
@@ -586,19 +590,13 @@ export function Dashboard() {
                       </span>
                       <div>
                         <h1 className="text-2xl font-extrabold tracking-tight text-white">Бичиг баримт</h1>
-                        <p className="mt-1 text-sm text-slate-400">Таны гэрээ, баримт бичгууд</p>
+                        <p className="mt-1 text-sm text-slate-400">{docsScopeLabel} гэрээ, баримт бичгууд</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
-                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-                      <FileText className="h-8 w-8 text-slate-600" />
-                    </span>
-                    <p className="text-sm font-semibold text-slate-400">Бичиг баримт байхгүй байна</p>
-                    <p className="max-w-xs text-xs leading-relaxed text-slate-600">
-                      Таны гэрээ, даатгалын баримт бичгууд энд харагдана
-                    </p>
+                  <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
+                    <DocumentsPanel scopeKey={docsScopeKey} scopeLabel={docsScopeLabel} />
                   </div>
                 </section>
               )}
