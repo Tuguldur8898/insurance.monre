@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
   Building2,
-  QrCode,
   Fingerprint,
   FileText,
   LogOut,
@@ -22,6 +21,7 @@ import {
   XCircle,
   X,
 } from "lucide-react";
+import { SignaturePanel } from "./SignaturePanel";
 import { cn } from "@/lib/utils";
 
 const ENDPOINT = "/api/graphql";
@@ -44,13 +44,12 @@ type CPUser = {
   createdAt?: string;
 };
 
-type TabId = "personal" | "company" | "qr" | "sign" | "docs";
+type TabId = "personal" | "company" | "sign" | "docs";
 type ModalId = "name" | "username" | "password" | null;
 
 const TABS: { id: TabId; label: string; icon: typeof User }[] = [
   { id: "personal", label: "Хувийн мэдээлэл", icon: User },
   { id: "company", label: "Байгууллага", icon: Building2 },
-  { id: "qr", label: "Миний QR", icon: QrCode },
   { id: "sign", label: "Гарын үсэг", icon: Fingerprint },
   { id: "docs", label: "Бичиг баримт", icon: FileText },
 ];
@@ -478,38 +477,14 @@ export function Dashboard() {
                 </section>
               )}
 
-              {tab === "qr" && (
-                <section className="flex flex-col items-center py-8">
-                  <h1 className="mb-8 text-xl font-extrabold tracking-tight text-white">Миний QR</h1>
-                  <div className="relative grid h-52 w-52 grid-cols-9 gap-[3px] rounded-2xl bg-white p-3 shadow-[0_0_44px_rgba(56,189,248,0.3)]">
-                    {Array.from({ length: 81 }).map((_, i) => {
-                      const on = (i * 11 + ((i / 9) | 0) * 7 + user._id.length) % 3 !== 0;
-                      const corner =
-                        (i < 27 && i % 9 < 3) || (i < 27 && i % 9 > 5) || (i > 53 && i % 9 < 3);
-                      return (
-                        <span
-                          key={i}
-                          className={cn(
-                            "rounded-[2px]",
-                            corner ? "bg-navy-deep" : on ? "bg-navy" : "bg-white"
-                          )}
-                        />
-                      );
-                    })}
-                  </div>
-                  <p className="mt-5 text-sm font-bold text-white">{displayName}</p>
-                  <p className="mt-1 font-mono text-xs text-slate-500">{user._id}</p>
-                </section>
-              )}
-
               {tab === "sign" && (
                 <section>
                   <h1 className="text-xl font-extrabold tracking-tight text-white">Гарын үсэг</h1>
                   <p className="mt-1 text-sm text-slate-500">
-                    Тоон гарын үсгийн төлөв болон баталгаажуулалтын түүх
+                    Гарын үсгээ гараар зурах эсвэл зураг оруулж хадгална уу
                   </p>
-                  <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 text-sm text-slate-500">
-                    Одоогоор гарын үсгийн хүсэлт байхгүй байна.
+                  <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 sm:p-6">
+                    <SignaturePanel userId={user._id} />
                   </div>
                 </section>
               )}
