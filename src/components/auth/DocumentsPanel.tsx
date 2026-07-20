@@ -55,6 +55,24 @@ function fmtSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function fileExt(name: string) {
+  const parts = name.split(".");
+  return parts.length > 1 ? parts.pop()?.toLowerCase() ?? "" : "";
+}
+
+function fileLabel(name: string) {
+  const ext = fileExt(name);
+  if (["doc", "docx"].includes(ext)) return "Word";
+  if (["xls", "xlsx", "csv"].includes(ext)) return "Excel";
+  if (["pdf"].includes(ext)) return "PDF";
+  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "Зураг";
+  if (["txt", "rtf"].includes(ext)) return "Текст";
+  return ext ? ext.toUpperCase() : "Файл";
+}
+
+const ACCEPT_TYPES =
+  ".doc,.docx,.pdf,.xls,.xlsx,.csv,.txt,.rtf,.png,.jpg,.jpeg,.webp,.gif";
+
 export function DocumentsPanel({ scopeKey, scopeLabel }: { scopeKey: string; scopeLabel: string }) {
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
@@ -292,7 +310,7 @@ export function DocumentsPanel({ scopeKey, scopeLabel }: { scopeKey: string; sco
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             Баримт оруулах
-            <input type="file" multiple className="hidden" onChange={onUpload} />
+            <input type="file" multiple accept={ACCEPT_TYPES} className="hidden" onChange={onUpload} />
           </label>
         </div>
 
@@ -307,7 +325,7 @@ export function DocumentsPanel({ scopeKey, scopeLabel }: { scopeKey: string; sco
             <FileText className="h-8 w-8 text-slate-700" />
             <p className="text-sm text-slate-500">Оруулсан баримт байхгүй байна</p>
             <p className="max-w-xs text-xs text-slate-600">
-              Гэрээ, нэхэмжлэх, бусад баримтаа (2MB хүртэл) оруулж хадгалаарай
+              DOCX, PDF, XLSX, TXT, зураг зэрэг бичиг баримтаа (2MB хүртэл) оруулж хадгалаарай
             </p>
           </div>
         ) : (
@@ -322,8 +340,13 @@ export function DocumentsPanel({ scopeKey, scopeLabel }: { scopeKey: string; sco
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-white">{doc.name}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {fmtSize(doc.size)} · {new Date(doc.createdAt).toLocaleDateString("mn-MN")}
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                    <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-bold uppercase">
+                      {fileLabel(doc.name)}
+                    </span>
+                    <span>{fmtSize(doc.size)}</span>
+                    <span>·</span>
+                    <span>{new Date(doc.createdAt).toLocaleDateString("mn-MN")}</span>
                   </p>
                 </div>
                 <button
