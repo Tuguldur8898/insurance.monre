@@ -108,7 +108,8 @@ export function LoginCard() {
         }
       );
       saveSession(data.clientPortalUserLoginWithCredentials);
-      router.push("/");
+      window.dispatchEvent(new Event("auth-changed"));
+      router.push("/dashboard");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Нэвтрэхэд алдаа гарлаа");
     } finally {

@@ -11,6 +11,18 @@ import type { CmsMenuItem } from "@/lib/cms";
 export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const check = () => setLoggedIn(!!localStorage.getItem("token"));
+    check();
+    window.addEventListener("auth-changed", check);
+    window.addEventListener("storage", check);
+    return () => {
+      window.removeEventListener("auth-changed", check);
+      window.removeEventListener("storage", check);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -47,10 +59,10 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
             </Link>
           ))}
           <Link
-            href="/login"
+            href={loggedIn ? "/dashboard" : "/login"}
             className="btn-glow rounded-full bg-brand px-6 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] hover:bg-brand-dark"
           >
-            Нэвтрэх
+            {loggedIn ? "Миний хуудас" : "Нэвтрэх"}
           </Link>
         </nav>
 
@@ -86,11 +98,11 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
                 </Link>
               ))}
               <Link
-                href="/login"
+                href={loggedIn ? "/dashboard" : "/login"}
                 onClick={() => setOpen(false)}
                 className="mt-2 rounded-full bg-brand px-4 py-3 text-center text-base font-bold text-white"
               >
-                Нэвтрэх
+                {loggedIn ? "Миний хуудас" : "Нэвтрэх"}
               </Link>
             </div>
           </motion.nav>
