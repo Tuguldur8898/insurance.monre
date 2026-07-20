@@ -17,28 +17,35 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "esign", label: "Тоон гарын үсэг" },
 ];
 
-async function gql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+async function gql<T>(query: string, variables: Record<string, unknown>): Promise<{ data: T; authToken: string }> {
   const res = await fetch(ENDPOINT, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-app-token": process.env.NEXT_PUBLIC_ERXES_APP_TOKEN ?? "",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
   });
-  const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
+  const json = (await res.json()) as {
+    data?: T;
+    errors?: { message: string }[];
+    extensions?: { authToken?: string };
+  };
   if (json.errors?.length) throw new Error(json.errors[0]?.message ?? "Алдаа гарлаа");
-  return json.data as T;
+  return { data: json.data as T, authToken: json.extensions?.authToken ?? "" };
 }
 
-function saveSession(payload: unknown) {
+function saveSession(payload: unknown, authToken: string) {
+  if (authToken) {
+    localStorage.setItem("token", authToken);
+    return;
+  }
   try {
     const data = typeof payload === "string" ? JSON.parse(payload) : payload;
     const obj = data as { token?: string; refreshToken?: string };
     if (obj?.token) localStorage.setItem("token", obj.token);
     if (obj?.refreshToken) localStorage.setItem("refreshToken", obj.refreshToken);
   } catch {
-    if (typeof payload === "string") localStorage.setItem("token", payload);
+    if (typeof payload === "string" && payload !== "Success") {
+      localStorage.setItem("token", payload);
+    }
   }
 }
 
@@ -97,7 +104,7 @@ export function LoginCard() {
     setLoading(true);
     reset();
     try {
-      const data = await gql<{ clientPortalUserLoginWithCredentials: unknown }>(
+      const { data, authToken } = await gql<{ clientPortalUserLoginWithCredentials: unknown }>(
         `mutation($email: String, $phone: String, $password: String) {
           clientPortalUserLoginWithCredentials(email: $email, phone: $phone, password: $password)
         }`,
@@ -107,7 +114,10 @@ export function LoginCard() {
           password,
         }
       );
-      saveSession(data.clientPortalUserLoginWithCredentials);
+      saveSession(data.clientPortalUserLoginWithCredentials, authToken);
+      if (!localStorage.getItem("token")) {
+        throw new Error("Нэвтрэх токен авч чадсангүй");
+      }
       window.dispatchEvent(new Event("auth-changed"));
       router.push("/dashboard");
     } catch (e) {

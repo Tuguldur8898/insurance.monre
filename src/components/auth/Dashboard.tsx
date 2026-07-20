@@ -79,7 +79,7 @@ export function Dashboard() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            authorization: `Bearer ${token}`,
+            "x-client-auth-token": token,
           },
           body: JSON.stringify({
             query: `query {
