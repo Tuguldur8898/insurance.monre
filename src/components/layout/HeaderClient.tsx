@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { Menu, X, ShieldCheck } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { CmsMenuItem } from "@/lib/cms";
@@ -29,8 +30,8 @@ export function HeaderClient({ items }: { items: CmsMenuItem[] }) {
     >
       <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky to-brand text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-            <ShieldCheck className="h-5 w-5" />
+          <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.45)]">
+            <Image src="/logo.jpg" alt="ins.monre logo" fill sizes="40px" className="object-cover" priority />
           </span>
           <span className="text-lg font-extrabold tracking-tight text-white">
             INS<span className="text-sky">.MONRE</span>
