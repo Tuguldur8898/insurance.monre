@@ -20,6 +20,11 @@ import {
   CheckCircle2,
   XCircle,
   X,
+  Phone,
+  Mail,
+  MapPin,
+  Users,
+  AtSign,
 } from "lucide-react";
 import { SignaturePanel } from "./SignaturePanel";
 import { cn } from "@/lib/utils";
@@ -54,13 +59,22 @@ const TABS: { id: TabId; label: string; icon: typeof User }[] = [
   { id: "docs", label: "Бичиг баримт", icon: FileText },
 ];
 
-function Field({ label, value }: { label: string; value?: string | null }) {
+function Field({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value?: string | null;
+  icon?: typeof User;
+}) {
   return (
-    <div>
-      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+    <div className="group">
+      <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        {Icon && <Icon className="h-3 w-3 text-sky/60" />}
         {label}
       </span>
-      <div className="rounded-lg border border-white/[0.07] bg-navy-deep/60 px-4 py-3 text-sm text-slate-100">
+      <div className="rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.05] to-transparent px-4 py-3 text-sm font-medium text-slate-100 transition-colors group-hover:border-sky/25">
         {value && value.trim() ? value : <span className="text-slate-700">—</span>}
       </div>
     </div>
@@ -68,25 +82,37 @@ function Field({ label, value }: { label: string; value?: string | null }) {
 }
 
 function VerifyCard({ label, ok, note }: { label: string; ok: boolean | null; note?: string }) {
+  const verified = ok === true;
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-xl border px-4 py-3.5",
-        ok === true
-          ? "border-emerald-500/50 bg-emerald-500/[0.07]"
+        "relative overflow-hidden rounded-xl border p-[1px]",
+        verified
+          ? "bg-gradient-to-br from-emerald-400/60 via-emerald-500/20 to-transparent"
           : "border-white/[0.08] bg-white/[0.02]"
       )}
     >
-      {ok === true ? (
-        <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" />
-      ) : (
-        <XCircle className="h-5 w-5 shrink-0 text-slate-600" />
-      )}
-      <div>
-        <p className="text-xs font-semibold leading-snug text-slate-200">{label}</p>
-        <p className={cn("mt-0.5 text-[11px]", ok === true ? "text-emerald-400" : "text-slate-500")}>
-          {note ?? (ok === true ? "Баталгаажсан" : "Баталгаажаагүй")}
-        </p>
+      <div
+        className={cn(
+          "flex items-center gap-3 rounded-[11px] px-4 py-3.5",
+          verified ? "bg-navy-deep/80" : ""
+        )}
+      >
+        {verified ? (
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 shadow-[0_0_16px_rgba(16,185,129,0.35)]">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          </span>
+        ) : (
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5">
+            <XCircle className="h-4 w-4 text-slate-600" />
+          </span>
+        )}
+        <div>
+          <p className="text-xs font-semibold leading-snug text-slate-200">{label}</p>
+          <p className={cn("mt-0.5 text-[11px] font-medium", verified ? "text-emerald-400" : "text-slate-500")}>
+            {note ?? (verified ? "Баталгаажсан" : "Баталгаажаагүй")}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -351,74 +377,86 @@ export function Dashboard() {
               {tab === "personal" && (
                 <section className="flex flex-col gap-6">
                   {/* Profile header */}
-                  <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-5">
-                      <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-sky/30 bg-gradient-to-br from-frost to-navy text-2xl font-extrabold text-sky shadow-[0_0_28px_rgba(56,189,248,0.25)]">
-                        {initials}
-                      </span>
-                      <div>
-                        <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-white">
-                          {displayName}
-                          {user.isVerified && <BadgeCheck className="h-5 w-5 text-sky" />}
-                        </h1>
-                        <p className="mt-1 text-sm text-sky">{user.email ?? user.phone}</p>
+                  <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-7">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-sky/15 blur-3xl" aria-hidden="true" />
+                    <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-brand/15 blur-3xl" aria-hidden="true" />
+                    <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-5">
+                        <span className="relative">
+                          <span className="absolute -inset-1 rounded-full bg-gradient-to-br from-sky to-brand opacity-60 blur-md" aria-hidden="true" />
+                          <span className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-sky/40 bg-gradient-to-br from-frost to-navy text-2xl font-extrabold text-sky">
+                            {initials}
+                          </span>
+                        </span>
+                        <div>
+                          <h1 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-white">
+                            {displayName}
+                            {user.isVerified && <BadgeCheck className="h-5 w-5 text-sky" />}
+                          </h1>
+                          <p className="mt-1 text-sm font-medium text-sky/90">{user.email ?? user.phone}</p>
+                          <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-sky/25 bg-sky/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky">
+                            {user.type === "company" ? "Байгууллага" : "Хувь хүн"}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col gap-2.5 sm:w-56">
-                      <button
-                        type="button"
-                        onClick={() => openModal("username")}
-                        className="flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-xs font-bold text-white transition-all hover:scale-[1.02] hover:bg-brand-dark"
-                      >
-                        <UserCog className="h-4 w-4" />
-                        Нэвтрэх нэр өөрчлөх
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal("password")}
-                        className="flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-xs font-bold text-white transition-all hover:scale-[1.02] hover:bg-brand-dark"
-                      >
-                        <KeyRound className="h-4 w-4" />
-                        Нууц үг өөрчлөх
-                      </button>
-                      <button
-                        type="button"
-                        className="flex items-center justify-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-xs font-bold text-slate-300 transition-all hover:border-sky/50 hover:text-sky"
-                      >
-                        <ImageIcon className="h-4 w-4" />
-                        Гарын үсгийн зураг солих
-                      </button>
+                      <div className="flex flex-col gap-2.5 sm:w-60">
+                        <button
+                          type="button"
+                          onClick={() => openModal("username")}
+                          className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-dark px-4 py-2.5 text-xs font-bold text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_8px_28px_rgba(56,189,248,0.45)]"
+                        >
+                          <UserCog className="h-4 w-4" />
+                          Нэвтрэх нэр өөрчлөх
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openModal("password")}
+                          className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-dark px-4 py-2.5 text-xs font-bold text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_8px_28px_rgba(56,189,248,0.45)]"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                          Нууц үг өөрчлөх
+                        </button>
+                        <button
+                          type="button"
+                          className="flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-4 py-2.5 text-xs font-bold text-slate-300 transition-all hover:border-sky/50 hover:text-sky"
+                        >
+                          <ImageIcon className="h-4 w-4" />
+                          Гарын үсгийн зураг солих
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   <div className="grid gap-6 lg:grid-cols-2">
                     {/* Info */}
-                    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
+                    <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
                       <div className="mb-5 flex items-center justify-between">
-                        <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                        <h2 className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                          <span className="h-4 w-1 rounded-full bg-gradient-to-b from-sky to-brand" aria-hidden="true" />
                           Мэдээлэл
                         </h2>
                         <button
                           type="button"
                           onClick={() => openModal("name")}
-                          className="text-xs font-bold text-sky transition-colors hover:text-sky/70"
+                          className="rounded-full border border-sky/30 bg-sky/10 px-3.5 py-1 text-xs font-bold text-sky transition-all hover:bg-sky/20"
                         >
                           Засах
                         </button>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <Field label="Овог" value={user.lastName} />
-                        <Field label="Нэр" value={user.firstName} />
-                        <Field label="Хүйс" value={cfStr("gender")} />
-                        <Field label="Хаяг" value={cfStr("address")} />
-                        <Field label="Утас" value={user.phone} />
-                        <Field label="Имэйл" value={user.email} />
+                        <Field label="Овог" value={user.lastName} icon={User} />
+                        <Field label="Нэр" value={user.firstName} icon={User} />
+                        <Field label="Хүйс" value={cfStr("gender")} icon={Users} />
+                        <Field label="Хаяг" value={cfStr("address")} icon={MapPin} />
+                        <Field label="Утас" value={user.phone} icon={Phone} />
+                        <Field label="Имэйл" value={user.email} icon={Mail} />
                       </div>
                     </div>
 
                     {/* Verification */}
-                    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
-                      <h2 className="mb-5 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                    <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
+                      <h2 className="mb-5 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                        <span className="h-4 w-1 rounded-full bg-gradient-to-b from-emerald-400 to-brand" aria-hidden="true" />
                         Баталгаажуулалт
                       </h2>
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -433,16 +471,19 @@ export function Dashboard() {
                   </div>
 
                   {/* Access */}
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
-                    <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                  <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
+                    <h2 className="mb-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                      <span className="h-4 w-1 rounded-full bg-gradient-to-b from-sky to-brand" aria-hidden="true" />
                       Нэвтрэх эрхүүд
                     </h2>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full border border-sky/30 bg-sky/10 px-4 py-1.5 text-xs font-bold text-sky">
+                    <div className="flex flex-wrap gap-2.5">
+                      <span className="flex items-center gap-1.5 rounded-full border border-sky/30 bg-sky/10 px-4 py-1.5 text-xs font-bold text-sky shadow-[0_0_16px_rgba(56,189,248,0.15)]">
+                        <AtSign className="h-3.5 w-3.5" />
                         {user.type === "company" ? "Байгууллагын админ" : "Хувь хүн"}
                       </span>
                       {user.companyName && (
-                        <span className="rounded-full border border-white/15 px-4 py-1.5 text-xs font-semibold text-slate-300">
+                        <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-4 py-1.5 text-xs font-semibold text-slate-300">
+                          <Building2 className="h-3.5 w-3.5 text-slate-400" />
                           {user.companyName}
                         </span>
                       )}
