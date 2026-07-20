@@ -23,7 +23,7 @@ export function HeroSection({
   const reduced = useReducedMotion();
 
   return (
-    <section className="hero-bg relative flex min-h-screen flex-col overflow-hidden pt-24">
+    <section className="hero-bg relative flex h-[calc(100dvh-64px)] flex-col overflow-hidden pt-24">
       <div className="starfield" aria-hidden="true" />
       {!reduced && <ThreeBackground />}
 
@@ -61,7 +61,7 @@ export function HeroSection({
         initial={reduced ? "visible" : "hidden"}
         animate="visible"
         variants={fadeUp}
-        className="relative mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-8 px-6 pb-10"
+        className="relative mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-8 px-6 pb-6"
       >
         <a
           href="tel:+97677779000"
