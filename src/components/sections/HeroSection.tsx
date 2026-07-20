@@ -11,8 +11,6 @@ const ThreeBackground = dynamic(() => import("@/components/effects/ThreeBackgrou
   loading: () => null,
 });
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "https://ins.monre";
-
 type HeroProps = {
   heading?: string;
   tagline?: string;
@@ -53,16 +51,6 @@ export function HeroSection({
           >
             {tagline}
           </motion.p>
-          <motion.div variants={fadeUp} className="mt-9">
-            <a
-              href={LOGIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-glow inline-flex items-center gap-2 rounded-full bg-brand px-9 py-4 text-base font-bold text-white transition-all duration-200 hover:scale-[1.04] hover:bg-brand-dark"
-            >
-              Нэвтрэх
-            </a>
-          </motion.div>
         </motion.div>
 
         <div className="hidden md:block" aria-hidden="true" />
