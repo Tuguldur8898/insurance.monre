@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f8ff;
+  --foreground: #0f1e3d;
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
+  --navy: #0a1b3d;
+  --navy-deep: #06122b;
+  --sky: #38bdf8;
+  --ice: #dbeafe;
+  --frost: #eff6ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-sky: var(--sky);
+  --color-ice: var(--ice);
+  --color-frost: var(--frost);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glass surfaces */
+.glass {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 12px 40px rgba(37, 99, 235, 0.12);
+}
+
+.glass-deep {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85), rgba(219, 234, 254, 0.45));
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 24px 72px rgba(37, 99, 235, 0.16);
+}
+
+/* Hero backdrop: layered ice-blue waves */
+.hero-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(56, 189, 248, 0.28), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 20% 80%, rgba(37, 99, 235, 0.22), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 85%, rgba(147, 197, 253, 0.35), transparent 65%),
+    linear-gradient(160deg, #f8fbff 0%, #eaf2fe 45%, #dbeafe 100%);
+}
+
+/* Floating animation for 3D orbs */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+@keyframes float-y-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-24px) rotate(4deg); }
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+
+@keyframes shield-glow {
+  0%, 100% { filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.45)); }
+  50% { filter: drop-shadow(0 0 48px rgba(56, 189, 248, 0.75)); }
+}
+
+.anim-float { animation: float-y 5s ease-in-out infinite; }
+.anim-float-slow { animation: float-y-slow 7s ease-in-out infinite; }
+.anim-shield-glow { animation: shield-glow 4s ease-in-out infinite; }
+
+/* Wave divider */
+.wave-layer {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, rgba(37, 99, 235, 0.08));
+  border-radius: 100% 100% 0 0 / 60% 60% 0 0;
+  transform: translateY(30%);
+}
+
+/* Cyan glow button */
+.btn-glow:hover {
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.55), 0 8px 24px rgba(37, 99, 235, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}

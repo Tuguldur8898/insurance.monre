@@ -1,0 +1,29 @@
+{
+  "motion_level": 3,
+  "visual_direction": "glass-future",
+  "packages": [
+    "framer-motion",
+    "lenis",
+    "react-intersection-observer",
+    "clsx",
+    "tailwind-merge",
+    "lucide-react"
+  ],
+  "shadcn_components": [],
+  "custom_components": [
+    "GlassCard",
+    "GlassNav",
+    "ShieldScene",
+    "FadeIn",
+    "StaggerContainer"
+  ],
+  "animation_config": {
+    "core_library": "framer-motion",
+    "scroll_library": "lenis",
+    "text_animation": "custom",
+    "page_transition": "framer",
+    "ambient_system": "css",
+    "micro_interactions": "framer-motion",
+    "gsap_plugins": []
+  }
+}
