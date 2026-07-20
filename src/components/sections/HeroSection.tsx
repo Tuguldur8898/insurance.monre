@@ -1,10 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Phone, Globe } from "lucide-react";
 import { staggerContainer, fadeUp, slideRight } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
-import { GlobeScene } from "@/components/effects/GlobeScene";
+
+const ThreeBackground = dynamic(() => import("@/components/effects/ThreeBackground"), {
+  ssr: false,
+  loading: () => null,
+});
 
 const LOGIN_URL = process.env.NEXT_PUBLIC_LOGIN_URL ?? "https://ins.monre";
 
@@ -22,6 +27,7 @@ export function HeroSection({
   return (
     <section className="hero-bg relative flex min-h-screen flex-col overflow-hidden pt-24">
       <div className="starfield" aria-hidden="true" />
+      {!reduced && <ThreeBackground />}
 
       <div className="relative mx-auto grid w-full max-w-[1200px] flex-1 items-center gap-12 px-6 md:grid-cols-2">
         <motion.div
@@ -59,7 +65,7 @@ export function HeroSection({
           </motion.div>
         </motion.div>
 
-        <GlobeScene />
+        <div className="hidden md:block" aria-hidden="true" />
       </div>
 
       {/* Contact chips at hero bottom */}
