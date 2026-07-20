@@ -493,25 +493,56 @@ export function Dashboard() {
               )}
 
               {tab === "company" && (
-                <section>
-                  <h1 className="text-xl font-extrabold tracking-tight text-white">
-                    {user.companyName ?? "Байгууллагын мэдээлэл"}
-                  </h1>
-                  <p className="mt-1 text-sm text-slate-500">Байгууллагын бүртгэлийн мэдээлэл</p>
-                  <div className="mt-6 grid gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 sm:grid-cols-2 sm:p-6">
-                    <Field label="Нэр" value={user.companyName} />
-                    <Field label="Товч нэр" value={cfStr("companyShortName")} />
-                    <Field label="Регистрийн дугаар" value={user.companyRegistrationNumber} />
-                    <Field label="Улс" value={cfStr("country")} />
-                    <Field label="Имэйл" value={user.email} />
-                    <Field label="Утас" value={user.phone} />
-                    <Field label="Аймаг / Нийслэл" value={cfStr("aimag")} />
-                    <Field label="Сум / Дүүрэг" value={cfStr("sum")} />
-                    <Field label="Баг / Хороо" value={cfStr("bag")} />
-                    <Field label="Хаяг" value={cfStr("address")} />
+                <section className="flex flex-col gap-6">
+                  {/* Company header */}
+                  <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-7">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand/15 blur-3xl" aria-hidden="true" />
+                    <div className="relative flex items-center gap-5">
+                      <span className="relative">
+                        <span className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-sky to-brand opacity-60 blur-md" aria-hidden="true" />
+                        <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-sky/40 bg-gradient-to-br from-frost to-navy">
+                          <Building2 className="h-7 w-7 text-sky" />
+                        </span>
+                      </span>
+                      <div>
+                        <h1 className="text-2xl font-extrabold tracking-tight text-white">
+                          {user.companyName ?? "Байгууллагын мэдээлэл"}
+                        </h1>
+                        <p className="mt-1 text-sm text-slate-400">Байгууллагын бүртгэлийн мэдээлэл</p>
+                      </div>
+                    </div>
                   </div>
+
+                  <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
+                    <h2 className="mb-5 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                      <span className="h-4 w-1 rounded-full bg-gradient-to-b from-sky to-brand" aria-hidden="true" />
+                      Ерөнхий мэдээлэл
+                    </h2>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Нэр" value={user.companyName} icon={Building2} />
+                      <Field label="Товч нэр" value={cfStr("companyShortName")} icon={Building2} />
+                      <Field label="Регистрийн дугаар" value={user.companyRegistrationNumber} icon={FileText} />
+                      <Field label="Улс" value={cfStr("country")} icon={MapPin} />
+                      <Field label="Имэйл" value={user.email} icon={Mail} />
+                      <Field label="Утас" value={user.phone} icon={Phone} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
+                    <h2 className="mb-5 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
+                      <span className="h-4 w-1 rounded-full bg-gradient-to-b from-sky to-brand" aria-hidden="true" />
+                      Хаяг байршил
+                    </h2>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Аймаг / Нийслэл" value={cfStr("aimag")} icon={MapPin} />
+                      <Field label="Сум / Дүүрэг" value={cfStr("sum")} icon={MapPin} />
+                      <Field label="Баг / Хороо" value={cfStr("bag")} icon={MapPin} />
+                      <Field label="Хаяг" value={cfStr("address")} icon={MapPin} />
+                    </div>
+                  </div>
+
                   {!user.companyName && (
-                    <p className="mt-5 rounded-xl border border-sky/30 bg-sky/10 px-4 py-3 text-xs leading-relaxed text-sky">
+                    <p className="rounded-2xl border border-sky/30 bg-sky/10 px-5 py-4 text-sm leading-relaxed text-sky">
                       Байгууллагын мэдээлэл хараахан бүртгэгдээгүй байна. +976 7777-9000 дугаарт холбогдож мэдээллээ бүртгүүлнэ үү.
                     </p>
                   )}
@@ -519,24 +550,55 @@ export function Dashboard() {
               )}
 
               {tab === "sign" && (
-                <section>
-                  <h1 className="text-xl font-extrabold tracking-tight text-white">Гарын үсэг</h1>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Гарын үсгээ гараар зурах эсвэл зураг оруулж хадгална уу
-                  </p>
-                  <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 sm:p-6">
+                <section className="flex flex-col gap-6">
+                  <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-7">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-sky/15 blur-3xl" aria-hidden="true" />
+                    <div className="relative flex items-center gap-5">
+                      <span className="relative">
+                        <span className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-sky to-brand opacity-60 blur-md" aria-hidden="true" />
+                        <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-sky/40 bg-gradient-to-br from-frost to-navy">
+                          <Fingerprint className="h-7 w-7 text-sky" />
+                        </span>
+                      </span>
+                      <div>
+                        <h1 className="text-2xl font-extrabold tracking-tight text-white">Гарын үсэг</h1>
+                        <p className="mt-1 text-sm text-slate-400">Гарын үсгээ гараар зурах эсвэл зураг оруулж хадгална уу</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
                     <SignaturePanel userId={user._id} />
                   </div>
                 </section>
               )}
 
               {tab === "docs" && (
-                <section>
-                  <h1 className="text-xl font-extrabold tracking-tight text-white">Бичиг баримт</h1>
-                  <p className="mt-1 text-sm text-slate-500">Таны гэрээ, баримт бичгууд</p>
-                  <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/10 py-14 text-center">
-                    <FileText className="h-10 w-10 text-slate-700" />
-                    <p className="text-sm text-slate-500">Бичиг баримт байхгүй байна</p>
+                <section className="flex flex-col gap-6">
+                  <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-7">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand/15 blur-3xl" aria-hidden="true" />
+                    <div className="relative flex items-center gap-5">
+                      <span className="relative">
+                        <span className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-sky to-brand opacity-60 blur-md" aria-hidden="true" />
+                        <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-sky/40 bg-gradient-to-br from-frost to-navy">
+                          <FileText className="h-7 w-7 text-sky" />
+                        </span>
+                      </span>
+                      <div>
+                        <h1 className="text-2xl font-extrabold tracking-tight text-white">Бичиг баримт</h1>
+                        <p className="mt-1 text-sm text-slate-400">Таны гэрээ, баримт бичгууд</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
+                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
+                      <FileText className="h-8 w-8 text-slate-600" />
+                    </span>
+                    <p className="text-sm font-semibold text-slate-400">Бичиг баримт байхгүй байна</p>
+                    <p className="max-w-xs text-xs leading-relaxed text-slate-600">
+                      Таны гэрээ, даатгалын баримт бичгууд энд харагдана
+                    </p>
                   </div>
                 </section>
               )}
