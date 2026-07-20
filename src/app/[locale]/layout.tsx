@@ -6,6 +6,7 @@ import ApolloClientProvider from "@/lib/apollo/provider";
 import { Providers } from "@/components/layout/Providers";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { Chrome } from "@/components/layout/Chrome";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -44,9 +45,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ApolloClientProvider>
             <Providers>
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
+              <Chrome header={<Header />} footer={<Footer />}>
+                {children}
+              </Chrome>
             </Providers>
           </ApolloClientProvider>
         </NextIntlClientProvider>
