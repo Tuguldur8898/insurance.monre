@@ -99,7 +99,7 @@ const STATS = [
   { label: "Идэвхтэй даатгалын компани", value: "0", change: "0.0%", up: true, sub: "даатгагч" },
 ];
 
-const FILTER_TABS = ["Долоо хоног", "Сар", "Улирал", "Хагас жил", "Жил"];
+const FILTER_TABS = ["Өдөр", "Сар", "Улирал", "Хагас жил", "Жил", "Тусгай"];
 
 function StatCard({ stat }: { stat: (typeof STATS)[number] }) {
   return (
@@ -157,6 +157,8 @@ export function BrokerDashboard() {
   const [openGroups, setOpenGroups] = useState<string[]>(["contracts"]);
   const [active, setActive] = useState("dashboard");
   const [activeFilter, setActiveFilter] = useState("Сар");
+  const [customStart, setCustomStart] = useState("2026-07-01");
+  const [customEnd, setCustomEnd] = useState("2026-07-23");
 
   const toggleGroup = (id: string) => {
     setOpenGroups((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
@@ -322,37 +324,61 @@ export function BrokerDashboard() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {FILTER_TABS.map((tab) => (
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+                <div className="flex flex-wrap items-center gap-2">
+                  {FILTER_TABS.map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveFilter(tab)}
+                      className={cn(
+                        "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                        activeFilter === tab
+                          ? "bg-indigo-500 text-white"
+                          : "border border-slate-700/60 bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white"
+                      )}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                {activeFilter === "Тусгай" && (
+                  <div className="flex items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                    <input
+                      type="date"
+                      value={customStart}
+                      onChange={(e) => setCustomStart(e.target.value)}
+                      className="bg-transparent text-xs font-medium text-white outline-none"
+                    />
+                    <span className="text-slate-500">→</span>
+                    <input
+                      type="date"
+                      value={customEnd}
+                      onChange={(e) => setCustomEnd(e.target.value)}
+                      className="bg-transparent text-xs font-medium text-white outline-none"
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
                   <button
-                    key={tab}
                     type="button"
-                    onClick={() => setActiveFilter(tab)}
-                    className={cn(
-                      "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-                      activeFilter === tab
-                        ? "bg-indigo-500 text-white"
-                        : "border border-slate-700/60 bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white"
-                    )}
+                    onClick={() => router.push("/dashboard")}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
                   >
-                    {tab}
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Буцах
                   </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Буцах
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Гэрээ байгуулах
-                </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Гэрээ байгуулах
+                  </button>
+                </div>
               </div>
             </div>
 
