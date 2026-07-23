@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   FileText,
@@ -11,7 +10,6 @@ import {
   List,
   Briefcase,
   Users,
-  UserPlus,
   ClipboardList,
   Wallet,
   RotateCcw,
@@ -23,17 +21,14 @@ import {
   Send,
   ClipboardCheck,
   ChevronDown,
-  ChevronRight,
   LogOut,
   Bell,
-  Search,
   Calendar,
   TrendingUp,
   TrendingDown,
   Building2,
   ChevronLeft,
   BarChart3,
-  PieChart,
   Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -101,17 +96,14 @@ const STATS = [
 
 function StatCard({ stat }: { stat: (typeof STATS)[number] }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-5 transition-all hover:border-sky/20">
-      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-sky/10 blur-3xl" aria-hidden="true" />
+    <div className="rounded-xl border border-white/[0.08] bg-navy-deep/60 p-5">
       <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{stat.label}</p>
       <div className="mt-3 flex items-end justify-between">
         <p className="text-3xl font-extrabold tracking-tight text-white">{stat.value}</p>
         <span
           className={cn(
             "flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold",
-            stat.up
-              ? "bg-emerald-500/15 text-emerald-400"
-              : "bg-red-500/15 text-red-400"
+            stat.up ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"
           )}
         >
           {stat.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -125,7 +117,7 @@ function StatCard({ stat }: { stat: (typeof STATS)[number] }) {
 
 function Widget({ title, subtitle, children, className }: { title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-5", className)}>
+    <div className={cn("rounded-xl border border-white/[0.08] bg-navy-deep/60 p-5", className)}>
       <h3 className="text-sm font-extrabold text-white">{title}</h3>
       {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
       <div className="mt-4">{children}</div>
@@ -160,21 +152,19 @@ export function BrokerDashboard() {
   };
 
   return (
-    <div className="hero-bg relative flex min-h-screen flex-col">
-      <div className="starfield" aria-hidden="true" />
-
+    <div className="flex min-h-screen flex-col bg-navy">
       {/* Topbar */}
-      <header className="relative z-10 flex h-16 items-center justify-between border-b border-white/[0.06] bg-navy-deep/70 px-5 backdrop-blur-xl">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.08] bg-navy-deep px-5">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
           >
-            {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            <ChevronLeft className={cn("h-5 w-5 transition-transform", collapsed && "rotate-180")} />
           </button>
           <div className="flex items-center gap-2.5">
-            <span className="relative h-9 w-9 overflow-hidden rounded-xl shadow-[0_0_16px_rgba(34,197,94,0.35)]">
+            <span className="relative h-9 w-9 overflow-hidden rounded-xl">
               <Image src="/logo.jpg" alt="ins.monre" fill sizes="36px" className="object-cover" />
             </span>
             <span className="text-sm font-extrabold tracking-tight text-white">
@@ -188,18 +178,18 @@ export function BrokerDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 md:flex">
+          <div className="hidden items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 md:flex">
             <Calendar className="h-3.5 w-3.5 text-slate-500" />
             <span>2026-07-01</span>
             <span className="text-slate-600">→</span>
             <span>2026-07-20</span>
           </div>
-          <button type="button" className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-slate-400 transition-colors hover:text-white">
+          <button type="button" className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-white">
             <Bell className="h-4 w-4" />
             <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
           </button>
           <div className="flex items-center gap-2.5 pl-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky to-brand text-sm font-extrabold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky text-sm font-extrabold text-white">
               АА
             </span>
             <div className="hidden text-right sm:block">
@@ -210,30 +200,31 @@ export function BrokerDashboard() {
           <button
             type="button"
             onClick={logout}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-slate-400 transition-all hover:border-red-400/50 hover:text-red-300"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-red-300"
           >
             <LogOut className="h-4 w-4" />
           </button>
         </div>
       </header>
 
-      <div className="relative z-10 flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <aside
           className={cn(
-            "flex shrink-0 flex-col border-r border-white/[0.06] bg-navy-deep/50 backdrop-blur-xl transition-all duration-300",
-            collapsed ? "w-0 overflow-hidden opacity-0 md:w-16 md:opacity-100" : "w-64 opacity-100"
+            "shrink-0 flex-col overflow-y-auto border-r border-white/[0.08] bg-navy-deep py-3 transition-[width] duration-200",
+            collapsed ? "hidden w-0 md:flex md:w-16" : "flex w-64"
           )}
         >
-          <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-            {MENU.map((group) => (
-              <div key={group.id} className="flex flex-col">
+          {MENU.map((group) => {
+            const isOpen = openGroups.includes(group.id);
+            return (
+              <div key={group.id} className="flex flex-col px-3">
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.id)}
                   className={cn(
-                    "flex items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold transition-colors",
-                    openGroups.includes(group.id) ? "bg-white/5 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                    "flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-[13px] font-semibold transition-colors",
+                    isOpen ? "bg-white/5 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
                   )}
                 >
                   <span className="flex items-center gap-2.5">
@@ -242,50 +233,43 @@ export function BrokerDashboard() {
                   </span>
                   {!collapsed && (
                     <ChevronDown
-                      className={cn("h-3.5 w-3.5 text-slate-500 transition-transform", !openGroups.includes(group.id) && "-rotate-90")}
+                      className={cn("h-3.5 w-3.5 text-slate-500 transition-transform duration-200", !isOpen && "-rotate-90")}
                     />
                   )}
                 </button>
-                <AnimatePresence initial={false}>
-                  {openGroups.includes(group.id) && !collapsed && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="flex flex-col gap-0.5 py-1 pl-4">
-                        {group.items.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => setActive(item.id)}
-                            className={cn(
-                              "flex items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-semibold transition-all",
-                              active === item.id
-                                ? "bg-brand/15 text-sky"
-                                : "text-slate-400 hover:bg-white/5 hover:text-white"
-                            )}
-                          >
-                            <item.icon className="h-3.5 w-3.5 shrink-0" />
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {!collapsed && (
+                  <div
+                    className={cn(
+                      "flex flex-col gap-0.5 overflow-hidden py-1 pl-4 transition-all duration-200",
+                      isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                    )}
+                  >
+                    {group.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setActive(item.id)}
+                        className={cn(
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold transition-colors",
+                          active === item.id ? "bg-brand/15 text-sky" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                        )}
+                      >
+                        <item.icon className="h-3.5 w-3.5 shrink-0" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </aside>
 
         {/* Main */}
-        <main className="flex-1 overflow-y-auto p-5 sm:p-7">
+        <main className="flex-1 overflow-y-auto bg-navy p-5 sm:p-7">
           <div className="mx-auto max-w-7xl">
             {/* Greeting */}
-            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-2xl font-extrabold tracking-tight text-white">Өдрийн мэнд, Алтансан Админ</h1>
                 <p className="mt-1 flex items-center gap-2 text-sm text-slate-400">
@@ -294,17 +278,17 @@ export function BrokerDashboard() {
                   <span>Сүүлд шинэчилсэн: {new Date().toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}</span>
                 </p>
               </div>
-              <div className="mt-3 flex gap-2 sm:mt-0">
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => router.push("/dashboard")}
-                  className="rounded-full border border-white/15 bg-white/[0.03] px-4 py-2 text-xs font-bold text-slate-300 transition-all hover:border-sky/50 hover:text-sky"
+                  className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   Хувийн хуудас руу буцах
                 </button>
                 <button
                   type="button"
-                  className="btn-glow rounded-full bg-brand px-4 py-2 text-xs font-bold text-white transition-all hover:scale-[1.02] hover:bg-brand-dark"
+                  className="rounded-lg bg-brand px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-brand-dark"
                 >
                   + Гэрээ байгуулах
                 </button>
