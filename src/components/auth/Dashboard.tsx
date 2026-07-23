@@ -310,10 +310,14 @@ export function Dashboard() {
           <span className="hidden text-sm font-extrabold tracking-tight text-white sm:block">
             ins<span className="text-sky">.monre</span>
           </span>
-          <span className="ml-2 hidden items-center gap-1.5 rounded-full border border-sky/25 bg-sky/10 px-3 py-1 text-[11px] font-bold text-sky md:flex">
+          <button
+            type="button"
+            onClick={() => router.push("/broker")}
+            className="ml-2 hidden cursor-pointer items-center gap-1.5 rounded-full border border-sky/25 bg-sky/10 px-3 py-1 text-[11px] font-bold text-sky transition-colors hover:bg-sky/20 md:flex"
+          >
             <LayoutDashboard className="h-3 w-3" />
             Даатгалын систем
-          </span>
+          </button>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5">
