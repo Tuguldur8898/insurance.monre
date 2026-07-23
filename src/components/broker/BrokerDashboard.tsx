@@ -202,13 +202,6 @@ export function BrokerDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-300 lg:flex">
-            <Calendar className="h-3.5 w-3.5 text-slate-500" />
-            <span>2026-07-01</span>
-            <span className="text-slate-600">→</span>
-            <span>2026-07-23</span>
-          </div>
-
           <button type="button" className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700/60 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
             <Bell className="h-4 w-4" />
             <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
