@@ -30,11 +30,10 @@ import {
   ChevronLeft,
   BarChart3,
   Activity,
-  Search,
-  Filter,
-  Download,
-  MoreHorizontal,
-  ArrowLeft,
+  Table,
+  PieChart,
+  LineChart,
+  Hexagon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -123,7 +122,23 @@ function StatCard({ stat }: { stat: (typeof STATS)[number] }) {
   );
 }
 
-function Widget({ title, subtitle, children, className }: { title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
+type ChartType = "Table" | "Bar" | "Line" | "Pie" | "Radar";
+
+const CHART_OPTIONS: { type: ChartType; label: string; icon: typeof Table }[] = [
+  { type: "Table", label: "Table", icon: Table },
+  { type: "Bar", label: "Bar", icon: BarChart3 },
+  { type: "Line", label: "Line", icon: LineChart },
+  { type: "Pie", label: "Pie", icon: PieChart },
+  { type: "Radar", label: "Radar", icon: Hexagon },
+];
+
+function ChartWidget({ title, subtitle, className }: { title: string; subtitle?: string; className?: string }) {
+  const [open, setOpen] = useState(false);
+  const [chartType, setChartType] = useState<ChartType>("Line");
+
+  const selected = CHART_OPTIONS.find((c) => c.type === chartType) ?? CHART_OPTIONS[2];
+  const SelectedIcon = selected.icon;
+
   return (
     <div className={cn("rounded-2xl border border-slate-700/50 bg-slate-800/40 p-5", className)}>
       <div className="flex items-start justify-between">
@@ -131,22 +146,60 @@ function Widget({ title, subtitle, children, className }: { title: string; subti
           <h3 className="text-sm font-bold text-white">{title}</h3>
           {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
         </div>
-        <button type="button" className="text-slate-500 hover:text-white">
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+          >
+            <SelectedIcon className="h-4 w-4" />
+          </button>
+          {open && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+              <div className="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-slate-700/60 bg-[#0f1321] py-1 shadow-xl">
+                {CHART_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.type}
+                      type="button"
+                      onClick={() => {
+                        setChartType(option.type);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition-colors",
+                        chartType === option.type ? "bg-indigo-500/15 text-indigo-300" : "text-slate-300 hover:bg-slate-800"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {option.label}
+                      {chartType === option.type && <span className="ml-auto">✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      <div className="mt-4">{children}</div>
+      <div className="mt-4">
+        <EmptyChart label="Мэдээлэл байхгүй" type={chartType} />
+      </div>
     </div>
   );
 }
 
-function EmptyChart({ label }: { label: string }) {
+function EmptyChart({ label, type }: { label: string; type: ChartType }) {
+  const TypeIcon = CHART_OPTIONS.find((c) => c.type === type)?.icon ?? LineChart;
   return (
     <div className="flex h-52 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/30 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
-        <Activity className="h-6 w-6 text-slate-600" />
+        <TypeIcon className="h-6 w-6 text-slate-600" />
       </div>
       <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="text-xs text-slate-600">{type} харах</p>
     </div>
   );
 }
@@ -358,14 +411,6 @@ export function BrokerDashboard() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => router.push("/dashboard")}
-                    className="flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    Буцах
-                  </button>
-                  <button
-                    type="button"
                     className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
                   >
                     <Plus className="h-3.5 w-3.5" />
@@ -384,22 +429,14 @@ export function BrokerDashboard() {
 
             {/* Charts row 1 */}
             <div className="mb-6 grid gap-5 lg:grid-cols-3">
-              <Widget title="Борлуулалтын сар бүрийн чиг хандлага" subtitle="Таны сарын орлогын тойм" className="lg:col-span-2">
-                <EmptyChart label="Мэдээлэл байхгүй" />
-              </Widget>
-              <Widget title="Шилдэг ажилтнууд" subtitle="Багийн гишүүдийн борлуулалт">
-                <EmptyChart label="Мэдээлэл байхгүй" />
-              </Widget>
+              <ChartWidget title="Борлуулалтын сар бүрийн чиг хандлага" subtitle="Таны сарын орлогын тойм" className="lg:col-span-2" />
+              <ChartWidget title="Шилдэг ажилтнууд" subtitle="Багийн гишүүдийн борлуулалт" />
             </div>
 
             {/* Charts row 2 */}
             <div className="grid gap-5 lg:grid-cols-2">
-              <Widget title="Гүйцэтгэл улираар" subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан">
-                <EmptyChart label="Мэдээлэл байхгүй" />
-              </Widget>
-              <Widget title="Даатгалын түншүүд" subtitle="Даатгалын компанийн хураамж">
-                <EmptyChart label="Мэдээлэл байхгүй" />
-              </Widget>
+              <ChartWidget title="Гүйцэтгэл улираар" subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан" />
+              <ChartWidget title="Даатгалын түншүүд" subtitle="Даатгалын компанийн хураамж" />
             </div>
           </div>
         </main>
