@@ -12,7 +12,7 @@ export function Chrome({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const bare = pathname?.includes("/dashboard") || pathname?.startsWith("/broker");
+  const bare = pathname?.includes("/dashboard") || pathname?.includes("/broker");
 
   if (bare) {
     return <main className="flex-1">{children}</main>;
