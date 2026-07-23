@@ -132,7 +132,17 @@ const CHART_OPTIONS: { type: ChartType; label: string; icon: typeof Table }[] = 
   { type: "Radar", label: "Radar", icon: Hexagon },
 ];
 
-function ChartWidget({ title, subtitle, className }: { title: string; subtitle?: string; className?: string }) {
+function ChartWidget({
+  title,
+  subtitle,
+  className,
+  selectable = false,
+}: {
+  title: string;
+  subtitle?: string;
+  className?: string;
+  selectable?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [chartType, setChartType] = useState<ChartType>("Line");
 
@@ -147,40 +157,48 @@ function ChartWidget({ title, subtitle, className }: { title: string; subtitle?:
           {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
         </div>
         <div className="relative">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
-          >
-            <SelectedIcon className="h-4 w-4" />
-          </button>
-          {open && (
+          {selectable ? (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-              <div className="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-slate-700/60 bg-[#0f1321] py-1 shadow-xl">
-                {CHART_OPTIONS.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <button
-                      key={option.type}
-                      type="button"
-                      onClick={() => {
-                        setChartType(option.type);
-                        setOpen(false);
-                      }}
-                      className={cn(
-                        "flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition-colors",
-                        chartType === option.type ? "bg-indigo-500/15 text-indigo-300" : "text-slate-300 hover:bg-slate-800"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {option.label}
-                      {chartType === option.type && <span className="ml-auto">✓</span>}
-                    </button>
-                  );
-                })}
-              </div>
+              <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+              >
+                <SelectedIcon className="h-4 w-4" />
+              </button>
+              {open && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+                  <div className="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-slate-700/60 bg-[#0f1321] py-1 shadow-xl">
+                    {CHART_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <button
+                          key={option.type}
+                          type="button"
+                          onClick={() => {
+                            setChartType(option.type);
+                            setOpen(false);
+                          }}
+                          className={cn(
+                            "flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition-colors",
+                            chartType === option.type ? "bg-indigo-500/15 text-indigo-300" : "text-slate-300 hover:bg-slate-800"
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {option.label}
+                          {chartType === option.type && <span className="ml-auto">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </>
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500">
+              <Activity className="h-4 w-4" />
+            </div>
           )}
         </div>
       </div>
@@ -429,7 +447,7 @@ export function BrokerDashboard() {
 
             {/* Charts row 1 */}
             <div className="mb-6 grid gap-5 lg:grid-cols-3">
-              <ChartWidget title="Борлуулалтын сар бүрийн чиг хандлага" subtitle="Таны сарын орлогын тойм" className="lg:col-span-2" />
+              <ChartWidget title="Борлуулалтын сар бүрийн чиг хандлага" subtitle="Таны сарын орлогын тойм" className="lg:col-span-2" selectable />
               <ChartWidget title="Шилдэг ажилтнууд" subtitle="Багийн гишүүдийн борлуулалт" />
             </div>
 
