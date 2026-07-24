@@ -65,6 +65,7 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
   minivan: "Микроавтобус",
   bus: "Автобус",
   truck: "Ачааны тэрэг",
+  heavy_truck: "Хүнд даацын машин",
   pickup: "Пикап",
   motorcycle: "Мотоцикл",
 };
@@ -83,6 +84,12 @@ const MOCK_VEHICLE_REGISTRY: Record<string, VehicleInfo[]> = {
   ],
   ББ22222222: [
     { brand: "Toyota", model: "Hiace", year: "2019", plate: "ББ-2222", vin: "JTFLA11H0KB000001", engine: "2TR-000000", type: "minivan", typeLabel: "Микроавтобус", seats: "14", color: "Саарал" },
+  ],
+  ХХ00000000: [
+    { brand: "MAN", model: "TGS 33.440", year: "2020", plate: "ХҮ-0000", vin: "WMA06SZZ5GP000001", engine: "D2676-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Улаан" },
+  ],
+  ХХ11111111: [
+    { brand: "Volvo", model: "FH 540", year: "2022", plate: "ХҮ-1111", vin: "YV2E4CBA8PB000001", engine: "D13K-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Цагаан" },
   ],
 };
 
@@ -212,6 +219,8 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
   const isAuto = category === "auto";
   const isAutoTransport = subCategory === "Авто тээврийн хэрэгслийн даатгал";
+  const isHeavyVehicle = subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал";
+  const isAutoLike = isAutoTransport || isHeavyVehicle;
   const valuationNum = valuation === "" ? 0 : Number(valuation);
   const discountNum = discountPercent === "" ? 0 : Number(discountPercent);
   const additionalTotal = useMemo(() => {
@@ -567,8 +576,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                     </div>
                   </div>
 
-                  {(subCategory === "Машин механизмын даатгал" ||
-                    subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал") && (
+                  {subCategory === "Машин механизмын даатгал" && (
                     <>
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-300">Марка</label>
@@ -618,7 +626,8 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                     </>
                   )}
 
-                  {subCategory === "Авто тээврийн хэрэгслийн даатгал" && (
+                  {(subCategory === "Авто тээврийн хэрэгслийн даатгал" ||
+                    subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал") && (
                     <>
                       <div className="space-y-2 sm:col-span-2">
                         <label className="text-xs font-semibold text-slate-300">Даатгуулах машины улиан дугаар</label>
@@ -912,7 +921,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                   </div>
                 </div>
 
-            {isAutoTransport && (
+            {isAutoLike && (
                   <div className="space-y-2">
                     <button
                       type="button"
@@ -933,7 +942,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                   </div>
                 )}
 
-                {!isAutoTransport && (
+                {!isAutoLike && (
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-300">Нэмэлт үнийн мэдээлэл</label>
                     <select
@@ -964,8 +973,8 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
               </div>
             </div>
 
-            {/* Auto transport add-ons */}
-            {isAutoTransport && showAddOns && (
+            {/* Auto transport / heavy vehicle add-ons */}
+            {isAutoLike && showAddOns && (
               <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
                 <div className="mb-5 flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-500/10 text-pink-400">
