@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -28,13 +28,33 @@ import {
   TrendingDown,
   Building2,
   ChevronLeft,
-  BarChart3,
+  BarChart3 as BarChartIcon,
   Activity,
-  Table,
-  PieChart,
-  LineChart,
-  Hexagon,
+  Table as TableIcon,
+  PieChart as PieChartIcon,
+  LineChart as LineChartIcon,
+  Hexagon as HexagonIcon,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  RadarChart,
+  Radar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  Legend,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+} from "recharts";
 import { cn } from "@/lib/utils";
 
 type MenuItem = { id: string; label: string; icon: typeof FileText };
@@ -93,9 +113,9 @@ const MENU: MenuGroup[] = [
 ];
 
 const STATS = [
-  { label: "Нийт борлуулалт", value: "₮0", change: "0.0%", up: true, sub: "Өмнөх сартай харьцуулахад" },
-  { label: "Гэрээний тоо", value: "0", change: "0.0%", up: true, sub: "гэрээ" },
-  { label: "Идэвхтэй даатгалын компани", value: "0", change: "0.0%", up: true, sub: "даатгагч" },
+  { label: "Нийт борлуулалт", value: "₮59.1M", change: "+18.4%", up: true, sub: "Өмнөх сартай харьцуулахад" },
+  { label: "Гэрээний тоо", value: "142", change: "+12.7%", up: true, sub: "гэрээ" },
+  { label: "Идэвхтэй даатгалын компани", value: "5", change: "+1", up: true, sub: "даатгагч" },
 ];
 
 const FILTER_TABS = ["Өдөр", "Сар", "Улирал", "Хагас жил", "Жил", "Тусгай"];
@@ -122,32 +142,89 @@ function StatCard({ stat }: { stat: (typeof STATS)[number] }) {
   );
 }
 
+// Mock data for broker dashboard testing
+const MOCK_SALES = [
+  { label: "1-р сар", value: 2450000, prev: 1800000 },
+  { label: "2-р сар", value: 3100000, prev: 2100000 },
+  { label: "3-р сар", value: 2800000, prev: 2600000 },
+  { label: "4-р сар", value: 4200000, prev: 3100000 },
+  { label: "5-р сар", value: 3900000, prev: 3500000 },
+  { label: "6-р сар", value: 5100000, prev: 4100000 },
+  { label: "7-р сар", value: 4700000, prev: 4400000 },
+  { label: "8-р сар", value: 5600000, prev: 4800000 },
+  { label: "9-р сар", value: 6100000, prev: 5200000 },
+  { label: "10-р сар", value: 5800000, prev: 5500000 },
+  { label: "11-р сар", value: 7200000, prev: 6000000 },
+  { label: "12-р сар", value: 8100000, prev: 7000000 },
+];
+
+const MOCK_EMPLOYEES = [
+  { label: "Л. Энхуянга", value: 18500000 },
+  { label: "Б. Бат-Эрдэнэ", value: 14200000 },
+  { label: "Г. Оюунчимэг", value: 12600000 },
+  { label: "Д. Мөнхбат", value: 9800000 },
+  { label: "Н. Анударь", value: 7600000 },
+];
+
+const MOCK_QUARTERS = [
+  { label: "1-р улирал", current: 8350000, prev: 6500000 },
+  { label: "2-р улирал", current: 13200000, prev: 10700000 },
+  { label: "3-р улирал", current: 16400000, prev: 14400000 },
+  { label: "4-р улирал", current: 21100000, prev: 18500000 },
+];
+
+const MOCK_PARTNERS = [
+  { label: "МИГ даатгал", value: 35 },
+  { label: "Ард даатгал", value: 25 },
+  { label: "Болдог даатгал", value: 20 },
+  { label: "Монгол даатгал", value: 15 },
+  { label: "Бусад", value: 5 },
+];
+
+const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b"];
+
+function formatMNT(n: number) {
+  return "₮" + (n / 1000000).toFixed(1) + "M";
+}
+
 type ChartType = "Table" | "Bar" | "Line" | "Pie" | "Radar";
 
-const CHART_OPTIONS: { type: ChartType; label: string; icon: typeof Table }[] = [
-  { type: "Table", label: "Table", icon: Table },
-  { type: "Bar", label: "Bar", icon: BarChart3 },
-  { type: "Line", label: "Line", icon: LineChart },
-  { type: "Pie", label: "Pie", icon: PieChart },
-  { type: "Radar", label: "Radar", icon: Hexagon },
+const CHART_OPTIONS: { type: ChartType; label: string; icon: typeof TableIcon }[] = [
+  { type: "Table", label: "Table", icon: TableIcon },
+  { type: "Bar", label: "Bar", icon: BarChartIcon },
+  { type: "Line", label: "Line", icon: LineChartIcon },
+  { type: "Pie", label: "Pie", icon: PieChartIcon },
+  { type: "Radar", label: "Radar", icon: HexagonIcon },
 ];
+
+function detectNumericKeys(data: Record<string, unknown>[]) {
+  const first = data[0] ?? {};
+  return Object.keys(first).filter((k) => k !== "label" && typeof first[k] === "number");
+}
 
 function ChartWidget({
   title,
   subtitle,
   className,
   selectable = false,
+  data,
+  defaultType = "Line",
+  valueFormatter = (v: number) => v.toLocaleString("mn-MN"),
 }: {
   title: string;
   subtitle?: string;
   className?: string;
   selectable?: boolean;
+  data: Record<string, string | number>[];
+  defaultType?: ChartType;
+  valueFormatter?: (v: number) => string;
 }) {
   const [open, setOpen] = useState(false);
-  const [chartType, setChartType] = useState<ChartType>("Line");
+  const [chartType, setChartType] = useState<ChartType>(defaultType);
 
   const selected = CHART_OPTIONS.find((c) => c.type === chartType) ?? CHART_OPTIONS[2];
   const SelectedIcon = selected.icon;
+  const numericKeys = detectNumericKeys(data);
 
   return (
     <div className={cn("rounded-2xl border border-slate-700/50 bg-slate-800/40 p-5", className)}>
@@ -202,23 +279,177 @@ function ChartWidget({
           )}
         </div>
       </div>
-      <div className="mt-4">
-        <EmptyChart label="Мэдээлэл байхгүй" type={chartType} />
+      <div className="mt-4 h-60">
+        <ChartRenderer data={data} type={chartType} numericKeys={numericKeys} valueFormatter={valueFormatter} />
       </div>
     </div>
   );
 }
 
-function EmptyChart({ label, type }: { label: string; type: ChartType }) {
-  const TypeIcon = CHART_OPTIONS.find((c) => c.type === type)?.icon ?? LineChart;
-  return (
-    <div className="flex h-52 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/30 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
-        <TypeIcon className="h-6 w-6 text-slate-600" />
+function ChartRenderer({
+  data,
+  type,
+  numericKeys,
+  valueFormatter,
+}: {
+  data: Record<string, string | number>[];
+  type: ChartType;
+  numericKeys: string[];
+  valueFormatter: (v: number) => string;
+}) {
+  if (!data.length) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/30 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
+          <Activity className="h-6 w-6 text-slate-600" />
+        </div>
+        <p className="text-sm font-medium text-slate-500">Мэдээлэл байхгүй</p>
       </div>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="text-xs text-slate-600">{type} харах</p>
-    </div>
+    );
+  }
+
+  const chartColors = ["#6366f1", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6"];
+
+  if (type === "Table") {
+    return (
+      <div className="h-full overflow-auto rounded-xl border border-slate-700/50 bg-slate-900/30">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-800/80 text-slate-400">
+            <tr>
+              <th className="px-3 py-2 font-semibold">Нэр</th>
+              {numericKeys.map((k) => (
+                <th key={k} className="px-3 py-2 font-semibold text-right">{k === "value" ? "Утга" : k === "prev" ? "Өмнөх" : k === "current" ? "Одоо" : k}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800">
+            {data.map((row, i) => (
+              <tr key={i} className="text-slate-300">
+                <td className="px-3 py-2">{row.label}</td>
+                {numericKeys.map((k) => (
+                  <td key={k} className="px-3 py-2 text-right font-medium text-white">
+                    {valueFormatter(Number(row[k]))}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  const tooltipStyle = {
+    backgroundColor: "#0f1321",
+    border: "1px solid rgba(51,65,85,0.5)",
+    borderRadius: "0.5rem",
+    color: "#e2e8f0",
+    fontSize: "12px",
+  };
+
+  if (type === "Pie") {
+    const pieKey = numericKeys[0] ?? "value";
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Tooltip
+            contentStyle={tooltipStyle}
+            itemStyle={{ color: "#e2e8f0" }}
+            formatter={((value: number) => [valueFormatter(value), ""]) as any}
+          />
+          <Legend
+            verticalAlign="bottom"
+            height={24}
+            iconType="circle"
+            wrapperStyle={{ fontSize: "11px", color: "#94a3b8" }}
+          />
+          <Pie
+            data={data}
+            dataKey={pieKey}
+            nameKey="label"
+            cx="50%"
+            cy="45%"
+            innerRadius={45}
+            outerRadius={70}
+            paddingAngle={2}
+          >
+            {data.map((_, i) => (
+              <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (type === "Radar") {
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <RadarChart data={data}>
+          <PolarGrid stroke="#334155" />
+          <PolarAngleAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+          <PolarRadiusAxis tick={{ fill: "#64748b", fontSize: 9 }} stroke="#334155" />
+          <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: "#e2e8f0" }} />
+          <Legend wrapperStyle={{ fontSize: "11px", color: "#94a3b8" }} />
+          {numericKeys.map((k, i) => (
+            <Radar
+              key={k}
+              name={k === "value" ? "Утга" : k === "prev" ? "Өмнөх" : k === "current" ? "Одоо" : k}
+              dataKey={k}
+              stroke={chartColors[i % chartColors.length]}
+              fill={chartColors[i % chartColors.length]}
+              fillOpacity={0.25}
+            />
+          ))}
+        </RadarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  const isBar = type === "Bar";
+  const Chart = isBar ? BarChart : LineChart;
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <Chart data={data} margin={{ top: 8, right: 8, bottom: 8, left: -8 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+        <XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 10 }} stroke="#334155" />
+        <YAxis
+          tick={{ fill: "#94a3b8", fontSize: 10 }}
+          stroke="#334155"
+          tickFormatter={(v: number) => (v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))}
+        />
+        <Tooltip
+          contentStyle={tooltipStyle}
+          itemStyle={{ color: "#e2e8f0" }}
+          formatter={((value: number, name: string) => [valueFormatter(value), name === "value" ? "Утга" : name === "prev" ? "Өмнөх" : name === "current" ? "Одоо" : name]) as any}
+        />
+        <Legend wrapperStyle={{ fontSize: "11px", color: "#94a3b8" }} />
+        {numericKeys.map((k, i) =>
+          isBar ? (
+            <Bar
+              key={k}
+              type="monotone"
+              dataKey={k}
+              name={k === "value" ? "Утга" : k === "prev" ? "Өмнөх" : k === "current" ? "Одоо" : k}
+              fill={chartColors[i % chartColors.length]}
+              radius={[4, 4, 0, 0]}
+            />
+          ) : (
+            <Line
+              key={k}
+              type="monotone"
+              dataKey={k}
+              name={k === "value" ? "Утга" : k === "prev" ? "Өмнөх" : k === "current" ? "Одоо" : k}
+              stroke={chartColors[i % chartColors.length]}
+              strokeWidth={2}
+              dot={{ r: 3, fill: chartColors[i % chartColors.length] }}
+              activeDot={{ r: 5 }}
+            />
+          )
+        )}
+      </Chart>
+    </ResponsiveContainer>
   );
 }
 
@@ -230,6 +461,16 @@ export function BrokerDashboard() {
   const [activeFilter, setActiveFilter] = useState("Сар");
   const [customStart, setCustomStart] = useState("2026-07-01");
   const [customEnd, setCustomEnd] = useState("2026-07-23");
+
+  // Demo filter: limit monthly sales view based on selected period
+  const salesByPeriod = useMemo(() => {
+    if (activeFilter === "Өдөр") return MOCK_SALES.slice(6, 7);
+    if (activeFilter === "Сар") return MOCK_SALES.slice(-1);
+    if (activeFilter === "Улирал") return MOCK_SALES.slice(-3);
+    if (activeFilter === "Хагас жил") return MOCK_SALES.slice(-6);
+    if (activeFilter === "Жил") return MOCK_SALES;
+    return MOCK_SALES;
+  }, [activeFilter]);
 
   const toggleGroup = (id: string) => {
     setOpenGroups((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
@@ -267,7 +508,7 @@ export function BrokerDashboard() {
           <div className="ml-4 hidden h-6 w-px bg-slate-700 md:block" />
 
           <span className="hidden items-center gap-1.5 rounded-md bg-indigo-500/10 px-2.5 py-1 text-xs font-bold text-indigo-400 md:flex">
-            <BarChart3 className="h-3.5 w-3.5" />
+            <BarChartIcon className="h-3.5 w-3.5" />
             Брокерын систем
           </span>
         </div>
@@ -447,14 +688,39 @@ export function BrokerDashboard() {
 
             {/* Charts row 1 */}
             <div className="mb-6 grid gap-5 lg:grid-cols-3">
-              <ChartWidget title="Борлуулалтын сар бүрийн чиг хандлага" subtitle="Таны сарын орлогын тойм" className="lg:col-span-2" selectable />
-              <ChartWidget title="Шилдэг ажилтнууд" subtitle="Багийн гишүүдийн борлуулалт" />
+              <ChartWidget
+                title="Борлуулалтын сар бүрийн чиг хандлага"
+                subtitle="Таны сарын орлогын тойм"
+                className="lg:col-span-2"
+                selectable
+                data={salesByPeriod}
+                valueFormatter={formatMNT}
+              />
+              <ChartWidget
+                title="Шилдэг ажилтнууд"
+                subtitle="Багийн гишүүдийн борлуулалт"
+                defaultType="Bar"
+                data={MOCK_EMPLOYEES}
+                valueFormatter={formatMNT}
+              />
             </div>
 
             {/* Charts row 2 */}
             <div className="grid gap-5 lg:grid-cols-2">
-              <ChartWidget title="Гүйцэтгэл улираар" subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан" />
-              <ChartWidget title="Даатгалын түншүүд" subtitle="Даатгалын компанийн хураамж" />
+              <ChartWidget
+                title="Гүйцэтгэл улираар"
+                subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан"
+                defaultType="Bar"
+                data={MOCK_QUARTERS}
+                valueFormatter={formatMNT}
+              />
+              <ChartWidget
+                title="Даатгалын түншүүд"
+                subtitle="Даатгалын компанийн хураамж"
+                defaultType="Pie"
+                data={MOCK_PARTNERS}
+                valueFormatter={(v) => `${v}%`}
+              />
             </div>
           </div>
         </main>
