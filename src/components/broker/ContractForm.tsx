@@ -45,6 +45,23 @@ const PACKAGES = ["Эко багц", "Гэр бүлийн багц", "Бизне
 const DURATIONS = ["1 Жил", "2 Жил", "3 Жил"];
 const ADDITIONAL_OPTIONS = ["Нэмэлт үнийн мэдээлэл", "Чиргүүл үйлчилгээ", "Түрээсийн тэрэг", "Хуулийн туслалцаа"];
 
+// Mock vehicle registry data (replace with DAN/HUR API integration later)
+type VehicleInfo = { brand: string; model: string; year: string; plate: string; vin: string; engine: string; type: string; seats: string };
+const MOCK_VEHICLE_REGISTRY: Record<string, VehicleInfo[]> = {
+  УУ00000000: [
+    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "УБА-1234", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", seats: "7" },
+    { brand: "Lexus", model: "LX570", year: "2020", plate: "УББ-5678", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", seats: "8" },
+  ],
+  УУ88888888: [
+    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "УХА-9999", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", seats: "5" },
+  ],
+  АА11111111: [
+    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "АА-1111", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", seats: "2" },
+  ],
+};
+
+const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", seats: "" };
+
 function formatMNT(n: number) {
   return "₮" + n.toLocaleString("mn-MN");
 }
@@ -81,6 +98,9 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [loadCapacity, setLoadCapacity] = useState("");
   const [trailerCount, setTrailerCount] = useState("");
   const [routeInfo, setRouteInfo] = useState("");
+  const [vehicleSearchLoading, setVehicleSearchLoading] = useState(false);
+  const [vehicleSearchResults, setVehicleSearchResults] = useState(MOCK_VEHICLE_REGISTRY["УУ00000000"]);
+  const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
 
   const selectedCompany = COMPANIES.find((c) => c.id === company);
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
@@ -310,7 +330,10 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                         <input
                           type="text"
                           value={regNumber}
-                          onChange={(e) => setRegNumber(e.target.value)}
+                          onChange={(e) => {
+                            setRegNumber(e.target.value);
+                            setVehicleSearchOpen(false);
+                          }}
                           placeholder="УУ00000000"
                           className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                         />
@@ -318,9 +341,24 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                       </div>
                       <button
                         type="button"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600"
+                        disabled={vehicleSearchLoading}
+                        onClick={() => {
+                          if (!regNumber) return;
+                          setVehicleSearchLoading(true);
+                          setVehicleSearchOpen(false);
+                          setTimeout(() => {
+                            setVehicleSearchResults(MOCK_VEHICLE_REGISTRY[regNumber] ?? []);
+                            setVehicleSearchLoading(false);
+                            setVehicleSearchOpen(true);
+                          }, 800);
+                        }}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
                       >
-                        <Search className="h-4 w-4" />
+                        {vehicleSearchLoading ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <Search className="h-4 w-4" />
+                        )}
                       </button>
                       <button
                         type="button"
@@ -329,6 +367,68 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                         <Plus className="h-4 w-4" />
                       </button>
                     </div>
+
+                    {/* Vehicle search results dropdown */}
+                    {vehicleSearchOpen && (
+                      <div className="relative z-20 mt-2">
+                        <div className="rounded-xl border border-slate-700/50 bg-[#0f1321] shadow-xl">
+                          <div className="border-b border-slate-700/50 px-3 py-2">
+                            <p className="text-xs font-bold text-white">
+                              {vehicleSearchResults.length > 0
+                                ? `${regNumber} -д бүртгэлийн дээрх автомашинууд`
+                                : "Мэдээлэл олдсонгүй"}
+                            </p>
+                            <p className="text-[10px] text-slate-500">
+                              {vehicleSearchResults.length > 0
+                                ? "Сонгох машинаа сонгоно уу (DAN/HUR mock)"
+                                : "Регистрийн дугаар шалгана уу"}
+                            </p>
+                          </div>
+                          <div className="max-h-60 overflow-auto p-1.5">
+                            {vehicleSearchResults.map((v, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => {
+                                  setVehicleBrand(v.brand);
+                                  setVehicleModel(v.model);
+                                  setVehicleYear(v.year);
+                                  setVinNumber(v.vin);
+                                  setEngineNumber(v.engine);
+                                  setLicensePlate(v.plate);
+                                  setVehicleType(v.type);
+                                  setPassengerCount(v.seats);
+                                  setVehicleSearchOpen(false);
+                                }}
+                                className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
+                              >
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                  <Car className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="truncate text-xs font-bold text-white">
+                                      {v.brand} {v.model}
+                                    </span>
+                                    <span className="shrink-0 text-[10px] text-slate-500">{v.year}</span>
+                                  </div>
+                                  <p className="mt-0.5 text-[10px] text-slate-500">
+                                    Дугаар: {v.plate} · VIN: {v.vin}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setVehicleSearchOpen(false)}
+                            className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
+                          >
+                            Хаах
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
