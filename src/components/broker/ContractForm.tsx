@@ -70,6 +70,18 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [showPackage, setShowPackage] = useState(false);
   const [touched, setTouched] = useState(false);
 
+  // Subcategory-specific vehicle fields
+  const [vehicleBrand, setVehicleBrand] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
+  const [vehicleYear, setVehicleYear] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [vinNumber, setVinNumber] = useState("");
+  const [licensePlate, setLicensePlate] = useState("");
+  const [passengerCount, setPassengerCount] = useState("");
+  const [loadCapacity, setLoadCapacity] = useState("");
+  const [trailerCount, setTrailerCount] = useState("");
+  const [routeInfo, setRouteInfo] = useState("");
+
   const selectedCompany = COMPANIES.find((c) => c.id === company);
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
   const isAuto = category === "auto";
@@ -275,68 +287,34 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
               )}
             </div>
 
-            {/* Customer + Vehicle */}
-            <div className="grid gap-5 sm:grid-cols-2">
+            {isAuto && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
               <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
                 <div className="mb-4 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-                    <User className="h-4.5 w-4.5" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                    <Car className="h-4.5 w-4.5" />
                   </div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Харилцагч</h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал"
+                      ? "Хүнд даацын тээврийн хэрэгсэл"
+                      : "Тээврийн хэрэгслийн мэдээлэл"}
+                  </h2>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Регистрийн дугаар <span className="text-red-400">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        value={regNumber}
-                        onChange={(e) => setRegNumber(e.target.value)}
-                        placeholder="УУ00000000"
-                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                      />
-                      <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                    </div>
-                    <button
-                      type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600"
-                    >
-                      <Search className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-600 bg-slate-700/50 text-white transition-all hover:bg-slate-700"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
 
-              {isAuto && (
-                <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
-                  <div className="mb-4 flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
-                      <Car className="h-4.5 w-4.5" />
-                    </div>
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Автомашин</h2>
-                  </div>
+                <div className="grid gap-5 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-300">
-                      Үнсэн дугаар <span className="text-red-400">*</span>
+                      Регистрийн дугаар <span className="text-red-400">*</span>
                     </label>
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <input
                           type="text"
-                          value={engineNumber}
-                          onChange={(e) => setEngineNumber(e.target.value)}
-                          placeholder="0000VBA"
+                          value={regNumber}
+                          onChange={(e) => setRegNumber(e.target.value)}
+                          placeholder="УУ00000000"
                           className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                         />
-                        <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                       </div>
                       <button
                         type="button"
@@ -344,11 +322,158 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                       >
                         <Search className="h-4 w-4" />
                       </button>
+                      <button
+                        type="button"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-600 bg-slate-700/50 text-white transition-all hover:bg-slate-700"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">
+                      Үнсэн дугаар <span className="text-red-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={engineNumber}
+                        onChange={(e) => setEngineNumber(e.target.value)}
+                        placeholder="0000VBA"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                    </div>
+                  </div>
+
+                  {(subCategory === "Машин механизмын даатгал" ||
+                    subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал") && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Марка</label>
+                        <input
+                          type="text"
+                          value={vehicleBrand}
+                          onChange={(e) => setVehicleBrand(e.target.value)}
+                          placeholder="Toyota"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Загвар</label>
+                        <input
+                          type="text"
+                          value={vehicleModel}
+                          onChange={(e) => setVehicleModel(e.target.value)}
+                          placeholder="Land Cruiser"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {subCategory === "Машин механизмын даатгал" && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Үйлдвэрлэсэн он</label>
+                        <input
+                          type="number"
+                          value={vehicleYear}
+                          onChange={(e) => setVehicleYear(e.target.value)}
+                          placeholder="2020"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Арлын дугаар (VIN)</label>
+                        <input
+                          type="text"
+                          value={vinNumber}
+                          onChange={(e) => setVinNumber(e.target.value)}
+                          placeholder="JT3DB..."
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {subCategory === "Авто тээврийн хэрэгслийн даатгал" && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Тээврийн хэрэгслийн төрөл</label>
+                        <select
+                          value={vehicleType}
+                          onChange={(e) => setVehicleType(e.target.value)}
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        >
+                          <option value="">Төрөл сонгох</option>
+                          <option value="sedan">Седан</option>
+                          <option value="suv">Джип/SUV</option>
+                          <option value="minivan">Микроавтобус</option>
+                          <option value="bus">Автобус</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Дугаарын дугаар</label>
+                        <input
+                          type="text"
+                          value={licensePlate}
+                          onChange={(e) => setLicensePlate(e.target.value)}
+                          placeholder="УБА-0000"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Суудлын тоо</label>
+                        <input
+                          type="number"
+                          value={passengerCount}
+                          onChange={(e) => setPassengerCount(e.target.value)}
+                          placeholder="4"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал" && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Ачилтын даац (тонн)</label>
+                        <input
+                          type="number"
+                          value={loadCapacity}
+                          onChange={(e) => setLoadCapacity(e.target.value)}
+                          placeholder="10"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Чиргүүлийн тоо</label>
+                        <input
+                          type="number"
+                          value={trailerCount}
+                          onChange={(e) => setTrailerCount(e.target.value)}
+                          placeholder="0"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-xs font-semibold text-slate-300">Чиглэл/зам</label>
+                        <input
+                          type="text"
+                          value={routeInfo}
+                          onChange={(e) => setRouteInfo(e.target.value)}
+                          placeholder="Улаанбаатар - Эрдэнэт"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Driver additional info accordion */}
             <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
