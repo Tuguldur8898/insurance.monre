@@ -15,7 +15,7 @@ export function Chrome({
   const bare = pathname?.includes("/dashboard") || pathname?.includes("/broker");
 
   if (bare) {
-    return <main className="flex-1">{children}</main>;
+    return <main className="flex-1 h-full overflow-hidden">{children}</main>;
   }
 
   return (

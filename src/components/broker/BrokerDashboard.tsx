@@ -555,7 +555,7 @@ export function BrokerDashboard() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0b0f19] text-slate-200">
+    <div className="flex h-full flex-col bg-[#0b0f19] text-slate-200">
       {/* Topbar */}
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 bg-[#0f1321] px-4 lg:px-6">
         <div className="flex items-center gap-3">

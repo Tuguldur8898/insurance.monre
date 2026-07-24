@@ -294,7 +294,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const isValid = company && category && subCategory && product && valuationNum > 0;
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] p-4 text-slate-200 lg:p-6">
+    <div className="h-full bg-[#0b0f19] p-4 text-slate-200 lg:p-6">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-6 flex items-center gap-3">
