@@ -147,6 +147,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [startDate, setStartDate] = useState("2026-07-24");
   const [duration, setDuration] = useState("1 Жил");
   const [additional, setAdditional] = useState("");
+  const [showAddOns, setShowAddOns] = useState(false);
   const [description, setDescription] = useState("");
   const [regNumber, setRegNumber] = useState("");
   const [engineNumber, setEngineNumber] = useState("");
@@ -827,21 +828,44 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">Нэмэлт үнийн мэдээлэл</label>
-                  <select
-                    value={additional}
-                    onChange={(e) => setAdditional(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-xs text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                  >
-                    <option value="">Нэмэлт үнийн мэдээлэл</option>
-                    {ADDITIONAL_OPTIONS.map((a) => (
-                      <option key={a} value={a}>
-                        {a}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            {isAutoTransport && showAddOns && (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddOns((v) => !v)}
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition-all",
+                        showAddOns
+                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-300"
+                          : "border-slate-700/60 bg-slate-800/60 text-slate-300 hover:border-slate-500 hover:text-white"
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Calculator className="h-4 w-4" />
+                        Нэмэлт үнийн мэдээлэл
+                      </span>
+                      <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", showAddOns && "rotate-180")} />
+                    </button>
+                  </div>
+                )}
+
+                {!isAutoTransport && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">Нэмэлт үнийн мэдээлэл</label>
+                    <select
+                      value={additional}
+                      onChange={(e) => setAdditional(e.target.value)}
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-xs text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    >
+                      <option value="">Нэмэлт үнийн мэдээлэл</option>
+                      {ADDITIONAL_OPTIONS.map((a) => (
+                        <option key={a} value={a}>
+                          {a}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-300">Тайлбар</label>
