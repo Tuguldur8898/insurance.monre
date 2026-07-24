@@ -56,6 +56,7 @@ import {
   PolarRadiusAxis,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { ContractForm } from "./ContractForm";
 
 type MenuItem = { id: string; label: string; icon: typeof FileText };
 type MenuGroup = { id: string; label: string; icon: typeof LayoutDashboard; items: MenuItem[] };
@@ -682,151 +683,156 @@ export function BrokerDashboard() {
 
         {/* Main */}
         <main className="flex-1 overflow-y-auto bg-[#0b0f19] p-4 lg:p-6">
-          <div className="mx-auto max-w-7xl">
-            {/* Greeting + filters */}
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h1 className="text-xl font-extrabold tracking-tight text-white lg:text-2xl">
-                  Өдрийн мэнд, Л. Энхуянга
-                </h1>
-                <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-                  <span className="text-indigo-400">Алтансан актив ББСБ</span>
-                  <span>·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Сүүлд шинэчилсэн: {new Date().toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-                <div className="flex flex-wrap items-center gap-2">
-                  {FILTER_TABS.map((tab) => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setActiveFilter(tab)}
-                      className={cn(
-                        "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-                        activeFilter === tab
-                          ? "bg-indigo-500 text-white"
-                          : "border border-slate-700/60 bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white"
-                      )}
-                    >
-                      {tab}
-                    </button>
-                  ))}
+          {(active === "new-contract" || active === "new-ajd") ? (
+            <ContractForm onBack={() => setActive("dashboard")} />
+          ) : (
+            <div className="mx-auto max-w-7xl">
+              {/* Greeting + filters */}
+              <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h1 className="text-xl font-extrabold tracking-tight text-white lg:text-2xl">
+                    Өдрийн мэнд, Л. Энхуянга
+                  </h1>
+                  <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
+                    <span className="text-indigo-400">Алтансан актив ББСБ</span>
+                    <span>·</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      Сүүлд шинэчилсэн: {new Date().toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </p>
                 </div>
 
-                {activeFilter === "Тусгай" && (
-                  <div className="flex items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                    <input
-                      type="date"
-                      value={customStart}
-                      onChange={(e) => setCustomStart(e.target.value)}
-                      className="bg-transparent text-xs font-medium text-white outline-none"
-                    />
-                    <span className="text-slate-500">→</span>
-                    <input
-                      type="date"
-                      value={customEnd}
-                      onChange={(e) => setCustomEnd(e.target.value)}
-                      className="bg-transparent text-xs font-medium text-white outline-none"
-                    />
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {FILTER_TABS.map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setActiveFilter(tab)}
+                        className={cn(
+                          "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                          activeFilter === tab
+                            ? "bg-indigo-500 text-white"
+                            : "border border-slate-700/60 bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-white"
+                        )}
+                      >
+                        {tab}
+                      </button>
+                    ))}
                   </div>
-                )}
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Гэрээ байгуулах
-                  </button>
+                  {activeFilter === "Тусгай" && (
+                    <div className="flex items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                      <input
+                        type="date"
+                        value={customStart}
+                        onChange={(e) => setCustomStart(e.target.value)}
+                        className="bg-transparent text-xs font-medium text-white outline-none"
+                      />
+                      <span className="text-slate-500">→</span>
+                      <input
+                        type="date"
+                        value={customEnd}
+                        onChange={(e) => setCustomEnd(e.target.value)}
+                        className="bg-transparent text-xs font-medium text-white outline-none"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActive("new-contract")}
+                      className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Гэрээ байгуулах
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Stats */}
-            <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {STATS.map((stat) => (
-                <StatCard key={stat.label} stat={stat} />
-              ))}
-            </div>
+              {/* Stats */}
+              <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {STATS.map((stat) => (
+                  <StatCard key={stat.label} stat={stat} />
+                ))}
+              </div>
 
-            {/* Charts row 1 */}
-            <div className="mb-6 grid gap-5 lg:grid-cols-3">
-              <ChartWidget
-                title="Борлуулалтын сар бүрийн чиг хандлага"
-                subtitle="Таны сарын орлогын тойм"
-                className="lg:col-span-2"
-                selectable
-                data={salesByPeriod}
-                valueFormatter={formatMNT}
-              />
-              <LeaderboardWidget
-                title="Ажилтны гүйцэтгэл"
-                subtitle="Хамгийн олон гэрээ &amp; борлуулалт"
-              />
-            </div>
+              {/* Charts row 1 */}
+              <div className="mb-6 grid gap-5 lg:grid-cols-3">
+                <ChartWidget
+                  title="Борлуулалтын сар бүрийн чиг хандлага"
+                  subtitle="Таны сарын орлогын тойм"
+                  className="lg:col-span-2"
+                  selectable
+                  data={salesByPeriod}
+                  valueFormatter={formatMNT}
+                />
+                <LeaderboardWidget
+                  title="Ажилтны гүйцэтгэл"
+                  subtitle="Хамгийн олон гэрээ &amp; борлуулалт"
+                />
+              </div>
 
-            {/* Charts row 2 */}
-            <div className="mb-6 grid gap-5 lg:grid-cols-2">
-              <ChartWidget
-                title="Бүтээгдэхүүний задаргаа"
-                subtitle="Борлуулалт бүтээгдэхүүнээр"
-                defaultType="Pie"
-                data={MOCK_PRODUCTS}
-                valueFormatter={(v) => `${v}%`}
-              />
-              <ChartWidget
-                title="Салбарын гүйцэтгэл"
-                subtitle="Борлуулалт салбар бүрээр"
-                defaultType="Bar"
-                data={MOCK_BRANCHES}
-                valueFormatter={formatMNT}
-              />
-            </div>
+              {/* Charts row 2 */}
+              <div className="mb-6 grid gap-5 lg:grid-cols-2">
+                <ChartWidget
+                  title="Бүтээгдэхүүний задаргаа"
+                  subtitle="Борлуулалт бүтээгдэхүүнээр"
+                  defaultType="Pie"
+                  data={MOCK_PRODUCTS}
+                  valueFormatter={(v) => `${v}%`}
+                />
+                <ChartWidget
+                  title="Салбарын гүйцэтгэл"
+                  subtitle="Борлуулалт салбар бүрээр"
+                  defaultType="Bar"
+                  data={MOCK_BRANCHES}
+                  valueFormatter={formatMNT}
+                />
+              </div>
 
-            {/* Charts row 3 */}
-            <div className="mb-6 grid gap-5 lg:grid-cols-2">
-              <ChartWidget
-                title="Гүйцэтгэл улираар"
-                subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан"
-                defaultType="Bar"
-                data={MOCK_QUARTERS}
-                valueFormatter={formatMNT}
-              />
-              <ChartWidget
-                title="Даатгалын түншүүд"
-                subtitle="Даатгалын компанийн хураамж"
-                defaultType="Pie"
-                data={MOCK_PARTNERS}
-                valueFormatter={(v) => `${v}%`}
-              />
-            </div>
+              {/* Charts row 3 */}
+              <div className="mb-6 grid gap-5 lg:grid-cols-2">
+                <ChartWidget
+                  title="Гүйцэтгэл улираар"
+                  subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан"
+                  defaultType="Bar"
+                  data={MOCK_QUARTERS}
+                  valueFormatter={formatMNT}
+                />
+                <ChartWidget
+                  title="Даатгалын түншүүд"
+                  subtitle="Даатгалын компанийн хураамж"
+                  defaultType="Pie"
+                  data={MOCK_PARTNERS}
+                  valueFormatter={(v) => `${v}%`}
+                />
+              </div>
 
-            {/* Charts row 4: top employee charts */}
-            <div className="grid gap-5 lg:grid-cols-2">
-              <ChartWidget
-                title="Шилдэг борлуулалттай ажилтнууд"
-                subtitle="Багийн гишүүдийн борлуулалт"
-                defaultType="Bar"
-                data={MOCK_EMPLOYEES}
-                keys={["value"]}
-                valueFormatter={formatMNT}
-              />
-              <ChartWidget
-                title="Хамгийн олон гэрээ хийсэн ажилтнууд"
-                subtitle="Ажилтны гэрээний тоо"
-                defaultType="Bar"
-                data={MOCK_EMPLOYEES.map((e) => ({ label: e.label, value: e.contracts }))}
-                valueFormatter={(v) => `${v} гэрээ`}
-              />
+              {/* Charts row 4: top employee charts */}
+              <div className="grid gap-5 lg:grid-cols-2">
+                <ChartWidget
+                  title="Шилдэг борлуулалттай ажилтнууд"
+                  subtitle="Багийн гишүүдийн борлуулалт"
+                  defaultType="Bar"
+                  data={MOCK_EMPLOYEES}
+                  keys={["value"]}
+                  valueFormatter={formatMNT}
+                />
+                <ChartWidget
+                  title="Хамгийн олон гэрээ хийсэн ажилтнууд"
+                  subtitle="Ажилтны гэрээний тоо"
+                  defaultType="Bar"
+                  data={MOCK_EMPLOYEES.map((e) => ({ label: e.label, value: e.contracts }))}
+                  valueFormatter={(v) => `${v} гэрээ`}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </div>
