@@ -31,7 +31,7 @@ const COMPANIES = [
 ];
 
 const CATEGORIES = [
-  { id: "auto", name: "Авто тээврийн хэрэгслийн даатгал", sub: ["Машин механизмын даатгал", "Авто ослын даатгал", "Авто хариуцлагын даатгал"] },
+  { id: "auto", name: "Авто тээврийн хэрэгслийн даатгал", sub: ["Машин механизмын даатгал", "Мотоциклийн даатгал", "Авто тээврийн хэрэгслийн даатгал", "Хүнд даацын тээврийн хэрэгслийн даатгал"] },
   { id: "official", name: "Албан журмын даатгал", sub: ["Албан журмын хариуцлагын даатгал", "Албан журмын эмнэлгийн даатгал"] },
   { id: "cargo", name: "Ачааны даатгал", sub: ["Олон улсын ачааны даатгал", "Дотоодын ачааны даатгал", "Тээврийн хэрэгслийн даатгал"] },
   { id: "agriculture", name: "Газар тариалангийн даатгал", sub: ["Ургацын даатгал", "Малын даатгал", "Тариалангийн хөрөнгийн даатгал"] },
@@ -177,11 +177,15 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                     }}
                     disabled={!category}
                     className={cn(
-                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:cursor-not-allowed disabled:opacity-50",
-                      touched && !subCategory ? "border-red-500/50" : "border-slate-700/60"
+                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                      !category
+                        ? "cursor-not-allowed border-slate-700/30 bg-slate-800/30 text-slate-500"
+                        : touched && !subCategory
+                          ? "border-red-500/50"
+                          : "border-slate-700/60 hover:border-slate-500"
                     )}
                   >
-                    <option value="">Дэд ангилал сонгох</option>
+                    <option value="">{category ? "Дэд ангилал сонгох" : "Эхлээд ангилал сонгоно уу"}</option>
                     {selectedCategory?.sub.map((s) => (
                       <option key={s} value={s}>
                         {s}
