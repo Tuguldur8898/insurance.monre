@@ -828,7 +828,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                   </div>
                 </div>
 
-            {isAutoTransport && showAddOns && (
+            {isAutoTransport && (
                   <div className="space-y-2">
                     <button
                       type="button"
@@ -881,7 +881,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
             </div>
 
             {/* Auto transport add-ons */}
-            {isAutoTransport && (
+            {isAutoTransport && showAddOns && (
               <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
                 <div className="mb-5 flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-500/10 text-pink-400">
