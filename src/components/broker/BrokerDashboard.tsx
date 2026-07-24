@@ -159,11 +159,27 @@ const MOCK_SALES = [
 ];
 
 const MOCK_EMPLOYEES = [
-  { label: "Л. Энхуянга", value: 18500000 },
-  { label: "Б. Бат-Эрдэнэ", value: 14200000 },
-  { label: "Г. Оюунчимэг", value: 12600000 },
-  { label: "Д. Мөнхбат", value: 9800000 },
-  { label: "Н. Анударь", value: 7600000 },
+  { label: "Л. Энхуянга", value: 18500000, contracts: 42 },
+  { label: "Б. Бат-Эрдэнэ", value: 14200000, contracts: 35 },
+  { label: "Г. Оюунчимэг", value: 12600000, contracts: 31 },
+  { label: "Д. Мөнхбат", value: 9800000, contracts: 24 },
+  { label: "Н. Анударь", value: 7600000, contracts: 18 },
+];
+
+const MOCK_PRODUCTS = [
+  { label: "Автомашины даатгал", value: 42 },
+  { label: "Аяллын даатгал", value: 18 },
+  { label: "Эрүүл мэндийн даатгал", value: 22 },
+  { label: "Гэрээслэлийн хариуцлагын даатгал", value: 10 },
+  { label: "Бусад", value: 8 },
+];
+
+const MOCK_BRANCHES = [
+  { label: "Улаанбаатар", value: 38500000 },
+  { label: "Эрдэнэт", value: 9200000 },
+  { label: "Дархан", value: 7400000 },
+  { label: "Баянхонгор", value: 3100000 },
+  { label: "Сэлэнгэ", value: 2800000 },
 ];
 
 const MOCK_QUARTERS = [
@@ -210,6 +226,7 @@ function ChartWidget({
   data,
   defaultType = "Line",
   valueFormatter = (v: number) => v.toLocaleString("mn-MN"),
+  keys,
 }: {
   title: string;
   subtitle?: string;
@@ -218,13 +235,15 @@ function ChartWidget({
   data: Record<string, string | number>[];
   defaultType?: ChartType;
   valueFormatter?: (v: number) => string;
+  keys?: string[];
 }) {
   const [open, setOpen] = useState(false);
   const [chartType, setChartType] = useState<ChartType>(defaultType);
 
   const selected = CHART_OPTIONS.find((c) => c.type === chartType) ?? CHART_OPTIONS[2];
   const SelectedIcon = selected.icon;
-  const numericKeys = detectNumericKeys(data);
+  const detectedKeys = detectNumericKeys(data);
+  const numericKeys = keys && keys.length ? keys.filter((k) => detectedKeys.includes(k)) : detectedKeys;
 
   return (
     <div className={cn("rounded-2xl border border-slate-700/50 bg-slate-800/40 p-5", className)}>
@@ -450,6 +469,57 @@ function ChartRenderer({
         )}
       </Chart>
     </ResponsiveContainer>
+  );
+}
+
+function LeaderboardWidget({
+  title,
+  subtitle,
+  className,
+}: {
+  title: string;
+  subtitle?: string;
+  className?: string;
+}) {
+  const sorted = [...MOCK_EMPLOYEES].sort((a, b) => b.contracts - a.contracts);
+  const maxSales = Math.max(...MOCK_EMPLOYEES.map((e) => e.value));
+
+  return (
+    <div className={cn("rounded-2xl border border-slate-700/50 bg-slate-800/40 p-5", className)}>
+      <div className="mb-4">
+        <h3 className="text-sm font-bold text-white">{title}</h3>
+        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+      </div>
+      <div className="space-y-3">
+        {sorted.map((emp, idx) => (
+          <div key={emp.label} className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+                idx === 0 ? "bg-amber-500/20 text-amber-300" : "bg-slate-700 text-slate-400"
+              )}
+            >
+              {idx + 1}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="truncate font-medium text-slate-200">{emp.label}</span>
+                <span className="font-bold text-white">{formatMNT(emp.value)}</span>
+              </div>
+              <div className="mt-1.5 flex items-center gap-3">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-700">
+                  <div
+                    className={cn("h-full rounded-full", idx === 0 ? "bg-amber-500" : "bg-indigo-500")}
+                    style={{ width: `${(emp.value / maxSales) * 100}%` }}
+                  />
+                </div>
+                <span className="shrink-0 text-[11px] text-slate-400">{emp.contracts} гэрээ</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -696,17 +766,32 @@ export function BrokerDashboard() {
                 data={salesByPeriod}
                 valueFormatter={formatMNT}
               />
-              <ChartWidget
-                title="Шилдэг ажилтнууд"
-                subtitle="Багийн гишүүдийн борлуулалт"
-                defaultType="Bar"
-                data={MOCK_EMPLOYEES}
-                valueFormatter={formatMNT}
+              <LeaderboardWidget
+                title="Ажилтны гүйцэтгэл"
+                subtitle="Хамгийн олон гэрээ &amp; борлуулалт"
               />
             </div>
 
             {/* Charts row 2 */}
-            <div className="grid gap-5 lg:grid-cols-2">
+            <div className="mb-6 grid gap-5 lg:grid-cols-2">
+              <ChartWidget
+                title="Бүтээгдэхүүний задаргаа"
+                subtitle="Борлуулалт бүтээгдэхүүнээр"
+                defaultType="Pie"
+                data={MOCK_PRODUCTS}
+                valueFormatter={(v) => `${v}%`}
+              />
+              <ChartWidget
+                title="Салбарын гүйцэтгэл"
+                subtitle="Борлуулалт салбар бүрээр"
+                defaultType="Bar"
+                data={MOCK_BRANCHES}
+                valueFormatter={formatMNT}
+              />
+            </div>
+
+            {/* Charts row 3 */}
+            <div className="mb-6 grid gap-5 lg:grid-cols-2">
               <ChartWidget
                 title="Гүйцэтгэл улираар"
                 subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан"
@@ -720,6 +805,25 @@ export function BrokerDashboard() {
                 defaultType="Pie"
                 data={MOCK_PARTNERS}
                 valueFormatter={(v) => `${v}%`}
+              />
+            </div>
+
+            {/* Charts row 4: top employee charts */}
+            <div className="grid gap-5 lg:grid-cols-2">
+              <ChartWidget
+                title="Шилдэг борлуулалттай ажилтнууд"
+                subtitle="Багийн гишүүдийн борлуулалт"
+                defaultType="Bar"
+                data={MOCK_EMPLOYEES}
+                keys={["value"]}
+                valueFormatter={formatMNT}
+              />
+              <ChartWidget
+                title="Хамгийн олон гэрээ хийсэн ажилтнууд"
+                subtitle="Ажилтны гэрээний тоо"
+                defaultType="Bar"
+                data={MOCK_EMPLOYEES.map((e) => ({ label: e.label, value: e.contracts }))}
+                valueFormatter={(v) => `${v} гэрээ`}
               />
             </div>
           </div>
