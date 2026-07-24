@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const COMPANIES = [
+export const COMPANIES = [
   { id: "monre", name: "Монре даатгал", rate: 9.5 },
   { id: "mig", name: "МИГ даатгал", rate: 12 },
   { id: "ard", name: "Ард даатгал", rate: 10 },
@@ -30,7 +30,7 @@ const COMPANIES = [
   { id: "mongol", name: "Монгол даатгал", rate: 9 },
 ];
 
-const CATEGORIES = [
+export const CATEGORIES = [
   { id: "auto", name: "Авто тээврийн хэрэгслийн даатгал", sub: ["Машин механизмын даатгал", "Мотоциклийн даатгал", "Авто тээврийн хэрэгслийн даатгал", "Хүнд даацын тээврийн хэрэгслийн даатгал"] },
   { id: "official", name: "Албан журмын даатгал", sub: ["Албан журмын хариуцлагын даатгал", "Албан журмын эмнэлгийн даатгал"] },
   { id: "cargo", name: "Ачааны даатгал", sub: ["Олон улсын ачааны даатгал", "Дотоодын ачааны даатгал", "Тээврийн хэрэгслийн даатгал"] },
@@ -225,7 +225,36 @@ function AddOnList({
   );
 }
 
-export function ContractForm({ onBack }: { onBack?: () => void }) {
+export function ContractForm({
+  onBack,
+  onSave,
+  isAjd = false,
+}: {
+  onBack?: () => void;
+  onSave?: (payload: {
+    companyId: string;
+    companyName: string;
+    categoryId: string;
+    categoryName: string;
+    subCategory: string;
+    product: string;
+    packageName?: string;
+    valuation: number;
+    premium: number;
+    brokerFee: number;
+    discountPercent: number;
+    discountAmount: number;
+    additionalTotal: number;
+    startDate: string;
+    duration: string;
+    ownerName?: string;
+    licensePlate?: string;
+    vehicleBrand?: string;
+    vehicleModel?: string;
+    isAjd: boolean;
+  }) => void;
+  isAjd?: boolean;
+}) {
   const [company, setCompany] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
@@ -1134,7 +1163,29 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                 type="button"
                 onClick={() => {
                   setTouched(true);
-                  if (isValid) alert("Гэрээ амжилттай хадгалагдлаа!");
+                  if (!isValid || !selectedCompany || !selectedCategory) return;
+                  onSave?.({
+                    companyId: company,
+                    companyName: selectedCompany.name,
+                    categoryId: category,
+                    categoryName: selectedCategory.name,
+                    subCategory,
+                    product,
+                    packageName: packageId || undefined,
+                    valuation: valuationNum,
+                    premium: totalPremium,
+                    brokerFee: Math.round(totalPremium * 0.15),
+                    discountPercent: discountNum,
+                    discountAmount,
+                    additionalTotal,
+                    startDate,
+                    duration,
+                    ownerName: ownerName || undefined,
+                    licensePlate: licensePlate || undefined,
+                    vehicleBrand: vehicleBrand || undefined,
+                    vehicleModel: vehicleModel || undefined,
+                    isAjd,
+                  });
                 }}
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
               >

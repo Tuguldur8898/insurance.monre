@@ -56,7 +56,8 @@ import {
   PolarRadiusAxis,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { ContractForm } from "./ContractForm";
+import { ContractForm, COMPANIES, CATEGORIES } from "./ContractForm";
+import { ContractList, type Contract } from "./ContractList";
 
 type MenuItem = { id: string; label: string; icon: typeof FileText };
 type MenuGroup = { id: string; label: string; icon: typeof LayoutDashboard; items: MenuItem[] };
@@ -533,6 +534,49 @@ export function BrokerDashboard() {
   const [customStart, setCustomStart] = useState("2026-07-01");
   const [customEnd, setCustomEnd] = useState("2026-07-23");
 
+  // Persisted contracts from the contract form
+  const [contracts, setContracts] = useState<Contract[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem("ins-monre-contracts");
+      return raw ? (JSON.parse(raw) as Contract[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const persistContracts = (next: Contract[]) => {
+    setContracts(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ins-monre-contracts", JSON.stringify(next));
+    }
+  };
+
+  const addContract = (payload: Omit<Contract, "id" | "number" | "createdAt" | "status">) => {
+    const nextId = contracts.length + 1;
+    const number = `Г-${new Date().getFullYear()}-${String(nextId).padStart(4, "0")}`;
+    const contract: Contract = {
+      ...payload,
+      id: crypto.randomUUID?.() || `${Date.now()}-${nextId}`,
+      number,
+      createdAt: new Date().toISOString(),
+      status: "draft",
+    };
+    const next = [contract, ...contracts];
+    persistContracts(next);
+    return contract;
+  };
+
+  const payContract = (id: string) => {
+    const next = contracts.map((c) => (c.id === id ? { ...c, status: "paid" as const } : c));
+    persistContracts(next);
+  };
+
+  const deleteContract = (id: string) => {
+    const next = contracts.filter((c) => c.id !== id);
+    persistContracts(next);
+  };
+
   // Demo filter: limit monthly sales view based on selected period
   const salesByPeriod = useMemo(() => {
     if (activeFilter === "Өдөр") return MOCK_SALES.slice(6, 7);
@@ -684,7 +728,26 @@ export function BrokerDashboard() {
         {/* Main */}
         <main className="flex-1 overflow-y-auto bg-[#0b0f19] p-4 lg:p-6">
           {(active === "new-contract" || active === "new-ajd") ? (
-            <ContractForm onBack={() => setActive("dashboard")} />
+            <ContractForm
+              isAjd={active === "new-ajd"}
+              onBack={() => setActive("dashboard")}
+              onSave={(payload) => {
+                addContract(payload);
+                setActive(active === "new-ajd" ? "ajd-list" : "contract-list");
+              }}
+            />
+          ) : active === "contract-list" || active === "ajd-list" ? (
+            <ContractList
+              contracts={contracts}
+              companies={COMPANIES}
+              categories={CATEGORIES}
+              title={active === "ajd-list" ? "Гэрээний жагсаалт АЖД" : "Гэрээний жагсаалт"}
+              isAjd={active === "ajd-list"}
+              onCreate={() => setActive(active === "ajd-list" ? "new-ajd" : "new-contract")}
+              onPay={payContract}
+              onDelete={deleteContract}
+              onRefresh={() => {}}
+            />
           ) : (
             <div className="mx-auto max-w-7xl">
               {/* Greeting + filters */}
