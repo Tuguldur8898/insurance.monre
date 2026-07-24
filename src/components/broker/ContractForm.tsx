@@ -93,6 +93,61 @@ const MOCK_VEHICLE_REGISTRY: Record<string, VehicleInfo[]> = {
   ],
 };
 
+// Test templates for fallback / random test lookups
+const MOCK_BRAND_TEMPLATES = [
+  { brand: "Toyota", models: ["Land Cruiser 200", "Hilux", "Hiace", "Corolla", "Camry"], types: ["suv", "truck", "minivan", "sedan", "sedan"] },
+  { brand: "Lexus", models: ["LX570", "RX350", "NX300", "ES300h"], types: ["suv", "suv", "suv", "sedan"] },
+  { brand: "Hyundai", models: ["Sonata", "Santa Fe", "Tucson", "H350", "Staria"], types: ["sedan", "suv", "suv", "minivan", "minivan"] },
+  { brand: "Kia", models: ["Sorento", "Sportage", "K5", "Bongo"], types: ["suv", "suv", "sedan", "truck"] },
+  { brand: "Mercedes-Benz", models: ["Actros 1845", "Sprinter", "G-Class", "E-Class"], types: ["truck", "minivan", "suv", "sedan"] },
+  { brand: "MAN", models: ["TGS 33.440", "TGX 18.500"], types: ["heavy_truck", "heavy_truck"] },
+  { brand: "Volvo", models: ["FH 540", "FM 420", "XC90"], types: ["heavy_truck", "heavy_truck", "suv"] },
+  { brand: "Ford", models: ["F-150", "Transit", "Explorer", "Ranger"], types: ["pickup", "minivan", "suv", "pickup"] },
+  { brand: "Isuzu", models: ["Elf", "Giga", "D-Max"], types: ["truck", "truck", "pickup"] },
+  { brand: "Mitsubishi", models: ["Lancer", "Pajero", "Canter", "Outlander"], types: ["sedan", "suv", "truck", "suv"] },
+];
+
+const MOCK_COLORS = ["Хар", "Цагаан", "Мөнгөлөг", "Улаан", "Цэнхэр", "Саарал", "Ногоон", "Шаргал", "Хөх"];
+
+function generateMockVehicles(reg: string): VehicleInfo[] {
+  const seed = reg.padEnd(8, "0");
+  const count = 1 + (seed.charCodeAt(2) + seed.charCodeAt(3)) % 3; // 1-3 vehicles
+  const vehicles: VehicleInfo[] = [];
+  for (let i = 0; i < count; i++) {
+    const brandIdx = (seed.charCodeAt(i) + seed.charCodeAt(i + 2) + i * 13) % MOCK_BRAND_TEMPLATES.length;
+    const brand = MOCK_BRAND_TEMPLATES[brandIdx];
+    const modelIdx = (seed.charCodeAt(i + 4) + i * 7) % brand.models.length;
+    const model = brand.models[modelIdx];
+    const type = brand.types[modelIdx];
+    const year = (2010 + (seed.charCodeAt(i + 5) + i * 11) % 16).toString();
+    const serial = 1000 + (seed.charCodeAt(i) + i * 53) % 9000;
+    const plate = `${seed.slice(0, 2)}-${serial}`;
+    const vin = `${seed.slice(0, 2)}${year}${String(i + 1).padStart(6, "0")}MOCK`;
+    const engine = `${seed.slice(0, 2)}-${(100000 + (seed.charCodeAt(i + 3) + i * 11) % 900000)}`;
+    const seats = type === "sedan" ? "5" : type === "suv" ? "5" : type === "minivan" ? (12 + (i % 4) * 2).toString() : type === "bus" ? "40" : type === "pickup" ? "5" : "2";
+    const color = MOCK_COLORS[(seed.charCodeAt(i + 6) + i * 3) % MOCK_COLORS.length];
+    vehicles.push({
+      brand: brand.brand,
+      model,
+      year,
+      plate,
+      vin,
+      engine,
+      type,
+      typeLabel: VEHICLE_TYPE_LABELS[type] || type,
+      seats,
+      color,
+    });
+  }
+  return vehicles;
+}
+
+function getMockVehicles(reg: string): VehicleInfo[] {
+  return MOCK_VEHICLE_REGISTRY[reg] || generateMockVehicles(reg);
+}
+
+const TEST_REGISTRATION_NUMBERS = ["УУ00000000", "УУ88888888", "АА11111111", "ББ22222222", "ХХ00000000", "ХХ11111111", "УБ12345678", "ОР55555555", "ДХ77777777"];
+
 const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", typeLabel: "", seats: "", color: "" };
 
 function formatMNT(n: number) {
@@ -205,7 +260,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [trailerCount, setTrailerCount] = useState("");
   const [routeInfo, setRouteInfo] = useState("");
   const [vehicleSearchLoading, setVehicleSearchLoading] = useState(false);
-  const [vehicleSearchResults, setVehicleSearchResults] = useState(MOCK_VEHICLE_REGISTRY["УУ00000000"]);
+  const [vehicleSearchResults, setVehicleSearchResults] = useState(getMockVehicles("УУ00000000"));
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
 
   // Auto transport subcategory add-ons
@@ -472,7 +527,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                           setVehicleSearchLoading(true);
                           setVehicleSearchOpen(false);
                           setTimeout(() => {
-                            setVehicleSearchResults(MOCK_VEHICLE_REGISTRY[regNumber] ?? []);
+                            setVehicleSearchResults(getMockVehicles(regNumber));
                             setVehicleSearchLoading(false);
                             setVehicleSearchOpen(true);
                           }, 800);
@@ -492,6 +547,9 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                         <Plus className="h-4 w-4" />
                       </button>
                     </div>
+                    <p className="text-[10px] text-slate-500">
+                      Тестийн дугаарууд: {TEST_REGISTRATION_NUMBERS.join(", ")}. Бусад дугаар оруулсан ч санамсаргүй тест мэдээлэл гарч ирнэ.
+                    </p>
 
                     {/* Vehicle search results dropdown */}
                     {vehicleSearchOpen && (
