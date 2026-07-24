@@ -66,6 +66,77 @@ function formatMNT(n: number) {
   return "₮" + n.toLocaleString("mn-MN");
 }
 
+function AddOnList({
+  title,
+  items,
+  setItems,
+  labelName,
+  labelValue,
+  placeholderName,
+  placeholderValue,
+}: {
+  title: string;
+  items: { name: string; value: string }[];
+  setItems: (items: { name: string; value: string }[]) => void;
+  labelName: string;
+  labelValue: string;
+  placeholderName: string;
+  placeholderValue: string;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-semibold text-slate-300">{title}</label>
+        <button
+          type="button"
+          onClick={() => setItems([...items, { name: "", value: "" }])}
+          className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500 text-white transition-all hover:bg-indigo-600"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="space-y-2">
+        {items.map((item, idx) => (
+          <div key={idx} className="grid grid-cols-[1fr_100px_28px] gap-2">
+            <input
+              type="text"
+              value={item.name}
+              onChange={(e) => {
+                const next = [...items];
+                next[idx].name = e.target.value;
+                setItems(next);
+              }}
+              placeholder={placeholderName}
+              className="w-full rounded-lg border border-slate-700/60 bg-slate-800/60 px-2.5 py-2 text-xs text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+            />
+            <input
+              type="number"
+              value={item.value}
+              onChange={(e) => {
+                const next = [...items];
+                next[idx].value = e.target.value;
+                setItems(next);
+              }}
+              placeholder={placeholderValue}
+              className="w-full rounded-lg border border-slate-700/60 bg-slate-800/60 px-2.5 py-2 text-right text-xs text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+            />
+            <button
+              type="button"
+              onClick={() => setItems(items.filter((_, i) => i !== idx))}
+              className="flex items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {items.length === 0 && (
+          <p className="text-[10px] text-slate-600">{labelName} нэмэхдээ + товч дээр дарна уу</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [company, setCompany] = useState("");
   const [category, setCategory] = useState("");
@@ -102,14 +173,31 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [vehicleSearchResults, setVehicleSearchResults] = useState(MOCK_VEHICLE_REGISTRY["УУ00000000"]);
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
 
+  // Auto transport subcategory add-ons
+  const [discountPercent, setDiscountPercent] = useState("");
+  const [equipmentList, setEquipmentList] = useState<{ name: string; value: string }[]>([]);
+  const [godList, setGodList] = useState<{ name: string; value: string }[]>([]);
+  const [ajdList, setAjdList] = useState<{ name: string; value: string }[]>([]);
+  const [customFieldsList, setCustomFieldsList] = useState<{ name: string; value: string }[]>([]);
+
   const selectedCompany = COMPANIES.find((c) => c.id === company);
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
   const isAuto = category === "auto";
+  const isAutoTransport = subCategory === "Авто тээврийн хэрэгслийн даатгал";
   const valuationNum = valuation === "" ? 0 : Number(valuation);
+  const discountNum = discountPercent === "" ? 0 : Number(discountPercent);
+  const additionalTotal = useMemo(() => {
+    const sum = (list: { value: string }[]) => list.reduce((acc, item) => acc + (item.value === "" ? 0 : Number(item.value)), 0);
+    return sum(equipmentList) + sum(godList) + sum(ajdList) + sum(customFieldsList);
+  }, [equipmentList, godList, ajdList, customFieldsList]);
+
   const basePremium = useMemo(() => {
     if (!selectedCompany || !valuationNum) return 0;
     return Math.round((valuationNum * selectedCompany.rate) / 100);
   }, [valuationNum, selectedCompany]);
+
+  const discountAmount = Math.round((basePremium * discountNum) / 100);
+  const totalPremium = basePremium - discountAmount + additionalTotal;
 
   const isValid = company && category && subCategory && product && valuationNum > 0;
 
@@ -726,6 +814,20 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                 </div>
 
                 <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">Хөнгөлөлт</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={discountPercent}
+                      onChange={(e) => setDiscountPercent(e.target.value)}
+                      placeholder="0"
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pr-10 text-right text-sm font-bold text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">Хувь</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-300">Нэмэлт үнийн мэдээлэл</label>
                   <select
                     value={additional}
@@ -754,6 +856,56 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
               </div>
             </div>
 
+            {/* Auto transport add-ons */}
+            {isAutoTransport && (
+              <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+                <div className="mb-5 flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-500/10 text-pink-400">
+                    <Calculator className="h-4.5 w-4.5" />
+                  </div>
+                  <h2 className="text-sm font-bold text-white">Нэмэлт үнийн мэдээлэл</h2>
+                </div>
+                <div className="space-y-5">
+                  <AddOnList
+                    title="Тоног нэмэх"
+                    items={equipmentList}
+                    setItems={setEquipmentList}
+                    labelName="Тоног"
+                    labelValue="Үнэ"
+                    placeholderName="Тоногийн нэр"
+                    placeholderValue="0"
+                  />
+                  <AddOnList
+                    title="ГОД"
+                    items={godList}
+                    setItems={setGodList}
+                    labelName="Улс"
+                    labelValue="Үнэ"
+                    placeholderName="Улс"
+                    placeholderValue="0"
+                  />
+                  <AddOnList
+                    title="АЖД"
+                    items={ajdList}
+                    setItems={setAjdList}
+                    labelName="АЖД"
+                    labelValue="Үнэ"
+                    placeholderName="Албан журмын нэр"
+                    placeholderValue="0"
+                  />
+                  <AddOnList
+                    title="Custom fields"
+                    items={customFieldsList}
+                    setItems={setCustomFieldsList}
+                    labelName="Талбар"
+                    labelValue="Үнэ"
+                    placeholderName="Талбарын нэр"
+                    placeholderValue="0"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Summary card */}
             <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-indigo-900/20 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
               <div className="mb-5 flex items-center gap-2.5">
@@ -772,12 +924,24 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                   <span className="text-xs text-slate-400">Үндсэн хураамж:</span>
                   <span className="text-sm font-bold text-white">{formatMNT(basePremium)}</span>
                 </div>
+                {discountNum > 0 && (
+                  <div className="flex items-center justify-between text-emerald-400">
+                    <span className="text-xs">Хөнгөлөлт ({discountNum}%)</span>
+                    <span className="text-sm font-bold">-{formatMNT(discountAmount)}</span>
+                  </div>
+                )}
+                {additionalTotal > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-400">Нэмэлт үнийн мэдээлэл:</span>
+                    <span className="text-sm font-bold text-white">+{formatMNT(additionalTotal)}</span>
+                  </div>
+                )}
 
                 <div className="h-px bg-slate-700/50" />
 
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-white">Нийт даатгалын хураамж:</span>
-                  <span className="text-2xl font-extrabold text-white">{formatMNT(basePremium)}</span>
+                  <span className="text-2xl font-extrabold text-white">{formatMNT(totalPremium)}</span>
                 </div>
               </div>
 
@@ -787,7 +951,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                     <Award className="h-4 w-4 text-indigo-400" />
                     <span className="text-xs font-bold text-indigo-300">Таны хураамж (15%)</span>
                   </div>
-                  <span className="text-xl font-extrabold text-indigo-300">{formatMNT(Math.round(basePremium * 0.15))}</span>
+                  <span className="text-xl font-extrabold text-indigo-300">{formatMNT(Math.round(totalPremium * 0.15))}</span>
                 </div>
               </div>
 
