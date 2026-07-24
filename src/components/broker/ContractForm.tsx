@@ -46,21 +46,47 @@ const DURATIONS = ["1 Жил", "2 Жил", "3 Жил"];
 const ADDITIONAL_OPTIONS = ["Нэмэлт үнийн мэдээлэл", "Чиргүүл үйлчилгээ", "Түрээсийн тэрэг", "Хуулийн туслалцаа"];
 
 // Mock vehicle registry data (replace with DAN/HUR API integration later)
-type VehicleInfo = { brand: string; model: string; year: string; plate: string; vin: string; engine: string; type: string; seats: string };
+type VehicleInfo = {
+  brand: string;
+  model: string;
+  year: string;
+  plate: string;
+  vin: string;
+  engine: string;
+  type: string;
+  typeLabel: string;
+  seats: string;
+  color?: string;
+};
+
+const VEHICLE_TYPE_LABELS: Record<string, string> = {
+  sedan: "Седан",
+  suv: "Джип/SUV",
+  minivan: "Микроавтобус",
+  bus: "Автобус",
+  truck: "Ачааны тэрэг",
+  pickup: "Пикап",
+  motorcycle: "Мотоцикл",
+};
+
 const MOCK_VEHICLE_REGISTRY: Record<string, VehicleInfo[]> = {
   УУ00000000: [
-    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "УБА-1234", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", seats: "7" },
-    { brand: "Lexus", model: "LX570", year: "2020", plate: "УББ-5678", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", seats: "8" },
+    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "УБА-1234", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", typeLabel: "Джип/SUV", seats: "7", color: "Хар" },
+    { brand: "Lexus", model: "LX570", year: "2020", plate: "УББ-5678", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", typeLabel: "Джип/SUV", seats: "8", color: "Цагаан" },
+    { brand: "Hyundai", model: "Sonata", year: "2017", plate: "УБС-9012", vin: "KMHEC41DDBA000001", engine: "G4KJ-000000", type: "sedan", typeLabel: "Седан", seats: "5", color: "Мөнгөлөг" },
   ],
   УУ88888888: [
-    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "УХА-9999", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", seats: "5" },
+    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "УХА-9999", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", typeLabel: "Джип/SUV", seats: "5", color: "Улаан" },
   ],
   АА11111111: [
-    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "АА-1111", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", seats: "2" },
+    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "АА-1111", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", typeLabel: "Ачааны тэрэг", seats: "2", color: "Цэнхэр" },
+  ],
+  ББ22222222: [
+    { brand: "Toyota", model: "Hiace", year: "2019", plate: "ББ-2222", vin: "JTFLA11H0KB000001", engine: "2TR-000000", type: "minivan", typeLabel: "Микроавтобус", seats: "14", color: "Саарал" },
   ],
 };
 
-const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", seats: "" };
+const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", typeLabel: "", seats: "", color: "" };
 
 function formatMNT(n: number) {
   return "₮" + n.toLocaleString("mn-MN");
@@ -167,6 +193,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
   const [vinNumber, setVinNumber] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [passengerCount, setPassengerCount] = useState("");
+  const [vehicleColor, setVehicleColor] = useState("");
   const [loadCapacity, setLoadCapacity] = useState("");
   const [trailerCount, setTrailerCount] = useState("");
   const [routeInfo, setRouteInfo] = useState("");
@@ -469,7 +496,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                             </p>
                             <p className="text-[10px] text-slate-500">
                               {vehicleSearchResults.length > 0
-                                ? "Сонгох машинаа сонгоно уу (DAN/HUR mock)"
+                                ? "Даатгуулах машины улиан дугаар сонгоно уу (DAN/HUR mock)"
                                 : "Регистрийн дугаар шалгана уу"}
                             </p>
                           </div>
@@ -486,6 +513,7 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                                   setEngineNumber(v.engine);
                                   setLicensePlate(v.plate);
                                   setVehicleType(v.type);
+                                  setVehicleColor(v.color || "");
                                   setPassengerCount(v.seats);
                                   setVehicleSearchOpen(false);
                                 }}
@@ -497,12 +525,15 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center justify-between">
                                     <span className="truncate text-xs font-bold text-white">
-                                      {v.brand} {v.model}
+                                      {v.plate}
                                     </span>
                                     <span className="shrink-0 text-[10px] text-slate-500">{v.year}</span>
                                   </div>
                                   <p className="mt-0.5 text-[10px] text-slate-500">
-                                    Дугаар: {v.plate} · VIN: {v.vin}
+                                    {v.brand} {v.model} · {v.typeLabel} · {v.seats} суудал
+                                  </p>
+                                  <p className="text-[10px] text-slate-600">
+                                    VIN: {v.vin}
                                   </p>
                                 </div>
                               </button>
@@ -589,38 +620,91 @@ export function ContractForm({ onBack }: { onBack?: () => void }) {
 
                   {subCategory === "Авто тээврийн хэрэгслийн даатгал" && (
                     <>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Тээврийн хэрэгслийн төрөл</label>
-                        <select
-                          value={vehicleType}
-                          onChange={(e) => setVehicleType(e.target.value)}
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        >
-                          <option value="">Төрөл сонгох</option>
-                          <option value="sedan">Седан</option>
-                          <option value="suv">Джип/SUV</option>
-                          <option value="minivan">Микроавтобус</option>
-                          <option value="bus">Автобус</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Дугаарын дугаар</label>
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-xs font-semibold text-slate-300">Даатгуулах машины улиан дугаар</label>
                         <input
                           type="text"
                           value={licensePlate}
                           onChange={(e) => setLicensePlate(e.target.value)}
                           placeholder="УБА-0000"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm font-bold text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                         />
                       </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Тээврийн хэрэгслийн төрөл</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={vehicleType ? VEHICLE_TYPE_LABELS[vehicleType] || vehicleType : ""}
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-300">Суудлын тоо</label>
                         <input
-                          type="number"
+                          type="text"
+                          readOnly
                           value={passengerCount}
-                          onChange={(e) => setPassengerCount(e.target.value)}
-                          placeholder="4"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Марка</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={vehicleBrand}
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Загвар</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={vehicleModel}
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Үйлдвэрлэсэн он</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={vehicleYear}
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Арлын дугаар (VIN)</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={vinNumber}
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Өнгө</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={vehicleColor}
+                          placeholder="Регистрээс дуудна"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
                         />
                       </div>
                     </>
