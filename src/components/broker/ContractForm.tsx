@@ -28,11 +28,56 @@ import type { Contract } from "./ContractList";
 import { PackageCompare, PACKAGES } from "./PackageCompare";
 
 export const COMPANIES = [
-  { id: "monre", name: "Монре даатгал", rate: 9.5 },
-  { id: "mig", name: "МИГ даатгал", rate: 12 },
-  { id: "ard", name: "Ард даатгал", rate: 10 },
-  { id: "boldog", name: "Болдог даатгал", rate: 11 },
-  { id: "mongol", name: "Монгол даатгал", rate: 9 },
+  {
+    id: "monre",
+    name: "Монре даатгал",
+    rate: 9.5,
+    branches: [
+      { id: "monre-hq", name: "Төв оффис" },
+      { id: "monre-1", name: "1-р салбар" },
+      { id: "monre-2", name: "2-р салбар" },
+      { id: "monre-3", name: "3-р салбар" },
+    ],
+  },
+  {
+    id: "mig",
+    name: "МИГ даатгал",
+    rate: 12,
+    branches: [
+      { id: "mig-hq", name: "Төв оффис" },
+      { id: "mig-1", name: "Сүхбаатар салбар" },
+      { id: "mig-2", name: "Баянзүрх салбар" },
+    ],
+  },
+  {
+    id: "ard",
+    name: "Ард даатгал",
+    rate: 10,
+    branches: [
+      { id: "ard-hq", name: "Төв оффис" },
+      { id: "ard-1", name: "Хан-Уул салбар" },
+      { id: "ard-2", name: "Чингэлтэй салбар" },
+    ],
+  },
+  {
+    id: "boldog",
+    name: "Болдог даатгал",
+    rate: 11,
+    branches: [
+      { id: "boldog-hq", name: "Төв оффис" },
+      { id: "boldog-1", name: "Сонгинохайрхан салбар" },
+    ],
+  },
+  {
+    id: "mongol",
+    name: "Монгол даатгал",
+    rate: 9,
+    branches: [
+      { id: "mongol-hq", name: "Төв оффис" },
+      { id: "mongol-1", name: "Баянгол салбар" },
+      { id: "mongol-2", name: "Сүхбаатар салбар" },
+    ],
+  },
 ];
 
 export const CATEGORIES = [
@@ -362,6 +407,7 @@ export function ContractForm({
   initialContract?: Contract | null;
 }) {
   const [company, setCompany] = useState("");
+  const [branch, setBranch] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [product, setProduct] = useState("");
@@ -442,6 +488,7 @@ export function ContractForm({
 
     const c = initialContract;
     setCompany(c.companyId);
+    setBranch(c.branchId || "");
     setCategory(c.categoryId);
     setSubCategory(c.subCategory);
     setProduct(c.product);
@@ -513,6 +560,7 @@ export function ContractForm({
 
   const isValid =
     company &&
+    branch &&
     category &&
     subCategory &&
     product &&
@@ -540,12 +588,15 @@ export function ContractForm({
   const handleSave = () => {
     setTouched(true);
     if (!isValid || !selectedCompany || !selectedCategory) return;
+    const selectedBranch = selectedCompany.branches.find((b) => b.id === branch);
     const contract: Contract = {
       id: initialContract?.id || crypto.randomUUID?.() || `${Date.now()}`,
       number: initialContract?.number || generateContractNumber(),
       companyId: company,
       companyName: selectedCompany.name,
       companyRate: premiumRate,
+      branchId: branch,
+      branchName: selectedBranch?.name,
       categoryId: category,
       categoryName: selectedCategory.name,
       subCategory,
@@ -561,6 +612,8 @@ export function ContractForm({
       duration,
       status: initialContract?.status || (isAjd ? "paid" : "draft"),
       createdAt: initialContract?.createdAt || new Date().toISOString(),
+      source: initialContract?.source || "Веб",
+      channel: initialContract?.channel || "Insure веб",
       insuredName:
         customerType === "legal"
           ? legalEntityName || "ХХК"
@@ -638,6 +691,7 @@ export function ContractForm({
                     value={company}
                     onChange={(e) => {
                       setCompany(e.target.value);
+                      setBranch("");
                       setTouched(true);
                     }}
                     className={cn(
@@ -653,6 +707,36 @@ export function ContractForm({
                     ))}
                   </select>
                   {touched && !company && <p className="text-xs text-red-400">Шаардлагатай</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">
+                    Салбарын нэр <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    value={branch}
+                    onChange={(e) => {
+                      setBranch(e.target.value);
+                      setTouched(true);
+                    }}
+                    disabled={!company}
+                    className={cn(
+                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                      !company
+                        ? "cursor-not-allowed border-slate-700/30 bg-slate-800/30 text-slate-500"
+                        : touched && !branch
+                          ? "border-red-500/50"
+                          : "border-slate-700/60 hover:border-slate-500"
+                    )}
+                  >
+                    <option value="">{company ? "Салбар сонгох" : "Эхлээд компани сонгоно уу"}</option>
+                    {selectedCompany?.branches.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                  {touched && !branch && company && <p className="text-xs text-red-400">Шаардлагатай</p>}
                 </div>
 
                 {!isAjd && (

@@ -566,7 +566,7 @@ export function BrokerDashboard() {
   };
 
   const deleteContract = (id: string) => {
-    const next = contracts.filter((c) => c.id !== id);
+    const next = contracts.map((c) => (c.id === id ? { ...c, status: "canceled" as const } : c));
     persistContracts(next);
   };
 

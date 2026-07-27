@@ -35,6 +35,8 @@ export type Contract = {
   companyId: string;
   companyName: string;
   companyRate: number;
+  branchId?: string;
+  branchName?: string;
   categoryId: string;
   categoryName: string;
   subCategory: string;
@@ -48,7 +50,7 @@ export type Contract = {
   additionalTotal: number;
   startDate: string;
   duration: string;
-  status: "draft" | "active" | "paid" | "expired";
+  status: "draft" | "active" | "paid" | "expired" | "canceled";
   createdAt: string;
   // Insured
   insuredName?: string;
@@ -79,6 +81,8 @@ export type Contract = {
   hasTrailer?: boolean;
   images?: string[];
   customerType?: "individual" | "legal";
+  source?: string;
+  channel?: string;
 };
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -88,11 +92,12 @@ const STATUSES: Record<Contract["status"], { label: string; className: string }>
   active: { label: "Идэвхитэй", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
   paid: { label: "Төлсөн", className: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400" },
   expired: { label: "Дууссан", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
+  canceled: { label: "Цуцлагдсан", className: "border-red-500/30 bg-red-500/10 text-red-400" },
 };
 
 type ContractListProps = {
   contracts: Contract[];
-  companies: { id: string; name: string; rate: number }[];
+  companies: { id: string; name: string; rate: number; branches: { id: string; name: string }[] }[];
   categories: { id: string; name: string; sub: string[] }[];
   title?: string;
   isAjd?: boolean;
@@ -289,6 +294,7 @@ export function ContractList({
             <option value="active">Идэвхитэй</option>
             <option value="paid">Төлсөн</option>
             <option value="expired">Дууссан</option>
+            <option value="canceled">Цуцлагдсан</option>
           </select>
 
           <button
@@ -366,31 +372,27 @@ export function ContractList({
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-10 bg-[#0f1321]">
                 <tr className="border-b border-slate-700/50 text-slate-400">
-                  <th className="px-4 py-3 font-semibold">№</th>
-                  <th className="px-4 py-3 font-semibold">Гэрээний дугаар</th>
-                  <th className="px-4 py-3 font-semibold">Даатгалын компани</th>
                   <th className="px-4 py-3 font-semibold">Ангилал</th>
-                  <th className="px-4 py-3 font-semibold">Дэд ангилал</th>
-                  <th className="px-4 py-3 font-semibold">Бүтээгдэхүүн</th>
-                  <th className="px-4 py-3 font-semibold text-right">Үнэлгээ</th>
-                  <th className="px-4 py-3 font-semibold text-right">Хураамж</th>
-                  <th className="px-4 py-3 font-semibold">Эхлэх огноо</th>
-                  <th className="px-4 py-3 font-semibold">Төлөв</th>
+                  <th className="px-4 py-3 font-semibold">Гэрээний дугаар</th>
+                  <th className="px-4 py-3 font-semibold">Регистрийн дугаар</th>
+                  <th className="px-4 py-3 font-semibold">Улсын дугаар</th>
+                  <th className="px-4 py-3 font-semibold">Статус</th>
+                  <th className="px-4 py-3 font-semibold">Даатгалын компани</th>
+                  <th className="px-4 py-3 font-semibold">Салбарын нэр</th>
+                  <th className="px-4 py-3 font-semibold text-right">Нийт төлбөр</th>
+                  <th className="px-4 py-3 font-semibold">Эх үүсвэр</th>
+                  <th className="px-4 py-3 font-semibold">channel</th>
+                  <th className="px-4 py-3 font-semibold">Бүртгэгдсэн огноо</th>
                   <th className="px-4 py-3 font-semibold text-center">Үйлдэл</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/50">
                 {pageItems.map((c, idx) => (
                   <tr key={c.id} className="transition-colors hover:bg-slate-800/40">
-                    <td className="px-4 py-3 text-slate-500">{(page - 1) * pageSize + idx + 1}</td>
-                    <td className="px-4 py-3 font-semibold text-white">{c.number}</td>
-                    <td className="px-4 py-3 text-slate-300">{c.companyName}</td>
                     <td className="px-4 py-3 text-slate-300">{c.categoryName}</td>
-                    <td className="px-4 py-3 text-slate-300">{c.subCategory}</td>
-                    <td className="px-4 py-3 text-slate-300">{c.product}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-white">{formatMNT(c.valuation)}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-emerald-400">{formatMNT(c.premium)}</td>
-                    <td className="px-4 py-3 text-slate-300">{c.startDate}</td>
+                    <td className="px-4 py-3 font-semibold text-white">{c.number}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.insuredRegister || "-"}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.licensePlate || "-"}</td>
                     <td className="px-4 py-3">
                       <span
                         className={cn(
@@ -401,6 +403,12 @@ export function ContractList({
                         {STATUSES[c.status].label}
                       </span>
                     </td>
+                    <td className="px-4 py-3 text-slate-300">{c.companyName}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.branchName || "-"}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-emerald-400">{formatMNT(c.premium)}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.source || "Веб"}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.channel || "Insure веб"}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.createdAt.replace("T", " ").slice(0, 19)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
