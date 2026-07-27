@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   FileText,
@@ -530,6 +531,88 @@ function LeaderboardWidget({
 
 export function BrokerDashboard() {
   const router = useRouter();
+
+  type CPUser = {
+    _id: string;
+    type?: string;
+    email?: string;
+    phone?: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+    companyName?: string;
+    companyRegistrationNumber?: string;
+    isVerified?: boolean;
+    isPhoneVerified?: boolean;
+    isEmailVerified?: boolean;
+    customFieldsData?: Record<string, unknown>;
+    createdAt?: string;
+  };
+
+  const [currentUser, setCurrentUser] = useState<CPUser | null>(null);
+
+  const getToken = () => (typeof window !== "undefined" ? localStorage.getItem("token") ?? "" : "");
+
+  const gql = async <T,>(query: string, variables: Record<string, unknown>): Promise<T> => {
+    const res = await fetch("/api/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-client-auth-token": getToken(),
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+    const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
+    if (json.errors?.length) throw new Error(json.errors[0]?.message ?? "Алдаа гарлаа");
+    return json.data as T;
+  };
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    (async () => {
+      try {
+        const data = await gql<{ clientPortalCurrentUser: CPUser | null }>(
+          `query {
+            clientPortalCurrentUser {
+              _id type email phone username firstName lastName avatar
+              companyName companyRegistrationNumber
+              isVerified isPhoneVerified isEmailVerified
+              customFieldsData createdAt
+            }
+          }`,
+          {}
+        );
+        const u = data.clientPortalCurrentUser;
+        if (!u) {
+          localStorage.removeItem("token");
+          router.push("/login");
+          return;
+        }
+        setCurrentUser(u);
+      } catch {
+        router.push("/login");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+
+  const displayName = currentUser
+    ? [currentUser.lastName, currentUser.firstName].filter(Boolean).join(" ") ||
+      currentUser.username ||
+      currentUser.phone ||
+      "Хэрэглэгч"
+    : "Хэрэглэгч";
+  const initials = currentUser
+    ? ((currentUser.lastName?.slice(0, 1) ?? "") + (currentUser.firstName?.slice(0, 1) ?? "")).toUpperCase() ||
+      (currentUser.username?.slice(0, 2) ?? currentUser.phone?.slice(0, 2) ?? "??").toUpperCase()
+    : "??";
+  const userRole = currentUser?.type === "company" ? "Байгууллагын админ" : "Хувь хүн";
+
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<string[]>(["contracts"]);
   const [active, setActive] = useState("dashboard");
@@ -694,7 +777,7 @@ export function BrokerDashboard() {
     });
 
     // Employee data: since we only track current broker, aggregate as one
-    const brokerName = "Л. Энхуянга";
+    const brokerName = displayName;
     const emp = contracts.reduce(
       (acc, c) => {
         acc.value += c.premium;
@@ -806,11 +889,11 @@ export function BrokerDashboard() {
 
           <div className="flex items-center gap-2.5 pl-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-sm font-extrabold text-white">
-              АА
+              {initials}
             </span>
             <div className="hidden text-right lg:block">
-              <p className="text-xs font-bold text-white">Л. Энхуянга</p>
-              <p className="text-[10px] uppercase tracking-wide text-slate-500">Админ</p>
+              <p className="text-xs font-bold text-white">{displayName}</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500">{userRole}</p>
             </div>
           </div>
 
@@ -987,7 +1070,7 @@ export function BrokerDashboard() {
               <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h1 className="text-xl font-extrabold tracking-tight text-white lg:text-2xl">
-                    Өдрийн мэнд, Л. Энхуянга
+                    Өдрийн мэнд, {displayName}
                   </h1>
                   <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
                     <span className="text-indigo-400">{orgDisplayName}</span>
