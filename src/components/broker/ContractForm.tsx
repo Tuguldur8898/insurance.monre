@@ -1725,74 +1725,78 @@ export function ContractForm({
               </div>
             )}
 
-            {/* Driver additional info accordion */}
-            <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
-              <button
-                type="button"
-                onClick={() => setDriverOpen((v) => !v)}
-                className="flex w-full items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
-                    <Award className="h-4.5 w-4.5" />
-                  </div>
-                  <h2 className="text-sm font-bold text-white">Жолоочийн нэмэлт мэдээлэл</h2>
-                </div>
-                <ChevronDown
-                  className={cn("h-5 w-5 text-slate-500 transition-transform duration-200", driverOpen && "rotate-180")}
-                />
-              </button>
+            {!isAjd && (
+              <>
+                {/* Driver additional info accordion */}
+                <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+                  <button
+                    type="button"
+                    onClick={() => setDriverOpen((v) => !v)}
+                    className="flex w-full items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
+                        <Award className="h-4.5 w-4.5" />
+                      </div>
+                      <h2 className="text-sm font-bold text-white">Жолоочийн нэмэлт мэдээлэл</h2>
+                    </div>
+                    <ChevronDown
+                      className={cn("h-5 w-5 text-slate-500 transition-transform duration-200", driverOpen && "rotate-180")}
+                    />
+                  </button>
 
-              <div
-                className={cn(
-                  "grid gap-5 overflow-hidden transition-all duration-300",
-                  driverOpen ? "mt-5 max-h-96 opacity-100" : "max-h-0 opacity-0"
-                )}
-              >
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">Үндсэн эзэмшигчийн нэр</label>
-                    <input
-                      type="text"
-                      value={ownerName}
-                      onChange={(e) => setOwnerName(e.target.value)}
-                      placeholder="Эзэмшигчийн нэр"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">Даатгуулагчийн жолоочийн туршлага жилээр</label>
-                    <input
-                      type="number"
-                      value={experience}
-                      onChange={(e) => setExperience(e.target.value)}
-                      placeholder="0"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">Жолооны үнэмлэхийн дугаар</label>
-                    <input
-                      type="text"
-                      value={licenseNumber}
-                      onChange={(e) => setLicenseNumber(e.target.value)}
-                      placeholder="Жолооны үнэмлэх"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">Мөргөцсөн жолооны үнэмлэхийн дугаар</label>
-                    <input
-                      type="text"
-                      value={licenseNumber2}
-                      onChange={(e) => setLicenseNumber2(e.target.value)}
-                      placeholder="Мөргөцсөн жолооч"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
+                  <div
+                    className={cn(
+                      "grid gap-5 overflow-hidden transition-all duration-300",
+                      driverOpen ? "mt-5 max-h-96 opacity-100" : "max-h-0 opacity-0"
+                    )}
+                  >
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Үндсэн эзэмшигчийн нэр</label>
+                        <input
+                          type="text"
+                          value={ownerName}
+                          onChange={(e) => setOwnerName(e.target.value)}
+                          placeholder="Эзэмшигчийн нэр"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Даатгуулагчийн жолоочийн туршлага жилээр</label>
+                        <input
+                          type="number"
+                          value={experience}
+                          onChange={(e) => setExperience(e.target.value)}
+                          placeholder="0"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Жолооны үнэмлэхийн дугаар</label>
+                        <input
+                          type="text"
+                          value={licenseNumber}
+                          onChange={(e) => setLicenseNumber(e.target.value)}
+                          placeholder="Жолооны үнэмлэх"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Мөргөцсөн жолооны үнэмлэхийн дугаар</label>
+                        <input
+                          type="text"
+                          value={licenseNumber2}
+                          onChange={(e) => setLicenseNumber2(e.target.value)}
+                          placeholder="Мөргөцсөн жолооч"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
             <button
               type="button"
