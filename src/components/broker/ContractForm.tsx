@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Building2,
   Search,
@@ -482,39 +483,41 @@ export function ContractForm({
                 </div>
               </div>
 
-              {showPackage && (
-                <div
-                  className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
-                  onClick={(e) => {
-                    if (e.target === e.currentTarget) setShowPackage(false);
-                  }}
-                >
-                  <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-600/50 bg-[#0b0f19] shadow-2xl">
-                    <div className="flex shrink-0 items-center justify-between border-b border-slate-700/50 bg-[#0f1321] px-5 py-4">
-                      <h3 className="text-sm font-bold text-white">Багц харьцуулалт</h3>
-                      <button
-                        type="button"
-                        onClick={() => setShowPackage(false)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+              {showPackage &&
+                createPortal(
+                  <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) setShowPackage(false);
+                    }}
+                  >
+                    <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-600/50 bg-[#0b0f19] shadow-2xl">
+                      <div className="flex shrink-0 items-center justify-between border-b border-slate-700/50 bg-[#0f1321] px-5 py-4">
+                        <h3 className="text-sm font-bold text-white">Багц харьцуулалт</h3>
+                        <button
+                          type="button"
+                          onClick={() => setShowPackage(false)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="min-h-0 flex-1 overflow-y-auto bg-[#0b0f19] p-5">
+                        <PackageCompare selected={packageId} onSelect={(pkg) => setPackageId(pkg)} />
+                      </div>
+                      <div className="flex shrink-0 justify-end border-t border-slate-700/50 bg-[#0f1321] px-5 py-4">
+                        <button
+                          type="button"
+                          onClick={() => setShowPackage(false)}
+                          className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                        >
+                          Хаах
+                        </button>
+                      </div>
                     </div>
-                    <div className="min-h-0 flex-1 overflow-y-auto bg-[#0b0f19] p-5">
-                      <PackageCompare selected={packageId} onSelect={(pkg) => setPackageId(pkg)} />
-                    </div>
-                    <div className="flex shrink-0 justify-end border-t border-slate-700/50 bg-[#0f1321] px-5 py-4">
-                      <button
-                        type="button"
-                        onClick={() => setShowPackage(false)}
-                        className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
-                      >
-                        Хаах
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+                  </div>,
+                  document.body
+                )}
             </div>
 
             {isAuto && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
