@@ -51,7 +51,7 @@ type CPUser = {
 };
 
 type TabId = "personal" | "company" | "sign" | "docs";
-type ModalId = "name" | "username" | "password" | null;
+type ModalId = "contact" | "username" | "password" | null;
 
 const TABS: { id: TabId; label: string; icon: typeof User }[] = [
   { id: "personal", label: "Хувийн мэдээлэл", icon: User },
@@ -132,6 +132,8 @@ export function Dashboard() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -200,25 +202,35 @@ export function Dashboard() {
     setFirstName(user.firstName ?? "");
     setLastName(user.lastName ?? "");
     setUsername(user.username ?? "");
+    setPhone(user.phone ?? "");
+    setEmail(user.email ?? "");
     setCurrentPassword("");
     setNewPassword("");
     setModal(m);
   };
 
-  const saveName = async () => {
+  const saveContact = async () => {
     setSaving(true);
     setModalError("");
     try {
       const data = await gql<{ clientPortalUserEdit: CPUser }>(
-        `mutation($firstName: String, $lastName: String) {
-          clientPortalUserEdit(firstName: $firstName, lastName: $lastName) {
-            _id firstName lastName
+        `mutation($firstName: String, $lastName: String, $phone: String, $email: String) {
+          clientPortalUserEdit(firstName: $firstName, lastName: $lastName, phone: $phone, email: $email) {
+            _id firstName lastName phone email
           }
         }`,
-        { firstName, lastName }
+        { firstName, lastName, phone, email }
       );
       setUser((u) =>
-        u ? { ...u, firstName: data.clientPortalUserEdit.firstName, lastName: data.clientPortalUserEdit.lastName } : u
+        u
+          ? {
+              ...u,
+              firstName: data.clientPortalUserEdit.firstName,
+              lastName: data.clientPortalUserEdit.lastName,
+              phone: data.clientPortalUserEdit.phone,
+              email: data.clientPortalUserEdit.email,
+            }
+          : u
       );
       setModal(null);
     } catch (e) {
@@ -445,7 +457,7 @@ export function Dashboard() {
                         </h2>
                         <button
                           type="button"
-                          onClick={() => openModal("name")}
+                          onClick={() => openModal("contact")}
                           className="rounded-full border border-sky/30 bg-sky/10 px-3.5 py-1 text-xs font-bold text-sky transition-all hover:bg-sky/20"
                         >
                           Засах
@@ -628,7 +640,7 @@ export function Dashboard() {
             >
               <div className="mb-5 flex items-center justify-between">
                 <h3 className="text-base font-extrabold text-white">
-                  {modal === "name" && "Нэр өөрчлөх"}
+                  {modal === "contact" && "Хувийн мэдээлэл засах"}
                   {modal === "username" && "Нэвтрэх нэр өөрчлөх"}
                   {modal === "password" && "Нууц үг өөрчлөх"}
                 </h3>
@@ -643,11 +655,13 @@ export function Dashboard() {
               </div>
 
               <div className="flex flex-col gap-3.5">
-                {modal === "name" && (
+                {modal === "contact" && (
                   <>
                     <input className={inputCls} placeholder="Овог" value={lastName} onChange={(e) => setLastName(e.target.value)} />
                     <input className={inputCls} placeholder="Нэр" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                    <ModalButton saving={saving} onClick={saveName} label="Хадгалах" />
+                    <input className={inputCls} placeholder="Утас" value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" />
+                    <input className={inputCls} placeholder="Имэйл" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+                    <ModalButton saving={saving} onClick={saveContact} label="Хадгалах" />
                   </>
                 )}
                 {modal === "username" && (
