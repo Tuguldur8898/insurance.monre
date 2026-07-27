@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { downloadContractDocx } from "@/lib/contract-docx";
 import type { Contract } from "./ContractList";
-import { PackageCompare } from "./PackageCompare";
+import { PackageCompare, PACKAGES } from "./PackageCompare";
 
 export const COMPANIES = [
   { id: "monre", name: "Монре даатгал", rate: 9.5 },
@@ -44,7 +44,6 @@ export const CATEGORIES = [
 ];
 
 const PRODUCTS = ["Basic", "Standard", "Premium"];
-const PACKAGES = ["Эко багц", "Гэр бүлийн багц", "Бизнес багц"];
 const DURATIONS = ["1 Жил", "2 Жил", "3 Жил"];
 const ADDITIONAL_OPTIONS = ["Нэмэлт үнийн мэдээлэл", "Чиргүүл үйлчилгээ", "Түрээсийн тэрэг", "Хуулийн туслалцаа"];
 
@@ -457,11 +456,14 @@ export function ContractForm({
                       )}
                     >
                       <option value="">Багц сонгох</option>
-                      {PACKAGES.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
-                      ))}
+                      {PACKAGES.map((p) => {
+                        const rate = p === "Багц 1" ? "1%" : "0.8%";
+                        return (
+                          <option key={p} value={p}>
+                            {p} ({rate})
+                          </option>
+                        );
+                      })}
                     </select>
                     <button
                       type="button"
