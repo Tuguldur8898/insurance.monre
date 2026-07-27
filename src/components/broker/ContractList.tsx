@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Search,
   RotateCcw,
@@ -16,11 +16,12 @@ import {
   Filter,
   Inbox,
   Pencil,
-  Image,
+  Image as ImageIcon,
   FileText,
   X,
   Download,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { downloadContractDocx } from "@/lib/contract-docx";
 
@@ -76,6 +77,8 @@ export type Contract = {
   coDrivers?: { name: string; reg: string }[];
   isLimitedCoverage?: boolean;
   hasTrailer?: boolean;
+  images?: string[];
+  customerType?: "individual" | "legal";
 };
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -94,9 +97,11 @@ type ContractListProps = {
   title?: string;
   isAjd?: boolean;
   onCreate?: () => void;
+  onEdit?: (contract: Contract) => void;
   onPay?: (id: string) => void;
   onDelete?: (id: string) => void;
   onRefresh?: () => void;
+  onUpdate?: (contract: Contract) => void;
 };
 
 export function ContractList({
@@ -106,9 +111,11 @@ export function ContractList({
   title = "Гэрээний жагсаалт",
   isAjd,
   onCreate,
+  onEdit,
   onPay,
   onDelete,
   onRefresh,
+  onUpdate,
 }: ContractListProps) {
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
@@ -118,6 +125,15 @@ export function ContractList({
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+
+  const [plateModalOpen, setPlateModalOpen] = useState(false);
+  const [plateContract, setPlateContract] = useState<Contract | null>(null);
+  const [plateInput, setPlateInput] = useState("");
+
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageContract, setImageContract] = useState<Contract | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   const filtered = useMemo(() => {
     let list = contracts.filter((c) => (isAjd === undefined ? true : c.isAjd === isAjd));
@@ -397,6 +413,7 @@ export function ContractList({
                         </button>
                         <button
                           type="button"
+                          onClick={() => onEdit?.(c)}
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 transition-all hover:bg-amber-500 hover:text-white"
                           title="Гэрээ шинэчлэх"
                         >
@@ -404,6 +421,11 @@ export function ContractList({
                         </button>
                         <button
                           type="button"
+                          onClick={() => {
+                            setPlateContract(c);
+                            setPlateInput(c.licensePlate || "");
+                            setPlateModalOpen(true);
+                          }}
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400 transition-all hover:bg-sky-500 hover:text-white"
                           title="Улсын дугаар засах"
                         >
@@ -411,10 +433,15 @@ export function ContractList({
                         </button>
                         <button
                           type="button"
+                          onClick={() => {
+                            setImageContract(c);
+                            setImagePreviews(c.images || []);
+                            setImageModalOpen(true);
+                          }}
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 transition-all hover:bg-emerald-500 hover:text-white"
                           title="Зураг"
                         >
-                          <Image className="h-4 w-4" />
+                          <ImageIcon className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
@@ -487,6 +514,203 @@ export function ContractList({
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {plateModalOpen && plateContract && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setPlateModalOpen(false);
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 to-slate-900/60 shadow-2xl backdrop-blur-md"
+            >
+              <div className="border-b border-slate-700/50 bg-[#0f1321]/80 px-5 py-4">
+                <h3 className="text-base font-bold text-white">Улсын дугаар засах</h3>
+                <p className="mt-1 text-xs text-slate-400">Тээврийн хэрэгслийн улсын дугаарыг засах</p>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">ГЭРЭЭНИЙ ДУГААР</label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={plateContract.number}
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-900/40 px-3 py-2.5 text-sm font-semibold text-white outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">ОДООГИЙН ДУГААР</label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={plateContract.licensePlate || ""}
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-900/40 px-3 py-2.5 text-sm font-semibold text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300">
+                    Улсын дугаар <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={plateInput}
+                    onChange={(e) => setPlateInput(e.target.value)}
+                    placeholder="УБА-1234"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-700/50 bg-[#0f1321]/80 px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => setPlateModalOpen(false)}
+                  className="rounded-lg border border-slate-700/60 bg-slate-800/60 px-4 py-2 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+                >
+                  Цуцлах
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdate?.({ ...plateContract, licensePlate: plateInput });
+                    setPlateModalOpen(false);
+                  }}
+                  className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                >
+                  Хадгалах
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {imageModalOpen && imageContract && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setImageModalOpen(false);
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/80 to-slate-900/60 shadow-2xl backdrop-blur-md"
+            >
+              <div className="flex items-center justify-between border-b border-slate-700/50 bg-[#0f1321]/80 px-5 py-4">
+                <div>
+                  <h3 className="text-base font-bold text-white">Гэрээний зураг</h3>
+                  <p className="mt-1 text-xs text-slate-400">Зөвхөн PNG, JPG зургуудыг оруулна уу</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setImageModalOpen(false)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="text-sm font-bold text-white">
+                    Нийт: {imagePreviews.length}/8
+                  </span>
+                  <label className="cursor-pointer rounded-lg bg-indigo-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600">
+                    Зураг нэмэх
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        const remaining = 8 - imagePreviews.length;
+                        const toProcess = files.slice(0, remaining);
+                        if (toProcess.length === 0) return;
+                        const readers = toProcess.map((file) => {
+                          return new Promise<string>((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result as string);
+                            reader.readAsDataURL(file);
+                          });
+                        });
+                        Promise.all(readers).then((results) => {
+                          setImagePreviews((prev) => [...prev, ...results].slice(0, 8));
+                        });
+                        if (imageInputRef.current) imageInputRef.current.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {imagePreviews.length === 0 ? (
+                  <div
+                    onClick={() => imageInputRef.current?.click()}
+                    className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700/60 bg-slate-900/40 text-center transition-colors hover:border-slate-500 hover:bg-slate-800/40"
+                  >
+                    <ImageIcon className="h-8 w-8 text-slate-600" />
+                    <p className="text-xs font-medium text-slate-500">Зураг оруулахын тулд дарна уу</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                    {imagePreviews.map((src, idx) => (
+                      <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-700/60 bg-slate-900/40">
+                        <img src={src} alt={`Зураг ${idx + 1}`} className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setImagePreviews((prev) => prev.filter((_, i) => i !== idx))}
+                          className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/80 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-700/50 bg-[#0f1321]/80 px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => setImageModalOpen(false)}
+                  className="rounded-lg border border-slate-700/60 bg-slate-800/60 px-4 py-2 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+                >
+                  Хаах
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdate?.({ ...imageContract, images: imagePreviews });
+                    setImageModalOpen(false);
+                  }}
+                  className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                >
+                  Хадгалах
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

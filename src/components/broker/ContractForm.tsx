@@ -354,10 +354,12 @@ export function ContractForm({
   onBack,
   onSave,
   isAjd = false,
+  initialContract,
 }: {
   onBack?: () => void;
   onSave?: (contract: Contract) => void;
   isAjd?: boolean;
+  initialContract?: Contract | null;
 }) {
   const [company, setCompany] = useState("");
   const [category, setCategory] = useState("");
@@ -425,14 +427,64 @@ export function ContractForm({
 
   // Auto-select AJD defaults
   useEffect(() => {
-    if (isAjd) {
+    if (isAjd && !initialContract) {
       setCategory("auto");
       setSubCategory("Авто тээврийн хэрэгслийн даатгал");
       setProduct("Basic");
       setPackageId("Багц 1");
       setValuation("15000000");
     }
-  }, [isAjd]);
+  }, [isAjd, initialContract]);
+
+  // Populate form when editing an existing contract
+  useEffect(() => {
+    if (!initialContract) return;
+
+    const c = initialContract;
+    setCompany(c.companyId);
+    setCategory(c.categoryId);
+    setSubCategory(c.subCategory);
+    setProduct(c.product);
+    setPackageId(c.packageName || "");
+    setValuation(String(c.valuation));
+    setStartDate(c.startDate);
+    setDuration(c.duration);
+    setDiscountPercent(String(c.discountPercent));
+    setOwnerName(c.ownerName || "");
+    setLicensePlate(c.licensePlate || "");
+    setVehicleBrand(c.vehicleBrand || "");
+    setVehicleModel(c.vehicleModel || "");
+    setVehicleYear(c.vehicleYear || "");
+    setVehicleColor(c.vehicleColor || "");
+    setVinNumber(c.vinNumber || "");
+    setVehicleType(c.vehicleFuel === "Дизель" ? "truck" : c.vehicleFuel === "Бензин" ? "sedan" : "");
+    setPassengerCount("");
+    setVehicleCategory("");
+    setCustomerReg(c.insuredRegister || "");
+    setCustomerPhone(c.insuredPhone || "");
+    setCoDrivers(c.coDrivers || []);
+    setIsLimitedCoverage(c.isLimitedCoverage ?? false);
+    setHasTrailer(c.hasTrailer ?? false);
+
+    const nameParts = (c.insuredName || "").trim().split(/\s+/);
+    if (c.customerType === "legal" || (nameParts.length === 1 && /\d/.test(c.insuredRegister || ""))) {
+      setCustomerType("legal");
+      setLegalEntityName(c.insuredName || "");
+      setLegalEntityReg(c.insuredRegister || "");
+      setLegalEntityAddress(c.insuredAddress || "");
+      setLegalEntityPhone(c.insuredPhone || "");
+      setCustomerSurname("");
+      setCustomerName("");
+    } else {
+      setCustomerType("individual");
+      setCustomerSurname(nameParts[0] || "");
+      setCustomerName(nameParts.slice(1).join(" ") || "");
+      setLegalEntityName("");
+      setLegalEntityReg("");
+      setLegalEntityAddress("");
+      setLegalEntityPhone("");
+    }
+  }, [initialContract]);
 
   const selectedCompany = COMPANIES.find((c) => c.id === company);
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
@@ -489,8 +541,8 @@ export function ContractForm({
     setTouched(true);
     if (!isValid || !selectedCompany || !selectedCategory) return;
     const contract: Contract = {
-      id: crypto.randomUUID?.() || `${Date.now()}`,
-      number: generateContractNumber(),
+      id: initialContract?.id || crypto.randomUUID?.() || `${Date.now()}`,
+      number: initialContract?.number || generateContractNumber(),
       companyId: company,
       companyName: selectedCompany.name,
       companyRate: premiumRate,
@@ -507,8 +559,8 @@ export function ContractForm({
       additionalTotal,
       startDate,
       duration,
-      status: isAjd ? "paid" : "draft",
-      createdAt: new Date().toISOString(),
+      status: initialContract?.status || (isAjd ? "paid" : "draft"),
+      createdAt: initialContract?.createdAt || new Date().toISOString(),
       insuredName:
         customerType === "legal"
           ? legalEntityName || "ХХК"
@@ -538,6 +590,8 @@ export function ContractForm({
       isLimitedCoverage,
       hasTrailer,
       isAjd,
+      customerType,
+      images: initialContract?.images,
     };
     onSave?.(contract);
     downloadContractDocx(contract);

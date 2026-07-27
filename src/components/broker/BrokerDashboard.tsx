@@ -546,6 +546,7 @@ export function BrokerDashboard() {
       return [];
     }
   });
+  const [editingContract, setEditingContract] = useState<Contract | null>(null);
 
   const persistContracts = (next: Contract[]) => {
     setContracts(next);
@@ -566,6 +567,11 @@ export function BrokerDashboard() {
 
   const deleteContract = (id: string) => {
     const next = contracts.filter((c) => c.id !== id);
+    persistContracts(next);
+  };
+
+  const updateContract = (contract: Contract) => {
+    const next = contracts.map((c) => (c.id === contract.id ? contract : c));
     persistContracts(next);
   };
 
@@ -868,9 +874,18 @@ export function BrokerDashboard() {
           {(active === "new-contract" || active === "new-ajd") ? (
             <ContractForm
               isAjd={active === "new-ajd"}
-              onBack={() => setActive("dashboard")}
+              initialContract={editingContract}
+              onBack={() => {
+                setEditingContract(null);
+                setActive(active === "new-ajd" ? "ajd-list" : "contract-list");
+              }}
               onSave={(contract) => {
-                addContract(contract);
+                if (editingContract) {
+                  updateContract(contract);
+                } else {
+                  addContract(contract);
+                }
+                setEditingContract(null);
                 setActive(active === "new-ajd" ? "ajd-list" : "contract-list");
               }}
             />
@@ -882,8 +897,13 @@ export function BrokerDashboard() {
               title={active === "ajd-list" ? "Гэрээний жагсаалт АЖД" : "Гэрээний жагсаалт"}
               isAjd={active === "ajd-list"}
               onCreate={() => setActive(active === "ajd-list" ? "new-ajd" : "new-contract")}
+              onEdit={(c) => {
+                setEditingContract(c);
+                setActive(c.isAjd ? "new-ajd" : "new-contract");
+              }}
               onPay={payContract}
               onDelete={deleteContract}
+              onUpdate={updateContract}
               onRefresh={() => {}}
             />
           ) : (
