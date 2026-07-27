@@ -124,7 +124,92 @@ const STATS = [
 
 const FILTER_TABS = ["Өдөр", "Сар", "Улирал", "Хагас жил", "Жил", "Тусгай"];
 
-function StatCard({ stat }: { stat: (typeof STATS)[number] }) {
+function RefundPanel({
+  contracts,
+  title,
+  emptyText,
+  actionLabel,
+  actionVariant,
+  onAction,
+}: {
+  contracts: Contract[];
+  title: string;
+  emptyText: string;
+  actionLabel: string;
+  actionVariant: "amber" | "emerald";
+  onAction: (id: string) => void;
+}) {
+  return (
+    <div className="flex h-full flex-col p-4 lg:p-6">
+      <div className="mb-5">
+        <h1 className="text-xl font-extrabold tracking-tight text-white lg:text-2xl">{title}</h1>
+        <p className="mt-1 text-xs text-slate-500">Нийт: {contracts.length}</p>
+      </div>
+
+      {contracts.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-8 text-center">
+          <RotateCcw className="h-10 w-10 text-slate-600" />
+          <p className="text-sm font-semibold text-slate-400">{emptyText}</p>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-hidden rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 shadow-xl">
+          <div className="h-full overflow-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="sticky top-0 z-10 bg-[#0f1321]">
+                <tr className="border-b border-slate-700/50 text-slate-400">
+                  <th className="px-4 py-3 font-semibold">Гэрээний дугаар</th>
+                  <th className="px-4 py-3 font-semibold">Даатгуулагч</th>
+                  <th className="px-4 py-3 font-semibold">Улсын дугаар</th>
+                  <th className="px-4 py-3 font-semibold text-right">Дүн</th>
+                  <th className="px-4 py-3 font-semibold">Статус</th>
+                  <th className="px-4 py-3 font-semibold text-center">Үйлдэл</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700/50">
+                {contracts.map((c) => (
+                  <tr key={c.id} className="transition-colors hover:bg-slate-800/40">
+                    <td className="px-4 py-3 font-semibold text-white">{c.number}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.insuredName}</td>
+                    <td className="px-4 py-3 text-slate-300">{c.licensePlate || "-"}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-emerald-400">₮{c.premium.toLocaleString("mn-MN")}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={cn(
+                          "rounded-md border px-2 py-1 text-[10px] font-semibold",
+                          c.status === "canceled"
+                            ? "border-red-500/30 bg-red-500/10 text-red-400"
+                            : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                        )}
+                      >
+                        {c.status === "canceled" ? "Цуцлагдсан" : "Зөвшөөрсөн"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => onAction(c.id)}
+                        className={cn(
+                          "rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors",
+                          actionVariant === "amber"
+                            ? "bg-amber-500 hover:bg-amber-600"
+                            : "bg-emerald-500 hover:bg-emerald-600"
+                        )}
+                      >
+                        {actionLabel}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ stat }: { stat: { label: string; value: string; change: string; up: boolean; sub: string } }) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/40 p-5 transition-colors hover:border-slate-600">
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -679,6 +764,16 @@ export function BrokerDashboard() {
     persistContracts(next);
   };
 
+  const approveRefund = (id: string) => {
+    const next = contracts.map((c) => (c.id === id ? { ...c, status: "refund_approved" as const } : c));
+    persistContracts(next);
+  };
+
+  const processRefund = (id: string) => {
+    const next = contracts.map((c) => (c.id === id ? { ...c, status: "refunded" as const } : c));
+    persistContracts(next);
+  };
+
   const updateContract = (contract: Contract) => {
     const next = contracts.map((c) => (c.id === contract.id ? contract : c));
     persistContracts(next);
@@ -1064,6 +1159,24 @@ export function BrokerDashboard() {
               onUpdate={updateContract}
               onRefresh={() => {}}
             />
+          ) : active === "refund-approve" ? (
+            <RefundPanel
+              contracts={contracts.filter((c) => c.status === "canceled")}
+              title="Буцалт зөвшөөрөх"
+              emptyText="Буцаан олголтын хүсэлт байхгүй байна"
+              actionLabel="Зөвшөөрөх"
+              actionVariant="amber"
+              onAction={approveRefund}
+            />
+          ) : active === "refund-list" ? (
+            <RefundPanel
+              contracts={contracts.filter((c) => c.status === "refund_approved")}
+              title="Буцалт"
+              emptyText="Буцаан олгох гэрээ байхгүй байна"
+              actionLabel="Буцаан олгосон"
+              actionVariant="emerald"
+              onAction={processRefund}
+            />
           ) : (
             <div className="mx-auto max-w-7xl">
               {/* Greeting + filters */}
@@ -1218,3 +1331,5 @@ export function BrokerDashboard() {
     </div>
   );
 }
+
+// End of BrokerDashboard

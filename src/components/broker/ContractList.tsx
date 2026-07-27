@@ -50,7 +50,7 @@ export type Contract = {
   additionalTotal: number;
   startDate: string;
   duration: string;
-  status: "draft" | "active" | "paid" | "expired" | "canceled";
+  status: "draft" | "active" | "paid" | "expired" | "canceled" | "refund_approved" | "refunded";
   createdAt: string;
   // Insured
   insuredName?: string;
@@ -93,6 +93,8 @@ const STATUSES: Record<Contract["status"], { label: string; className: string }>
   paid: { label: "Төлсөн", className: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400" },
   expired: { label: "Дууссан", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
   canceled: { label: "Цуцлагдсан", className: "border-red-500/30 bg-red-500/10 text-red-400" },
+  refund_approved: { label: "Буцаан олголт зөвшөөрсөн", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
+  refunded: { label: "Буцаан олгосон", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
 };
 
 type ContractListProps = {
@@ -296,6 +298,8 @@ export function ContractList({
             <option value="paid">Төлсөн</option>
             <option value="expired">Дууссан</option>
             <option value="canceled">Цуцлагдсан</option>
+            <option value="refund_approved">Буцаан олголт зөвшөөрсөн</option>
+            <option value="refunded">Буцаан олгосон</option>
           </select>
 
           <button
