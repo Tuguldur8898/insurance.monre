@@ -116,10 +116,10 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
   };
 
   return (
-    <div className="mt-5 space-y-4 rounded-2xl border border-slate-700/50 bg-slate-900/40 p-4">
+    <div className="space-y-4 rounded-2xl border border-slate-700/50 bg-[#0f1321] p-4">
       {/* Header comparison */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between rounded-xl border border-slate-700/50 bg-slate-800/60 p-3">
+        <div className="flex items-center justify-between rounded-xl border border-slate-700/50 bg-slate-800 p-3">
           <span className="text-xs font-semibold text-slate-300">Даатгалын эрсдэл / Insurance Risk</span>
           <div className="flex gap-2">
             {PACKAGES.map((pkg) => (
@@ -144,7 +144,7 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/60 p-3">
+        <div className="rounded-xl border border-slate-700/50 bg-slate-800 p-3">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-slate-300">Хураамжийн хувь:</span>
             {PACKAGES.map((pkg) => (
@@ -167,11 +167,11 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
         <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Даатгалын эрсдэлүүд</h3>
         <div className="space-y-2">
           {RISKS.map((risk) => (
-            <div key={risk.id} className="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/40">
+            <div key={risk.id} className="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800">
               <button
                 type="button"
                 onClick={() => toggle(risk.id)}
-                className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-slate-800/60"
+                className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-slate-700"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-700/50">{risk.icon}</div>
@@ -184,7 +184,7 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
               </button>
               <div
                 className={cn(
-                  "overflow-hidden border-t border-slate-700/50 bg-slate-900/30 px-3 text-xs text-slate-400 transition-all",
+                  "overflow-hidden border-t border-slate-700/50 bg-slate-900 px-3 text-xs text-slate-400 transition-all",
                   open[risk.id] ? "max-h-40 py-3 opacity-100" : "max-h-0 py-0 opacity-0"
                 )}
               >
@@ -196,11 +196,11 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
       </div>
 
       {/* Own damage */}
-      <div className="overflow-hidden rounded-xl border border-amber-500/20 bg-amber-500/5">
+      <div className="overflow-hidden rounded-xl border border-amber-500/20 bg-amber-500/10">
         <button
           type="button"
           onClick={() => toggle(OWN_DAMAGE.id)}
-          className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-amber-500/10"
+          className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-amber-500/15"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">{OWN_DAMAGE.icon}</div>
@@ -213,7 +213,7 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
         </button>
         <div
           className={cn(
-            "overflow-hidden border-t border-amber-500/10 px-3 text-xs text-amber-200/70 transition-all",
+            "overflow-hidden border-t border-amber-500/10 bg-slate-900 px-3 text-xs text-amber-200/70 transition-all",
             open[OWN_DAMAGE.id] ? "max-h-40 py-3 opacity-100" : "max-h-0 py-0 opacity-0"
           )}
         >
@@ -228,7 +228,7 @@ export function PackageCompare({ selected, onSelect }: { selected?: string; onSe
         </h3>
         <div className="space-y-2">
           {SERVICES.map((service) => (
-            <div key={service.id} className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-3">
+            <div key={service.id} className="rounded-xl border border-slate-700/50 bg-slate-800 p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-700/50">{service.icon}</div>

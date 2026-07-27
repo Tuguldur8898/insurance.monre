@@ -484,13 +484,13 @@ export function ContractForm({
 
               {showPackage && (
                 <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+                  className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
                   onClick={(e) => {
                     if (e.target === e.currentTarget) setShowPackage(false);
                   }}
                 >
-                  <div className="relative max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-700/50 bg-[#0f1321] shadow-2xl">
-                    <div className="flex items-center justify-between border-b border-slate-700/50 px-5 py-4">
+                  <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-600/50 bg-[#0b0f19] shadow-2xl">
+                    <div className="flex shrink-0 items-center justify-between border-b border-slate-700/50 bg-[#0f1321] px-5 py-4">
                       <h3 className="text-sm font-bold text-white">Багц харьцуулалт</h3>
                       <button
                         type="button"
@@ -500,11 +500,17 @@ export function ContractForm({
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="max-h-[calc(85vh-64px)] overflow-y-auto p-5">
-                      <PackageCompare
-                        selected={packageId}
-                        onSelect={(pkg) => setPackageId(pkg)}
-                      />
+                    <div className="min-h-0 flex-1 overflow-y-auto bg-[#0b0f19] p-5">
+                      <PackageCompare selected={packageId} onSelect={(pkg) => setPackageId(pkg)} />
+                    </div>
+                    <div className="flex shrink-0 justify-end border-t border-slate-700/50 bg-[#0f1321] px-5 py-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowPackage(false)}
+                        className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                      >
+                        Хаах
+                      </button>
                     </div>
                   </div>
                 </div>
