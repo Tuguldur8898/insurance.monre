@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { downloadContractDocx } from "@/lib/contract-docx";
 import type { Contract } from "./ContractList";
+import { PackageCompare } from "./PackageCompare";
 
 export const COMPANIES = [
   { id: "monre", name: "Монре даатгал", rate: 9.5 },
@@ -475,25 +476,10 @@ export function ContractForm({
               </div>
 
               {showPackage && (
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  {PACKAGES.map((p) => (
-                    <div
-                      key={p}
-                      onClick={() => setPackageId(p)}
-                      className={cn(
-                        "cursor-pointer rounded-xl border p-3 transition-all hover:border-slate-500",
-                        packageId === p
-                          ? "border-indigo-500 bg-indigo-500/10"
-                          : "border-slate-700/50 bg-slate-800/40"
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-white">{p}</span>
-                        {packageId === p && <CheckCircle2 className="h-4 w-4 text-indigo-400" />}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <PackageCompare
+                  selected={packageId}
+                  onSelect={(pkg) => setPackageId(pkg)}
+                />
               )}
             </div>
 
