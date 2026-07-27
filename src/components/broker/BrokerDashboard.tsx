@@ -58,6 +58,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ContractForm, COMPANIES, CATEGORIES } from "./ContractForm";
 import { ContractList, type Contract } from "./ContractList";
+import { PaymentView } from "./PaymentView";
 
 type MenuItem = { id: string; label: string; icon: typeof FileText };
 type MenuGroup = { id: string; label: string; icon: typeof LayoutDashboard; items: MenuItem[] };
@@ -547,6 +548,7 @@ export function BrokerDashboard() {
     }
   });
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
+  const [pendingPaymentContract, setPendingPaymentContract] = useState<Contract | null>(null);
 
   const persistContracts = (next: Contract[]) => {
     setContracts(next);
@@ -879,14 +881,27 @@ export function BrokerDashboard() {
                 setEditingContract(null);
                 setActive(active === "new-ajd" ? "ajd-list" : "contract-list");
               }}
-              onSave={(contract) => {
+              onProceedToPayment={(contract) => {
+                setPendingPaymentContract(contract);
+                setActive("payment");
+              }}
+            />
+          ) : active === "payment" && pendingPaymentContract ? (
+            <PaymentView
+              contract={pendingPaymentContract}
+              onBack={() => {
+                setPendingPaymentContract(null);
+                setActive(pendingPaymentContract.isAjd ? "new-ajd" : "new-contract");
+              }}
+              onPay={(contract) => {
                 if (editingContract) {
                   updateContract(contract);
                 } else {
                   addContract(contract);
                 }
                 setEditingContract(null);
-                setActive(active === "new-ajd" ? "ajd-list" : "contract-list");
+                setPendingPaymentContract(null);
+                setActive(contract.isAjd ? "ajd-list" : "contract-list");
               }}
             />
           ) : active === "contract-list" || active === "ajd-list" ? (

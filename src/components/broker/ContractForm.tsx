@@ -10,7 +10,6 @@ import {
   Calendar,
   Calculator,
   CreditCard,
-  Save,
   ChevronDown,
   User,
   Car,
@@ -23,7 +22,6 @@ import {
   X,
 } from "lucide-react";
 import { cn, isValidLicensePlate, formatLicensePlateInput } from "@/lib/utils";
-import { downloadContractDocx } from "@/lib/contract-docx";
 import type { Contract } from "./ContractList";
 import { PackageCompare, PACKAGES } from "./PackageCompare";
 
@@ -397,12 +395,12 @@ function AddOnList({
 
 export function ContractForm({
   onBack,
-  onSave,
+  onProceedToPayment,
   isAjd = false,
   initialContract,
 }: {
   onBack?: () => void;
-  onSave?: (contract: Contract) => void;
+  onProceedToPayment?: (contract: Contract) => void;
   isAjd?: boolean;
   initialContract?: Contract | null;
 }) {
@@ -646,8 +644,7 @@ export function ContractForm({
       customerType,
       images: initialContract?.images,
     };
-    onSave?.(contract);
-    downloadContractDocx(contract);
+    onProceedToPayment?.(contract);
   };
 
   return (
@@ -2046,8 +2043,8 @@ export function ContractForm({
                 onClick={handleSave}
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Save className="h-4 w-4" />
-                {isAjd ? "Төлбөр төлөх" : "Хадгалах"}
+                <CreditCard className="h-4 w-4" />
+                Төлбөр төлөх
               </button>
 
               {!isValid && touched && (
