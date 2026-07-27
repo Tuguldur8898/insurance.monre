@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Building2,
@@ -394,6 +394,7 @@ export function ContractForm({
   const [vehicleSearchLoading, setVehicleSearchLoading] = useState(false);
   const [vehicleSearchResults, setVehicleSearchResults] = useState(getMockVehicles("УУ00000000"));
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
+  const [vehicleSearchError, setVehicleSearchError] = useState(false);
 
   // Customer / insured person lookup
   const [customerReg, setCustomerReg] = useState("");
@@ -403,6 +404,11 @@ export function ContractForm({
   const [customerSurname, setCustomerSurname] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerType, setCustomerType] = useState<"individual" | "legal">("individual");
+  const [legalEntityName, setLegalEntityName] = useState("");
+  const [legalEntityReg, setLegalEntityReg] = useState("");
+  const [legalEntityAddress, setLegalEntityAddress] = useState("");
+  const [legalEntityPhone, setLegalEntityPhone] = useState("");
 
   // Driver / coverage options
   const [coDrivers, setCoDrivers] = useState<{ name: string; reg: string }[]>([]);
@@ -415,6 +421,15 @@ export function ContractForm({
   const [godList, setGodList] = useState<{ name: string; value: string }[]>([]);
   const [ajdList, setAjdList] = useState<{ name: string; value: string }[]>([]);
   const [customFieldsList, setCustomFieldsList] = useState<{ name: string; value: string }[]>([]);
+
+  // Auto-select AJD defaults
+  useEffect(() => {
+    if (isAjd) {
+      setCategory("auto");
+      setSubCategory("Авто тээврийн хэрэгслийн даатгал");
+      setProduct("Basic");
+    }
+  }, [isAjd]);
 
   const selectedCompany = COMPANIES.find((c) => c.id === company);
   const selectedCategory = CATEGORIES.find((c) => c.id === category);
@@ -448,7 +463,10 @@ export function ContractForm({
     product &&
     packageId &&
     valuationNum > 0 &&
-    (!isAuto || (customerReg && licensePlate));
+    (!isAuto ||
+      (customerType === "individual"
+        ? customerReg && licensePlate
+        : legalEntityReg && legalEntityName && legalEntityAddress && legalEntityPhone && licensePlate));
 
   return (
     <div className="h-full bg-[#0b0f19] p-4 text-slate-200 lg:p-6">
@@ -508,86 +526,109 @@ export function ContractForm({
                   {touched && !company && <p className="text-xs text-red-400">Шаардлагатай</p>}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Ангилал <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => {
-                      setCategory(e.target.value);
-                      setSubCategory("");
-                      setTouched(true);
-                    }}
-                    className={cn(
-                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
-                      touched && !category ? "border-red-500/50" : "border-slate-700/60"
-                    )}
-                  >
-                    <option value="">Ангилал сонгох</option>
-                    {CATEGORIES.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  {touched && !category && <p className="text-xs text-red-400">Шаардлагатай</p>}
-                </div>
+                {!isAjd && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Ангилал <span className="text-red-400">*</span>
+                      </label>
+                      <select
+                        value={category}
+                        onChange={(e) => {
+                          setCategory(e.target.value);
+                          setSubCategory("");
+                          setTouched(true);
+                        }}
+                        className={cn(
+                          "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                          touched && !category ? "border-red-500/50" : "border-slate-700/60"
+                        )}
+                      >
+                        <option value="">Ангилал сонгох</option>
+                        {CATEGORIES.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      {touched && !category && <p className="text-xs text-red-400">Шаардлагатай</p>}
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Дэд ангилал <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={subCategory}
-                    onChange={(e) => {
-                      setSubCategory(e.target.value);
-                      setTouched(true);
-                    }}
-                    disabled={!category}
-                    className={cn(
-                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
-                      !category
-                        ? "cursor-not-allowed border-slate-700/30 bg-slate-800/30 text-slate-500"
-                        : touched && !subCategory
-                          ? "border-red-500/50"
-                          : "border-slate-700/60 hover:border-slate-500"
-                    )}
-                  >
-                    <option value="">{category ? "Дэд ангилал сонгох" : "Эхлээд ангилал сонгоно уу"}</option>
-                    {selectedCategory?.sub.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                  {touched && !subCategory && <p className="text-xs text-red-400">Шаардлагатай</p>}
-                </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Дэд ангилал <span className="text-red-400">*</span>
+                      </label>
+                      <select
+                        value={subCategory}
+                        onChange={(e) => {
+                          setSubCategory(e.target.value);
+                          setTouched(true);
+                        }}
+                        disabled={!category}
+                        className={cn(
+                          "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                          !category
+                            ? "cursor-not-allowed border-slate-700/30 bg-slate-800/30 text-slate-500"
+                            : touched && !subCategory
+                              ? "border-red-500/50"
+                              : "border-slate-700/60 hover:border-slate-500"
+                        )}
+                      >
+                        <option value="">{category ? "Дэд ангилал сонгох" : "Эхлээд ангилал сонгоно уу"}</option>
+                        {selectedCategory?.sub.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                      {touched && !subCategory && <p className="text-xs text-red-400">Шаардлагатай</p>}
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Бүтээгдэхүүн сонгох <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={product}
-                    onChange={(e) => {
-                      setProduct(e.target.value);
-                      setTouched(true);
-                    }}
-                    className={cn(
-                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
-                      touched && !product ? "border-red-500/50" : "border-slate-700/60"
-                    )}
-                  >
-                    <option value="">Бүтээгдэхүүн сонгох</option>
-                    {PRODUCTS.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                  {touched && !product && <p className="text-xs text-red-400">Шаардлагатай</p>}
-                </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Бүтээгдэхүүн сонгох <span className="text-red-400">*</span>
+                      </label>
+                      <select
+                        value={product}
+                        onChange={(e) => {
+                          setProduct(e.target.value);
+                          setTouched(true);
+                        }}
+                        className={cn(
+                          "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                          touched && !product ? "border-red-500/50" : "border-slate-700/60"
+                        )}
+                      >
+                        <option value="">Бүтээгдэхүүн сонгох</option>
+                        {PRODUCTS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                      {touched && !product && <p className="text-xs text-red-400">Шаардлагатай</p>}
+                    </div>
+                  </>
+                )}
+
+                {isAjd && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">
+                      Ангилал <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      value={customerType}
+                      onChange={(e) => setCustomerType(e.target.value as "individual" | "legal")}
+                      className={cn(
+                        "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                        touched && !customerType ? "border-red-500/50" : "border-slate-700/60"
+                      )}
+                    >
+                      <option value="individual">Хувь хүн</option>
+                      <option value="legal">Хуулийн этгээд</option>
+                    </select>
+                  </div>
+                )}
 
                 <div className="space-y-2 sm:col-span-2">
                   <label className="text-xs font-semibold text-slate-300">
@@ -684,129 +725,189 @@ export function ContractForm({
                   <div className="space-y-4 rounded-xl border border-slate-700/30 bg-slate-800/30 p-4">
                     <div className="flex items-center gap-2 border-b border-slate-700/30 pb-3">
                       <User className="h-4 w-4 text-slate-400" />
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Харилцагч</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        {customerType === "legal" ? "Хуулийн этгээд" : "Харилцагч"}
+                      </h3>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-300">
-                        Регистрийн дугаар <span className="text-red-400">*</span>
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            value={customerReg}
-                            onChange={(e) => {
-                              setCustomerReg(e.target.value);
-                              setCustomerSearchOpen(false);
-                            }}
-                            placeholder="УУ00000000"
-                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                          />
-                          <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                        </div>
-                        <button
-                          type="button"
-                          disabled={customerSearchLoading}
-                          onClick={() => {
-                            if (!customerReg) return;
-                            setCustomerSearchLoading(true);
-                            setCustomerSearchOpen(false);
-                            setTimeout(() => {
-                              setCustomerSearchResults(getMockCustomers(customerReg));
-                              setCustomerSearchOpen(true);
-                              setCustomerSearchLoading(false);
-                            }, 400);
-                          }}
-                          className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
-                        >
-                          {customerSearchLoading ? (
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          ) : (
-                            <Search className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                      <p className="text-[10px] text-slate-500">
-                        Тестийн РД: {TEST_REGISTRATION_NUMBERS.slice(0, 4).join(", ")}
-                      </p>
-
-                      {customerSearchOpen && (
-                        <div className="relative z-20 mt-2">
-                          <div className="rounded-xl border border-slate-700/50 bg-[#0b0f19] shadow-xl">
-                            <div className="border-b border-slate-700/50 px-3 py-2">
-                              <p className="text-xs font-bold text-white">
-                                {customerSearchResults.length > 0 ? `${customerReg} - харилцагчид` : "Мэдээлэл олдсонгүй"}
-                              </p>
-                            </div>
-                            <div className="max-h-60 overflow-auto p-1.5">
-                              {customerSearchResults.map((c, idx) => (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  onClick={() => {
-                                    setCustomerSurname(c.surname);
-                                    setCustomerName(c.name);
-                                    setCustomerPhone(c.phone);
-                                    setCustomerSearchOpen(false);
-                                  }}
-                                  className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
-                                >
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
-                                    <User className="h-4 w-4" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <span className="text-xs font-bold text-white">{c.surname} {c.name}</span>
-                                    <p className="text-[10px] text-slate-500">{c.phone} · {c.reg}</p>
-                                  </div>
-                                </button>
-                              ))}
+                    {customerType === "individual" ? (
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-300">
+                            Регистрийн дугаар <span className="text-red-400">*</span>
+                          </label>
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <input
+                                type="text"
+                                value={customerReg}
+                                onChange={(e) => {
+                                  setCustomerReg(e.target.value);
+                                  setCustomerSearchOpen(false);
+                                }}
+                                placeholder="УУ00000000"
+                                className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                              />
+                              <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                             </div>
                             <button
                               type="button"
-                              onClick={() => setCustomerSearchOpen(false)}
-                              className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
+                              disabled={customerSearchLoading}
+                              onClick={() => {
+                                if (!customerReg) return;
+                                setCustomerSearchLoading(true);
+                                setCustomerSearchOpen(false);
+                                setTimeout(() => {
+                                  setCustomerSearchResults(getMockCustomers(customerReg));
+                                  setCustomerSearchOpen(true);
+                                  setCustomerSearchLoading(false);
+                                }, 400);
+                              }}
+                              className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
                             >
-                              Хаах
+                              {customerSearchLoading ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <Search className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
+                          <p className="text-[10px] text-slate-500">
+                            Тестийн РД: {TEST_REGISTRATION_NUMBERS.slice(0, 4).join(", ")}
+                          </p>
+
+                          {customerSearchOpen && (
+                            <div className="relative z-20 mt-2">
+                              <div className="rounded-xl border border-slate-700/50 bg-[#0b0f19] shadow-xl">
+                                <div className="border-b border-slate-700/50 px-3 py-2">
+                                  <p className="text-xs font-bold text-white">
+                                    {customerSearchResults.length > 0 ? `${customerReg} - харилцагчид` : "Мэдээлэл олдсонгүй"}
+                                  </p>
+                                </div>
+                                <div className="max-h-60 overflow-auto p-1.5">
+                                  {customerSearchResults.map((c, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() => {
+                                        setCustomerSurname(c.surname);
+                                        setCustomerName(c.name);
+                                        setCustomerPhone(c.phone);
+                                        setCustomerSearchOpen(false);
+                                      }}
+                                      className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
+                                    >
+                                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                        <User className="h-4 w-4" />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <span className="text-xs font-bold text-white">{c.surname} {c.name}</span>
+                                        <p className="text-[10px] text-slate-500">{c.phone} · {c.reg}</p>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setCustomerSearchOpen(false)}
+                                  className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
+                                >
+                                  Хаах
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Овог</label>
-                        <input
-                          type="text"
-                          value={customerSurname}
-                          onChange={(e) => setCustomerSurname(e.target.value)}
-                          placeholder="Овог"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Нэр</label>
-                        <input
-                          type="text"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          placeholder="Нэр"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                    </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <label className="text-xs font-semibold text-slate-300">Овог</label>
+                            <input
+                              type="text"
+                              value={customerSurname}
+                              onChange={(e) => setCustomerSurname(e.target.value)}
+                              placeholder="Овог"
+                              className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-semibold text-slate-300">Нэр</label>
+                            <input
+                              type="text"
+                              value={customerName}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                              placeholder="Нэр"
+                              className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                            />
+                          </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-300">Утасны дугаар</label>
-                      <input
-                        type="text"
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        placeholder="99119911"
-                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-300">Утасны дугаар</label>
+                          <input
+                            type="text"
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
+                            placeholder="99119911"
+                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-300">
+                            Байгууллагын регистр <span className="text-red-400">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={legalEntityReg}
+                            onChange={(e) => setLegalEntityReg(e.target.value)}
+                            placeholder="1234567"
+                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-300">
+                            Байгууллагын нэр <span className="text-red-400">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={legalEntityName}
+                            onChange={(e) => setLegalEntityName(e.target.value)}
+                            placeholder="ХХК-ийн нэр"
+                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-300">
+                            Хаягийн мэдээлэл <span className="text-red-400">*</span>
+                          </label>
+                          <textarea
+                            value={legalEntityAddress}
+                            onChange={(e) => setLegalEntityAddress(e.target.value)}
+                            rows={3}
+                            placeholder="Дүүрэг, хороо, гудамж, байрын дугаар"
+                            className="w-full resize-none rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-xs text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-300">
+                            Утасны дугаар <span className="text-red-400">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={legalEntityPhone}
+                            onChange={(e) => setLegalEntityPhone(e.target.value)}
+                            placeholder="99119911"
+                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="space-y-4 rounded-xl border border-slate-700/30 bg-slate-800/30 p-4">
@@ -842,10 +943,13 @@ export function ContractForm({
                             if (!licensePlate) return;
                             setVehicleSearchLoading(true);
                             setVehicleSearchOpen(false);
+                            setVehicleSearchError(false);
                             setTimeout(() => {
-                              setVehicleSearchResults(getMockVehiclesByPlate(licensePlate));
+                              const results = getMockVehiclesByPlate(licensePlate);
+                              setVehicleSearchResults(results);
                               setVehicleSearchLoading(false);
                               setVehicleSearchOpen(true);
+                              setVehicleSearchError(results.length === 0);
                             }, 800);
                           }}
                           className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
@@ -906,6 +1010,13 @@ export function ContractForm({
                               Хаах
                             </button>
                           </div>
+                        </div>
+                      )}
+
+                      {vehicleSearchError && (
+                        <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-300">
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                          <span>Улсын дугаар бүртгэлгүй байна. Зөв дугаар оруулна уу.</span>
                         </div>
                       )}
                     </div>
@@ -1249,6 +1360,7 @@ export function ContractForm({
                           onChange={(e) => {
                             setLicensePlate(e.target.value);
                             setVehicleSearchOpen(false);
+                            setVehicleSearchError(false);
                           }}
                           placeholder="УБА-1234"
                           className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
@@ -1892,10 +2004,15 @@ export function ContractForm({
                     duration,
                     status: "draft",
                     createdAt: new Date().toISOString(),
-                    insuredName: customerName ? `${customerSurname} ${customerName}`.trim() : ownerName || "Бат-Эрдэнэ",
-                    insuredRegister: customerReg || "УУ99112233",
-                    insuredAddress: "Улаанбаатар",
-                    insuredPhone: customerPhone || "99119911",
+                    insuredName:
+                      customerType === "legal"
+                        ? legalEntityName || "ХХК"
+                        : customerName
+                          ? `${customerSurname} ${customerName}`.trim()
+                          : ownerName || "Бат-Эрдэнэ",
+                    insuredRegister: customerType === "legal" ? legalEntityReg || "1234567" : customerReg || "УУ99112233",
+                    insuredAddress: customerType === "legal" ? legalEntityAddress || "Улаанбаатар" : "Улаанбаатар",
+                    insuredPhone: customerType === "legal" ? legalEntityPhone || "99119911" : customerPhone || "99119911",
                     insurerName: "Л. Энхуянга",
                     insurerRegister: "АА89160234",
                     insurerLicense: licenseNumber || "AB123456",
