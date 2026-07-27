@@ -138,6 +138,7 @@ export function ContractList({
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [imageContract, setImageContract] = useState<Contract | null>(null);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<Set<number>>(new Set());
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   const filtered = useMemo(() => {
@@ -444,6 +445,7 @@ export function ContractList({
                           onClick={() => {
                             setImageContract(c);
                             setImagePreviews(c.images || []);
+                            setSelectedImages(new Set());
                             setImageModalOpen(true);
                           }}
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 transition-all hover:bg-emerald-500 hover:text-white"
@@ -646,37 +648,79 @@ export function ContractList({
               </div>
 
               <div className="min-h-0 flex-1 p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-sm font-bold text-white">
-                    Нийт: {imagePreviews.length}/8
-                  </span>
-                  <label className="cursor-pointer rounded-lg bg-indigo-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600">
-                    Зураг нэмэх
-                    <input
-                      ref={imageInputRef}
-                      type="file"
-                      accept="image/png,image/jpeg,image/jpg"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        const remaining = 8 - imagePreviews.length;
-                        const toProcess = files.slice(0, remaining);
-                        if (toProcess.length === 0) return;
-                        const readers = toProcess.map((file) => {
-                          return new Promise<string>((resolve) => {
-                            const reader = new FileReader();
-                            reader.onloadend = () => resolve(reader.result as string);
-                            reader.readAsDataURL(file);
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold text-white">
+                      Нийт: {imagePreviews.length}/8
+                    </span>
+                    {imagePreviews.length > 0 && (
+                      <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-400 hover:text-white">
+                        <input
+                          type="checkbox"
+                          checked={selectedImages.size === imagePreviews.length && imagePreviews.length > 0}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedImages(new Set(imagePreviews.map((_, i) => i)));
+                            } else {
+                              setSelectedImages(new Set());
+                            }
+                          }}
+                          className="h-3.5 w-3.5 rounded border-slate-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500/20"
+                        />
+                        Бүгдийг сонгох
+                      </label>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectedImages.size > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          Array.from(selectedImages)
+                            .sort((a, b) => a - b)
+                            .forEach((idx) => {
+                              const a = document.createElement("a");
+                              a.href = imagePreviews[idx];
+                              a.download = `contract-image-${idx + 1}.png`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            });
+                        }}
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-600"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        Сонгосон зургуудыг татах ({selectedImages.size})
+                      </button>
+                    )}
+                    <label className="cursor-pointer rounded-lg bg-indigo-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600">
+                      Зураг нэмэх
+                      <input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          const remaining = 8 - imagePreviews.length;
+                          const toProcess = files.slice(0, remaining);
+                          if (toProcess.length === 0) return;
+                          const readers = toProcess.map((file) => {
+                            return new Promise<string>((resolve) => {
+                              const reader = new FileReader();
+                              reader.onloadend = () => resolve(reader.result as string);
+                              reader.readAsDataURL(file);
+                            });
                           });
-                        });
-                        Promise.all(readers).then((results) => {
-                          setImagePreviews((prev) => [...prev, ...results].slice(0, 8));
-                        });
-                        if (imageInputRef.current) imageInputRef.current.value = "";
-                      }}
-                    />
-                  </label>
+                          Promise.all(readers).then((results) => {
+                            setImagePreviews((prev) => [...prev, ...results].slice(0, 8));
+                          });
+                          if (imageInputRef.current) imageInputRef.current.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 {imagePreviews.length === 0 ? (
@@ -690,11 +734,40 @@ export function ContractList({
                 ) : (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                     {imagePreviews.map((src, idx) => (
-                      <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-700/60 bg-slate-900/40">
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          setSelectedImages((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(idx)) next.delete(idx);
+                            else next.add(idx);
+                            return next;
+                          });
+                        }}
+                        className={cn(
+                          "group relative aspect-square cursor-pointer overflow-hidden rounded-xl border bg-slate-900/40 transition-all",
+                          selectedImages.has(idx)
+                            ? "border-indigo-500 ring-2 ring-indigo-500/30"
+                            : "border-slate-700/60 hover:border-slate-500"
+                        )}
+                      >
                         <img src={src} alt={`Зураг ${idx + 1}`} className="h-full w-full object-cover" />
+                        <div
+                          className={cn(
+                            "absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border transition-all",
+                            selectedImages.has(idx)
+                              ? "border-indigo-500 bg-indigo-500 text-white"
+                              : "border-slate-500/50 bg-slate-900/50 text-transparent group-hover:border-indigo-400 group-hover:text-indigo-400"
+                          )}
+                        >
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
                         <a
                           href={src}
                           download={`contract-image-${idx + 1}.png`}
+                          onClick={(e) => e.stopPropagation()}
                           className="absolute bottom-1.5 left-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/80 text-white opacity-0 transition-opacity hover:bg-indigo-500 group-hover:opacity-100"
                           title="Татах"
                         >
@@ -702,7 +775,15 @@ export function ContractList({
                         </a>
                         <button
                           type="button"
-                          onClick={() => setImagePreviews((prev) => prev.filter((_, i) => i !== idx))}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+                            setSelectedImages((prev) => {
+                              const next = new Set(prev);
+                              next.delete(idx);
+                              return next;
+                            });
+                          }}
                           className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-500/80 text-white opacity-0 transition-opacity hover:bg-red-500 group-hover:opacity-100"
                         >
                           <X className="h-3 w-3" />
