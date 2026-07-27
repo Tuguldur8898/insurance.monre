@@ -388,6 +388,7 @@ export function ContractForm({
   const [licensePlate, setLicensePlate] = useState("");
   const [passengerCount, setPassengerCount] = useState("");
   const [vehicleColor, setVehicleColor] = useState("");
+  const [vehicleCategory, setVehicleCategory] = useState("");
   const [loadCapacity, setLoadCapacity] = useState("");
   const [trailerCount, setTrailerCount] = useState("");
   const [routeInfo, setRouteInfo] = useState("");
@@ -1267,475 +1268,314 @@ export function ContractForm({
               </div>
             )}
 
-            {isAuto && !isAjd && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
-              <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
-                <div className="mb-4 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-                    <User className="h-4.5 w-4.5" />
+{isAuto && !isAjd && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
+              <div className="grid gap-5 lg:grid-cols-2">
+                <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+                  <div className="mb-4 flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                      <User className="h-4.5 w-4.5" />
+                    </div>
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Харилцагч</h2>
                   </div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Харилцагч</h2>
-                </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-xs font-semibold text-slate-300">
-                      Регистрийн дугаар <span className="text-red-400">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          value={customerReg}
-                          onChange={(e) => {
-                            setCustomerReg(e.target.value);
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-2 sm:col-span-2">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Регистрийн дугаар <span className="text-red-400">*</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={customerReg}
+                            onChange={(e) => {
+                              setCustomerReg(e.target.value);
+                              setCustomerSearchOpen(false);
+                            }}
+                            placeholder="УУ00000000"
+                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                          <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        </div>
+                        <button
+                          type="button"
+                          disabled={customerSearchLoading}
+                          onClick={() => {
+                            if (!customerReg) return;
+                            setCustomerSearchLoading(true);
                             setCustomerSearchOpen(false);
+                            setTimeout(() => {
+                              setCustomerSearchResults(getMockCustomers(customerReg));
+                              setCustomerSearchOpen(true);
+                              setCustomerSearchLoading(false);
+                            }, 400);
                           }}
-                          placeholder="УУ00000000"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                        <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                          className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
+                        >
+                          {customerSearchLoading ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <Search className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-600 bg-slate-700/50 text-white transition-all hover:bg-slate-700"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        disabled={customerSearchLoading}
-                        onClick={() => {
-                          if (!customerReg) return;
-                          setCustomerSearchLoading(true);
-                          setCustomerSearchOpen(false);
-                          setTimeout(() => {
-                            setCustomerSearchResults(getMockCustomers(customerReg));
-                            setCustomerSearchOpen(true);
-                            setCustomerSearchLoading(false);
-                          }, 400);
-                        }}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
-                      >
-                        {customerSearchLoading ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <Search className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-slate-500">
-                      Тестийн РД: {TEST_REGISTRATION_NUMBERS.slice(0, 6).join(", ")}...
-                    </p>
+                      <p className="text-[10px] text-slate-500">
+                        Тестийн РД: {TEST_REGISTRATION_NUMBERS.slice(0, 6).join(", ")}...
+                      </p>
 
-                    {customerSearchOpen && (
-                      <div className="relative z-20 mt-2">
-                        <div className="rounded-xl border border-slate-700/50 bg-[#0f1321] shadow-xl">
-                          <div className="border-b border-slate-700/50 px-3 py-2">
-                            <p className="text-xs font-bold text-white">
-                              {customerSearchResults.length > 0 ? `${customerReg} - харилцагчид` : "Мэдээлэл олдсонгүй"}
-                            </p>
-                            <p className="text-[10px] text-slate-500">
-                              {customerSearchResults.length > 0
-                                ? "Даатгуулагч харилцагчаа сонгоно уу (DAN/HUR mock)"
-                                : "Регистрийн дугаар шалгана уу"}
-                            </p>
-                          </div>
-                          <div className="max-h-60 overflow-auto p-1.5">
-                            {customerSearchResults.map((c, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => {
-                                  setCustomerSurname(c.surname);
-                                  setCustomerName(c.name);
-                                  setCustomerPhone(c.phone);
-                                  setCustomerSearchOpen(false);
-                                }}
-                                className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
-                              >
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
-                                  <User className="h-4 w-4" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <span className="truncate text-xs font-bold text-white">
-                                      {c.surname} {c.name}
-                                    </span>
+                      {customerSearchOpen && (
+                        <div className="relative z-20 mt-2">
+                          <div className="rounded-xl border border-slate-700/50 bg-[#0f1321] shadow-xl">
+                            <div className="border-b border-slate-700/50 px-3 py-2">
+                              <p className="text-xs font-bold text-white">
+                                {customerSearchResults.length > 0 ? `${customerReg} - харилцагчид` : "Мэдээлэл олдсонгүй"}
+                              </p>
+                              <p className="text-[10px] text-slate-500">
+                                {customerSearchResults.length > 0
+                                  ? "Даатгуулагч харилцагчаа сонгоно уу (DAN/HUR mock)"
+                                  : "Регистрийн дугаар шалгана уу"}
+                              </p>
+                            </div>
+                            <div className="max-h-60 overflow-auto p-1.5">
+                              {customerSearchResults.map((c, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => {
+                                    setCustomerSurname(c.surname);
+                                    setCustomerName(c.name);
+                                    setCustomerPhone(c.phone);
+                                    setCustomerSearchOpen(false);
+                                  }}
+                                  className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
+                                >
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                    <User className="h-4 w-4" />
                                   </div>
-                                  <p className="mt-0.5 text-[10px] text-slate-500">{c.phone}</p>
-                                  <p className="text-[10px] text-slate-600">РД: {c.reg}</p>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setCustomerSearchOpen(false)}
-                            className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
-                          >
-                            Хаах
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">Овог</label>
-                    <input
-                      type="text"
-                      value={customerSurname}
-                      onChange={(e) => setCustomerSurname(e.target.value)}
-                      placeholder="Овог"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">Нэр</label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Нэр"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
-                  </div>
-
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-xs font-semibold text-slate-300">Утасны дугаар</label>
-                    <input
-                      type="text"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="99119911"
-                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {isAuto && !isAjd && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
-              <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
-                <div className="mb-4 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
-                    <Car className="h-4.5 w-4.5" />
-                  </div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал"
-                      ? "Хүнд даацын тээврийн хэрэгсэл"
-                      : "Автомашин"}
-                  </h2>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">
-                      Улсын дугаар <span className="text-red-400">*</span>
-                    </label>
-
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          value={licensePlate}
-                          onChange={(e) => {
-                            setLicensePlate(e.target.value);
-                            setVehicleSearchOpen(false);
-                            setVehicleSearchError(false);
-                          }}
-                          placeholder="УБА-1234"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                        <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                      </div>
-                      <button
-                        type="button"
-                        disabled={vehicleSearchLoading}
-                        onClick={() => {
-                          if (!licensePlate) return;
-                          setVehicleSearchLoading(true);
-                          setVehicleSearchOpen(false);
-                          setTimeout(() => {
-                            setVehicleSearchResults(getMockVehiclesByPlate(licensePlate));
-                            setVehicleSearchLoading(false);
-                            setVehicleSearchOpen(true);
-                          }, 800);
-                        }}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
-                      >
-                        {vehicleSearchLoading ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <Search className="h-4 w-4" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-600 bg-slate-700/50 text-white transition-all hover:bg-slate-700"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-slate-500">
-                      Тестийн улсын дугаарууд: {TEST_PLATE_NUMBERS.join(", ")}. Бусад дугаар оруулсан ч санамсаргүй тест мэдээлэл гарч ирнэ.
-                    </p>
-
-                    {/* Vehicle search results dropdown */}
-                    {vehicleSearchOpen && (
-                      <div className="relative z-20 mt-2">
-                        <div className="rounded-xl border border-slate-700/50 bg-[#0f1321] shadow-xl">
-                          <div className="border-b border-slate-700/50 px-3 py-2">
-                            <p className="text-xs font-bold text-white">
-                              {vehicleSearchResults.length > 0
-                                ? `${licensePlate} - улсын дугаар дээрх автомашинууд`
-                                : "Мэдээлэл олдсонгүй"}
-                            </p>
-                            <p className="text-[10px] text-slate-500">
-                              {vehicleSearchResults.length > 0
-                                ? "Даатгуулах машиныг сонгоно уу (DAN/HUR mock)"
-                                : "Улсын дугаар шалгана уу"}
-                            </p>
-                          </div>
-                          <div className="max-h-60 overflow-auto p-1.5">
-                            {vehicleSearchResults.map((v, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => {
-                                  setVehicleBrand(v.brand);
-                                  setVehicleModel(v.model);
-                                  setVehicleYear(v.year);
-                                  setVinNumber(v.vin);
-                                  setEngineNumber(v.engine);
-                                  setLicensePlate(v.plate);
-                                  setVehicleType(v.type);
-                                  setVehicleColor(v.color || "");
-                                  setPassengerCount(v.seats);
-                                  setVehicleSearchOpen(false);
-                                }}
-                                className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
-                              >
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
-                                  <Car className="h-4 w-4" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <span className="truncate text-xs font-bold text-white">
-                                      {v.plate}
-                                    </span>
-                                    <span className="shrink-0 text-[10px] text-slate-500">{v.year}</span>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <span className="truncate text-xs font-bold text-white">
+                                        {c.surname} {c.name}
+                                      </span>
+                                    </div>
+                                    <p className="mt-0.5 text-[10px] text-slate-500">{c.phone}</p>
+                                    <p className="text-[10px] text-slate-600">РД: {c.reg}</p>
                                   </div>
-                                  <p className="mt-0.5 text-[10px] text-slate-500">
-                                    {v.brand} {v.model} · {v.typeLabel} · {v.seats} суудал
-                                  </p>
-                                  <p className="text-[10px] text-slate-600">
-                                    VIN: {v.vin}
-                                  </p>
-                                </div>
-                              </button>
-                            ))}
+                                </button>
+                              ))}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setCustomerSearchOpen(false)}
+                              className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
+                            >
+                              Хаах
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setVehicleSearchOpen(false)}
-                            className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
-                          >
-                            Хаах
-                          </button>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-300">
-                      Улсын дугаар <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">Овог</label>
                       <input
                         type="text"
-                        value={engineNumber}
-                        onChange={(e) => setEngineNumber(e.target.value)}
-                        placeholder="0000VBA"
-                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        value={customerSurname}
+                        onChange={(e) => setCustomerSurname(e.target.value)}
+                        placeholder="Овог"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                       />
-                      <Hash className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">Нэр</label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Нэр"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
+
+                    <div className="space-y-2 sm:col-span-2">
+                      <label className="text-xs font-semibold text-slate-300">Утасны дугаар</label>
+                      <input
+                        type="text"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        placeholder="99119911"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {subCategory === "Машин механизмын даатгал" && (
-                    <>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Марка</label>
-                        <input
-                          type="text"
-                          value={vehicleBrand}
-                          onChange={(e) => setVehicleBrand(e.target.value)}
-                          placeholder="Toyota"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Загвар</label>
-                        <input
-                          type="text"
-                          value={vehicleModel}
-                          onChange={(e) => setVehicleModel(e.target.value)}
-                          placeholder="Land Cruiser"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                    </>
-                  )}
+                <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+                  <div className="mb-4 flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                      <Car className="h-4.5 w-4.5" />
+                    </div>
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                      {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал"
+                        ? "Хүнд даацын тээврийн хэрэгсэл"
+                        : "Автомашин"}
+                    </h2>
+                  </div>
 
-                  {subCategory === "Машин механизмын даатгал" && (
-                    <>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Үйлдвэрлэсэн он</label>
-                        <input
-                          type="number"
-                          value={vehicleYear}
-                          onChange={(e) => setVehicleYear(e.target.value)}
-                          placeholder="2020"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Арлын дугаар (VIN)</label>
-                        <input
-                          type="text"
-                          value={vinNumber}
-                          onChange={(e) => setVinNumber(e.target.value)}
-                          placeholder="JT3DB..."
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {(subCategory === "Авто тээврийн хэрэгслийн даатгал" ||
-                    subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал") && (
-                    <>
-                      <div className="space-y-2 sm:col-span-2">
-                        <label className="text-xs font-semibold text-slate-300">Даатгуулах машины улсын дугаар</label>
-                        <input
-                          type="text"
-                          value={licensePlate}
-                          onChange={(e) => setLicensePlate(e.target.value)}
-                          placeholder="УБА-0000"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm font-bold text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-2 sm:col-span-2">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Улсын дугаар <span className="text-red-400">*</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={licensePlate}
+                            onChange={(e) => {
+                              setLicensePlate(e.target.value);
+                              setVehicleSearchOpen(false);
+                            }}
+                            placeholder="УБА-1234"
+                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          />
+                          <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        </div>
+                        <button
+                          type="button"
+                          disabled={vehicleSearchLoading}
+                          onClick={() => {
+                            if (!licensePlate) return;
+                            setVehicleSearchLoading(true);
+                            setVehicleSearchOpen(false);
+                            setTimeout(() => {
+                              setVehicleSearchResults(getMockVehiclesByPlate(licensePlate));
+                              setVehicleSearchLoading(false);
+                              setVehicleSearchOpen(true);
+                            }, 800);
+                          }}
+                          className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
+                        >
+                          {vehicleSearchLoading ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <Search className="h-4 w-4" />
+                          )}
+                        </button>
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Тээврийн хэрэгслийн төрөл</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={vehicleType ? VEHICLE_TYPE_LABELS[vehicleType] || vehicleType : ""}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
+                      {vehicleSearchOpen && (
+                        <div className="relative z-20 mt-2">
+                          <div className="rounded-xl border border-slate-700/50 bg-[#0f1321] shadow-xl">
+                            <div className="border-b border-slate-700/50 px-3 py-2">
+                              <p className="text-xs font-bold text-white">
+                                {vehicleSearchResults.length > 0 ? `${licensePlate} - автомашин` : "Мэдээлэл олдсонгүй"}
+                              </p>
+                            </div>
+                            <div className="max-h-60 overflow-auto p-1.5">
+                              {vehicleSearchResults.map((v, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => {
+                                    setVehicleBrand(v.brand);
+                                    setVehicleModel(v.model);
+                                    setVehicleYear(v.year);
+                                    setVinNumber(v.vin);
+                                    setLicensePlate(v.plate);
+                                    setVehicleType(v.type);
+                                    setVehicleCategory(v.category || "");
+                                    setVehicleColor(v.color || "");
+                                    setPassengerCount(v.seats);
+                                    setOwnerName([v.ownerSurname, v.ownerName].filter(Boolean).join(" "));
+                                    setVehicleSearchOpen(false);
+                                  }}
+                                  className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
+                                >
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                    <Car className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <span className="text-xs font-bold text-white">{v.plate}</span>
+                                    <p className="text-[10px] text-slate-500">{v.brand} {v.model}</p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setVehicleSearchOpen(false)}
+                              className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
+                            >
+                              Хаах
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Суудлын тоо</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={passengerCount}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">Марка</label>
+                      <input
+                        type="text"
+                        value={vehicleBrand}
+                        onChange={(e) => setVehicleBrand(e.target.value)}
+                        placeholder="Honda"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Марка</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={vehicleBrand}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">Модел</label>
+                      <input
+                        type="text"
+                        value={vehicleModel}
+                        onChange={(e) => setVehicleModel(e.target.value)}
+                        placeholder="Acty"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Загвар</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={vehicleModel}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">Ангилал</label>
+                      <input
+                        type="text"
+                        value={vehicleCategory}
+                        onChange={(e) => setVehicleCategory(e.target.value)}
+                        placeholder="B"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Үйлдвэрлэсэн он</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={vehicleYear}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-300">Арлын дугаар</label>
+                      <input
+                        type="text"
+                        value={vinNumber}
+                        onChange={(e) => setVinNumber(e.target.value)}
+                        placeholder="HA71517932"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Арлын дугаар (VIN)</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={vinNumber}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Өнгө</label>
-                        <input
-                          type="text"
-                          readOnly
-                          value={vehicleColor}
-                          placeholder="Регистрээс дуудна"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал" && (
-                    <>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Ачилтын даац (тонн)</label>
-                        <input
-                          type="number"
-                          value={loadCapacity}
-                          onChange={(e) => setLoadCapacity(e.target.value)}
-                          placeholder="10"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-300">Чиргүүлийн тоо</label>
-                        <input
-                          type="number"
-                          value={trailerCount}
-                          onChange={(e) => setTrailerCount(e.target.value)}
-                          placeholder="0"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                      <div className="space-y-2 sm:col-span-2">
-                        <label className="text-xs font-semibold text-slate-300">Чиглэл/зам</label>
-                        <input
-                          type="text"
-                          value={routeInfo}
-                          onChange={(e) => setRouteInfo(e.target.value)}
-                          placeholder="Улаанбаатар - Эрдэнэт"
-                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
-                        />
-                      </div>
-                    </>
-                  )}
+                    <div className="space-y-2 sm:col-span-2">
+                      <label className="text-xs font-semibold text-slate-300">Зээмшигчийн нэр</label>
+                      <input
+                        type="text"
+                        value={ownerName}
+                        onChange={(e) => setOwnerName(e.target.value)}
+                        placeholder="Болд-Эрдэнэ"
+                        className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
