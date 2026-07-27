@@ -639,15 +639,26 @@ export function BrokerDashboard() {
   // Demo filter: limit monthly sales view based on selected period
   const { salesByPeriod, employeeData, productData, companyData, quarterlyData, partnersData } = useMemo(() => {
     const year = new Date().getFullYear();
+    const month = new Date().getMonth();
     const prevYear = year - 1;
 
-    // Monthly sales: current year vs previous year
-    const monthlyCurrent = Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}-р сар`, value: 0, prev: 0 }));
+    // Forward-looking 12-month window starting from current month
+    const monthlyCurrent = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(year, month + i, 1);
+      return { label: `${d.getMonth() + 1}-р сар`, value: 0, prev: 0 };
+    });
     contracts.forEach((c) => {
       const d = new Date(c.createdAt);
-      const m = d.getMonth();
-      if (d.getFullYear() === year) monthlyCurrent[m].value += c.premium;
-      if (d.getFullYear() === prevYear) monthlyCurrent[m].prev += c.premium;
+      // Find which window month this contract falls into
+      const monthOffset = (d.getFullYear() - year) * 12 + (d.getMonth() - month);
+      if (monthOffset >= 0 && monthOffset < 12) {
+        monthlyCurrent[monthOffset].value += c.premium;
+      }
+      // Previous year same window (offset by -12)
+      const prevOffset = monthOffset - 12;
+      if (prevOffset >= 0 && prevOffset < 12) {
+        monthlyCurrent[prevOffset].prev += c.premium;
+      }
     });
 
     // Employee data: since we only track current broker, aggregate as one
@@ -697,12 +708,12 @@ export function BrokerDashboard() {
       { label: "4-р улирал", current: qCurrent[3], prev: qPrev[3] },
     ];
 
-    // Slice based on selected period
+    // Slice based on selected period for sales trend (months from current month)
     let salesByPeriod = monthlyCurrent;
-    if (activeFilter === "Өдөр") salesByPeriod = monthlyCurrent.slice(6, 7);
-    else if (activeFilter === "Сар") salesByPeriod = monthlyCurrent.slice(-1);
-    else if (activeFilter === "Улирал") salesByPeriod = monthlyCurrent.slice(-3);
-    else if (activeFilter === "Хагас жил") salesByPeriod = monthlyCurrent.slice(-6);
+    if (activeFilter === "Өдөр") salesByPeriod = monthlyCurrent.slice(0, 1);
+    else if (activeFilter === "Сар") salesByPeriod = monthlyCurrent.slice(0, 1);
+    else if (activeFilter === "Улирал") salesByPeriod = monthlyCurrent.slice(0, 3);
+    else if (activeFilter === "Хагас жил") salesByPeriod = monthlyCurrent.slice(0, 6);
 
     return {
       salesByPeriod,
