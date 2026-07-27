@@ -49,7 +49,7 @@ const PRODUCTS = ["Basic", "Standard", "Premium"];
 const DURATIONS = ["1 Жил", "2 Жил", "3 Жил"];
 const ADDITIONAL_OPTIONS = ["Нэмэлт үнийн мэдээлэл", "Чиргүүл үйлчилгээ", "Түрээсийн тэрэг", "Хуулийн туслалцаа"];
 
-// Mock vehicle registry data (replace with DAN/HUR API integration later)
+// Mock DAN/HUR registry data (replace with real API integration later)
 type VehicleInfo = {
   brand: string;
   model: string;
@@ -61,6 +61,18 @@ type VehicleInfo = {
   typeLabel: string;
   seats: string;
   color?: string;
+  category?: string;
+  ownerSurname?: string;
+  ownerName?: string;
+  ownerPhone?: string;
+  ownerReg?: string;
+};
+
+type CustomerInfo = {
+  reg: string;
+  surname: string;
+  name: string;
+  phone: string;
 };
 
 const VEHICLE_TYPE_LABELS: Record<string, string> = {
@@ -76,24 +88,24 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
 
 const MOCK_VEHICLE_REGISTRY: Record<string, VehicleInfo[]> = {
   УУ00000000: [
-    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "УБА-1234", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", typeLabel: "Джип/SUV", seats: "7", color: "Хар" },
-    { brand: "Lexus", model: "LX570", year: "2020", plate: "УББ-5678", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", typeLabel: "Джип/SUV", seats: "8", color: "Цагаан" },
-    { brand: "Hyundai", model: "Sonata", year: "2017", plate: "УБС-9012", vin: "KMHEC41DDBA000001", engine: "G4KJ-000000", type: "sedan", typeLabel: "Седан", seats: "5", color: "Мөнгөлөг" },
+    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "УБА-1234", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", typeLabel: "Джип/SUV", seats: "7", color: "Хар", category: "A", ownerSurname: "Лхагваочир", ownerName: "Энхуянга", ownerPhone: "94660906", ownerReg: "УШ02290621" },
+    { brand: "Lexus", model: "LX570", year: "2020", plate: "УББ-5678", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", typeLabel: "Джип/SUV", seats: "8", color: "Цагаан", category: "A", ownerSurname: "Бат", ownerName: "Эрдэнэ", ownerPhone: "99119911", ownerReg: "УУ11223344" },
+    { brand: "Hyundai", model: "Sonata", year: "2017", plate: "УБС-9012", vin: "KMHEC41DDBA000001", engine: "G4KJ-000000", type: "sedan", typeLabel: "Седан", seats: "5", color: "Мөнгөлөг", category: "B", ownerSurname: "Ганбат", ownerName: "Оюун", ownerPhone: "88112233", ownerReg: "УУ99887766" },
   ],
   УУ88888888: [
-    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "УХА-9999", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", typeLabel: "Джип/SUV", seats: "5", color: "Улаан" },
+    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "УХА-9999", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", typeLabel: "Джип/SUV", seats: "5", color: "Улаан", category: "A", ownerSurname: "Дорж", ownerName: "Баяр", ownerPhone: "99001122", ownerReg: "УУ55443322" },
   ],
   АА11111111: [
-    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "АА-1111", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", typeLabel: "Ачааны тэрэг", seats: "2", color: "Цэнхэр" },
+    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "АА-1111", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", typeLabel: "Ачааны тэрэг", seats: "2", color: "Цэнхэр", category: "C", ownerSurname: "Болд", ownerName: "Эрдэнэ", ownerPhone: "95556677", ownerReg: "АА99887766" },
   ],
   ББ22222222: [
-    { brand: "Toyota", model: "Hiace", year: "2019", plate: "ББ-2222", vin: "JTFLA11H0KB000001", engine: "2TR-000000", type: "minivan", typeLabel: "Микроавтобус", seats: "14", color: "Саарал" },
+    { brand: "Toyota", model: "Hiace", year: "2019", plate: "ББ-2222", vin: "JTFLA11H0KB000001", engine: "2TR-000000", type: "minivan", typeLabel: "Микроавтобус", seats: "14", color: "Саарал", category: "B", ownerSurname: "Баатар", ownerName: "Сүх", ownerPhone: "99113344", ownerReg: "ББ11223344" },
   ],
   ХХ00000000: [
-    { brand: "MAN", model: "TGS 33.440", year: "2020", plate: "ХҮ-0000", vin: "WMA06SZZ5GP000001", engine: "D2676-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Улаан" },
+    { brand: "MAN", model: "TGS 33.440", year: "2020", plate: "ХҮ-0000", vin: "WMA06SZZ5GP000001", engine: "D2676-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Улаан", category: "E", ownerSurname: "Сүх", ownerName: "Мөнх", ownerPhone: "99887766", ownerReg: "ХХ11223344" },
   ],
   ХХ11111111: [
-    { brand: "Volvo", model: "FH 540", year: "2022", plate: "ХҮ-1111", vin: "YV2E4CBA8PB000001", engine: "D13K-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Цагаан" },
+    { brand: "Volvo", model: "FH 540", year: "2022", plate: "ХҮ-1111", vin: "YV2E4CBA8PB000001", engine: "D13K-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Цагаан", category: "E", ownerSurname: "Цог", ownerName: "Ганхуяг", ownerPhone: "99776655", ownerReg: "ХХ55667788" },
   ],
 };
 
@@ -130,6 +142,14 @@ function generateMockVehicles(reg: string): VehicleInfo[] {
     const engine = `${seed.slice(0, 2)}-${(100000 + (seed.charCodeAt(i + 3) + i * 11) % 900000)}`;
     const seats = type === "sedan" ? "5" : type === "suv" ? "5" : type === "minivan" ? (12 + (i % 4) * 2).toString() : type === "bus" ? "40" : type === "pickup" ? "5" : "2";
     const color = MOCK_COLORS[(seed.charCodeAt(i + 6) + i * 3) % MOCK_COLORS.length];
+    const categories = ["A", "B", "C", "D", "E"];
+    const category = categories[(seed.charCodeAt(i) + i) % categories.length];
+    const surnames = ["Лхагваочир", "Бат", "Ганбат", "Дорж", "Болд", "Баатар", "Сүх", "Цог"];
+    const names = ["Энхуянга", "Эрдэнэ", "Оюун", "Баяр", "Эрдэнэ", "Сүх", "Мөнх", "Ганхуяг"];
+    const ownerSurname = surnames[(seed.charCodeAt(i) + i * 3) % surnames.length];
+    const ownerName = names[(seed.charCodeAt(i + 1) + i * 5) % names.length];
+    const ownerPhone = `99${(100000 + (seed.charCodeAt(i + 2) + i * 7) % 900000).toString().slice(0, 6)}`;
+    const ownerReg = `${seed.slice(0, 2)}${(10000000 + (seed.charCodeAt(i + 3) + i * 13) % 90000000)}`;
     vehicles.push({
       brand: brand.brand,
       model,
@@ -141,6 +161,11 @@ function generateMockVehicles(reg: string): VehicleInfo[] {
       typeLabel: VEHICLE_TYPE_LABELS[type] || type,
       seats,
       color,
+      category,
+      ownerSurname,
+      ownerName,
+      ownerPhone,
+      ownerReg,
     });
   }
   return vehicles;
@@ -150,7 +175,92 @@ function getMockVehicles(reg: string): VehicleInfo[] {
   return MOCK_VEHICLE_REGISTRY[reg] || generateMockVehicles(reg);
 }
 
+function getMockVehiclesByPlate(plate: string): VehicleInfo[] {
+  const normalized = plate.trim().toUpperCase();
+  if (!normalized) return [];
+  for (const vehicles of Object.values(MOCK_VEHICLE_REGISTRY)) {
+    const found = vehicles.filter((v) => v.plate.toUpperCase() === normalized);
+    if (found.length) return found;
+  }
+  // Deterministic fallback vehicle from the plate itself
+  const seed = normalized.padEnd(8, "0");
+  const brandIdx = (seed.charCodeAt(0) + seed.charCodeAt(2)) % MOCK_BRAND_TEMPLATES.length;
+  const brand = MOCK_BRAND_TEMPLATES[brandIdx];
+  const modelIdx = (seed.charCodeAt(1) + seed.charCodeAt(3)) % brand.models.length;
+  const model = brand.models[modelIdx];
+  const type = brand.types[modelIdx];
+  const year = (2010 + (seed.charCodeAt(4) + seed.charCodeAt(5)) % 16).toString();
+  const engine = `${seed.slice(0, 2)}-${(100000 + (seed.charCodeAt(6) + seed.charCodeAt(7)) % 900000)}`;
+  const seats =
+    type === "sedan"
+      ? "5"
+      : type === "suv"
+        ? "5"
+        : type === "minivan"
+          ? "12"
+          : type === "bus"
+            ? "40"
+            : type === "pickup"
+              ? "5"
+              : "2";
+  const color = MOCK_COLORS[(seed.charCodeAt(0) + seed.charCodeAt(1)) % MOCK_COLORS.length];
+  const categories = ["A", "B", "C", "D", "E"];
+  const category = categories[(seed.charCodeAt(2) + seed.charCodeAt(3)) % categories.length];
+  const surnames = ["Лхагваочир", "Бат", "Ганбат", "Дорж", "Болд", "Баатар", "Сүх", "Цог"];
+  const names = ["Энхуянга", "Эрдэнэ", "Оюун", "Баяр", "Эрдэнэ", "Сүх", "Мөнх", "Ганхуяг"];
+  const ownerSurname = surnames[(seed.charCodeAt(4) + seed.charCodeAt(5)) % surnames.length];
+  const ownerName = names[(seed.charCodeAt(6) + seed.charCodeAt(7)) % names.length];
+  const ownerPhone = `99${(100000 + (seed.charCodeAt(0) + seed.charCodeAt(1)) % 900000).toString().slice(0, 6)}`;
+  const ownerReg = `${seed.slice(0, 2)}${(10000000 + (seed.charCodeAt(2) + seed.charCodeAt(3)) % 90000000)}`;
+  return [
+    {
+      brand: brand.brand,
+      model,
+      year,
+      plate: normalized,
+      vin: `${seed.slice(0, 2)}${year}000001`,
+      engine,
+      type,
+      typeLabel: VEHICLE_TYPE_LABELS[type] || type,
+      seats,
+      color,
+      category,
+      ownerSurname,
+      ownerName,
+      ownerPhone,
+      ownerReg,
+    },
+  ];
+}
+
+function getMockCustomers(reg: string): CustomerInfo[] {
+  // Exact match in known registry vehicles by ownerReg
+  const matches: CustomerInfo[] = [];
+  Object.values(MOCK_VEHICLE_REGISTRY).forEach((vehicles) => {
+    vehicles.forEach((v) => {
+      if (v.ownerReg === reg && !matches.find((c) => c.reg === v.ownerReg)) {
+        matches.push({
+          reg: v.ownerReg || "",
+          surname: v.ownerSurname || "",
+          name: v.ownerName || "",
+          phone: v.ownerPhone || "",
+        });
+      }
+    });
+  });
+  if (matches.length) return matches;
+  // Fallback deterministic mock customer
+  const seed = reg.padEnd(8, "0");
+  const surnames = ["Лхагваочир", "Бат", "Ганбат", "Дорж", "Болд", "Баатар", "Сүх", "Цог"];
+  const names = ["Энхуянга", "Эрдэнэ", "Оюун", "Баяр", "Эрдэнэ", "Сүх", "Мөнх", "Ганхуяг"];
+  const surname = surnames[(seed.charCodeAt(0) + seed.charCodeAt(2)) % surnames.length];
+  const name = names[(seed.charCodeAt(1) + seed.charCodeAt(3)) % names.length];
+  const phone = `99${(100000 + (seed.charCodeAt(4) + seed.charCodeAt(5)) % 900000).toString().slice(0, 6)}`;
+  return [{ reg, surname, name, phone }];
+}
+
 const TEST_REGISTRATION_NUMBERS = ["УУ00000000", "УУ88888888", "АА11111111", "ББ22222222", "ХХ00000000", "ХХ11111111", "УБ12345678", "ОР55555555", "ДХ77777777"];
+const TEST_PLATE_NUMBERS = ["УБА-1234", "УББ-5678", "УБС-9012", "УХА-9999", "АА-1111", "ББ-2222", "ХҮ-0000", "ХҮ-1111"];
 
 const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", typeLabel: "", seats: "", color: "" };
 
@@ -249,7 +359,6 @@ export function ContractForm({
   const [additional, setAdditional] = useState("");
   const [showAddOns, setShowAddOns] = useState(false);
   const [description, setDescription] = useState("");
-  const [regNumber, setRegNumber] = useState("");
   const [engineNumber, setEngineNumber] = useState("");
   const [driverOpen, setDriverOpen] = useState(false);
   const [ownerName, setOwnerName] = useState("");
@@ -274,6 +383,15 @@ export function ContractForm({
   const [vehicleSearchLoading, setVehicleSearchLoading] = useState(false);
   const [vehicleSearchResults, setVehicleSearchResults] = useState(getMockVehicles("УУ00000000"));
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
+
+  // Customer / insured person lookup
+  const [customerReg, setCustomerReg] = useState("");
+  const [customerSearchLoading, setCustomerSearchLoading] = useState(false);
+  const [customerSearchResults, setCustomerSearchResults] = useState<CustomerInfo[]>([]);
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [customerSurname, setCustomerSurname] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
 
   // Auto transport subcategory add-ons
   const [discountPercent, setDiscountPercent] = useState("");
@@ -307,7 +425,14 @@ export function ContractForm({
   const discountAmount = Math.round((basePremium * discountNum) / 100);
   const totalPremium = basePremium - discountAmount + additionalTotal;
 
-  const isValid = company && category && subCategory && product && packageId && valuationNum > 0;
+  const isValid =
+    company &&
+    category &&
+    subCategory &&
+    product &&
+    packageId &&
+    valuationNum > 0 &&
+    (!isAuto || (customerReg && licensePlate));
 
   return (
     <div className="h-full bg-[#0b0f19] p-4 text-slate-200 lg:p-6">
@@ -523,18 +648,14 @@ export function ContractForm({
             {isAuto && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
               <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
                 <div className="mb-4 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
-                    <Car className="h-4.5 w-4.5" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                    <User className="h-4.5 w-4.5" />
                   </div>
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал"
-                      ? "Хүнд даацын тээврийн хэрэгсэл"
-                      : "Тээврийн хэрэгслийн мэдээлэл"}
-                  </h2>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Харилцагч</h2>
                 </div>
 
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <label className="text-xs font-semibold text-slate-300">
                       Регистрийн дугаар <span className="text-red-400">*</span>
                     </label>
@@ -542,10 +663,10 @@ export function ContractForm({
                       <div className="relative flex-1">
                         <input
                           type="text"
-                          value={regNumber}
+                          value={customerReg}
                           onChange={(e) => {
-                            setRegNumber(e.target.value);
-                            setVehicleSearchOpen(false);
+                            setCustomerReg(e.target.value);
+                            setCustomerSearchOpen(false);
                           }}
                           placeholder="УУ00000000"
                           className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
@@ -554,13 +675,158 @@ export function ContractForm({
                       </div>
                       <button
                         type="button"
+                        disabled={customerSearchLoading}
+                        onClick={() => {
+                          if (!customerReg) return;
+                          setCustomerSearchLoading(true);
+                          setCustomerSearchOpen(false);
+                          setTimeout(() => {
+                            setCustomerSearchResults(getMockCustomers(customerReg));
+                            setCustomerSearchOpen(true);
+                            setCustomerSearchLoading(false);
+                          }, 400);
+                        }}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500 text-white transition-all hover:bg-indigo-600 disabled:opacity-50"
+                      >
+                        {customerSearchLoading ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <Search className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+
+                    {customerSearchOpen && (
+                      <div className="relative z-20 mt-2">
+                        <div className="rounded-xl border border-slate-700/50 bg-[#0f1321] shadow-xl">
+                          <div className="border-b border-slate-700/50 px-3 py-2">
+                            <p className="text-xs font-bold text-white">
+                              {customerSearchResults.length > 0 ? `${customerReg} - харилцагчид` : "Мэдээлэл олдсонгүй"}
+                            </p>
+                            <p className="text-[10px] text-slate-500">
+                              {customerSearchResults.length > 0
+                                ? "Даатгуулагч харилцагчаа сонгоно уу (DAN/HUR mock)"
+                                : "Регистрийн дугаар шалгана уу"}
+                            </p>
+                          </div>
+                          <div className="max-h-60 overflow-auto p-1.5">
+                            {customerSearchResults.map((c, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => {
+                                  setCustomerSurname(c.surname);
+                                  setCustomerName(c.name);
+                                  setCustomerPhone(c.phone);
+                                  setCustomerSearchOpen(false);
+                                }}
+                                className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-800"
+                              >
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                  <User className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="truncate text-xs font-bold text-white">
+                                      {c.surname} {c.name}
+                                    </span>
+                                  </div>
+                                  <p className="mt-0.5 text-[10px] text-slate-500">{c.phone}</p>
+                                  <p className="text-[10px] text-slate-600">РД: {c.reg}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setCustomerSearchOpen(false)}
+                            className="w-full border-t border-slate-700/50 px-3 py-2 text-center text-xs font-medium text-slate-400 transition-colors hover:bg-slate-800"
+                          >
+                            Хаах
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">Овог</label>
+                    <input
+                      type="text"
+                      value={customerSurname}
+                      onChange={(e) => setCustomerSurname(e.target.value)}
+                      placeholder="Овог"
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">Нэр</label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Нэр"
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    />
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-xs font-semibold text-slate-300">Утасны дугаар</label>
+                    <input
+                      type="text"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="99119911"
+                      className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isAuto && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
+              <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+                <div className="mb-4 flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                    <Car className="h-4.5 w-4.5" />
+                  </div>
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    {subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал"
+                      ? "Хүнд даацын тээврийн хэрэгсэл"
+                      : "Автомашин"}
+                  </h2>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">
+                      Улсын дугаар <span className="text-red-400">*</span>
+                    </label>
+
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={licensePlate}
+                          onChange={(e) => {
+                            setLicensePlate(e.target.value);
+                            setVehicleSearchOpen(false);
+                          }}
+                          placeholder="УБА-1234"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                        <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                      </div>
+                      <button
+                        type="button"
                         disabled={vehicleSearchLoading}
                         onClick={() => {
-                          if (!regNumber) return;
+                          if (!licensePlate) return;
                           setVehicleSearchLoading(true);
                           setVehicleSearchOpen(false);
                           setTimeout(() => {
-                            setVehicleSearchResults(getMockVehicles(regNumber));
+                            setVehicleSearchResults(getMockVehiclesByPlate(licensePlate));
                             setVehicleSearchLoading(false);
                             setVehicleSearchOpen(true);
                           }, 800);
@@ -581,7 +847,7 @@ export function ContractForm({
                       </button>
                     </div>
                     <p className="text-[10px] text-slate-500">
-                      Тестийн дугаарууд: {TEST_REGISTRATION_NUMBERS.join(", ")}. Бусад дугаар оруулсан ч санамсаргүй тест мэдээлэл гарч ирнэ.
+                      Тестийн улсын дугаарууд: {TEST_PLATE_NUMBERS.join(", ")}. Бусад дугаар оруулсан ч санамсаргүй тест мэдээлэл гарч ирнэ.
                     </p>
 
                     {/* Vehicle search results dropdown */}
@@ -591,13 +857,13 @@ export function ContractForm({
                           <div className="border-b border-slate-700/50 px-3 py-2">
                             <p className="text-xs font-bold text-white">
                               {vehicleSearchResults.length > 0
-                                ? `${regNumber} -д бүртгэлийн дээрх автомашинууд`
+                                ? `${licensePlate} - улсын дугаар дээрх автомашинууд`
                                 : "Мэдээлэл олдсонгүй"}
                             </p>
                             <p className="text-[10px] text-slate-500">
                               {vehicleSearchResults.length > 0
-                                ? "Даатгуулах машины улиан дугаар сонгоно уу (DAN/HUR mock)"
-                                : "Регистрийн дугаар шалгана уу"}
+                                ? "Даатгуулах машиныг сонгоно уу (DAN/HUR mock)"
+                                : "Улсын дугаар шалгана уу"}
                             </p>
                           </div>
                           <div className="max-h-60 overflow-auto p-1.5">
@@ -1189,10 +1455,10 @@ export function ContractForm({
                     duration,
                     status: "draft",
                     createdAt: new Date().toISOString(),
-                    insuredName: ownerName || "Бат-Эрдэнэ",
-                    insuredRegister: regNumber || "УУ99112233",
+                    insuredName: customerName ? `${customerSurname} ${customerName}`.trim() : ownerName || "Бат-Эрдэнэ",
+                    insuredRegister: customerReg || "УУ99112233",
                     insuredAddress: "Улаанбаатар",
-                    insuredPhone: "99119911",
+                    insuredPhone: customerPhone || "99119911",
                     insurerName: "Л. Энхуянга",
                     insurerRegister: "АА89160234",
                     insurerLicense: licenseNumber || "AB123456",
