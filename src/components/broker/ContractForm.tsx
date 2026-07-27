@@ -428,6 +428,8 @@ export function ContractForm({
       setCategory("auto");
       setSubCategory("Авто тээврийн хэрэгслийн даатгал");
       setProduct("Basic");
+      setPackageId("Багц 1");
+      setValuation("15000000");
     }
   }, [isAjd]);
 
@@ -630,39 +632,41 @@ export function ContractForm({
                   </div>
                 )}
 
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Багц сонгох <span className="text-red-400">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={packageId}
-                      onChange={(e) => setPackageId(e.target.value)}
-                      className={cn(
-                        "flex-1 rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
-                        touched && !packageId ? "border-red-500/50" : "border-slate-700/60"
-                      )}
-                    >
-                      <option value="">Багц сонгох</option>
-                      {PACKAGES.map((p) => {
-                        const rate = p === "Багц 1" ? "1%" : "0.8%";
-                        return (
-                          <option key={p} value={p}>
-                            {p} ({rate})
-                          </option>
-                        );
-                      })}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowPackage(true)}
-                      className="flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-700/50 px-4 py-2.5 text-xs font-semibold text-white transition-all hover:bg-slate-700"
-                    >
-                      <Eye className="h-4 w-4" />
-                      Багц харах
-                    </button>
+                {!isAjd && (
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-xs font-semibold text-slate-300">
+                      Багц сонгох <span className="text-red-400">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <select
+                        value={packageId}
+                        onChange={(e) => setPackageId(e.target.value)}
+                        className={cn(
+                          "flex-1 rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm text-white outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                          touched && !packageId ? "border-red-500/50" : "border-slate-700/60"
+                        )}
+                      >
+                        <option value="">Багц сонгох</option>
+                        {PACKAGES.map((p) => {
+                          const rate = p === "Багц 1" ? "1%" : "0.8%";
+                          return (
+                            <option key={p} value={p}>
+                              {p} ({rate})
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setShowPackage(true)}
+                        className="flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-700/50 px-4 py-2.5 text-xs font-semibold text-white transition-all hover:bg-slate-700"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Багц харах
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {showPackage &&
@@ -1748,33 +1752,35 @@ export function ContractForm({
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
                   <Calculator className="h-4.5 w-4.5" />
                 </div>
-                <h2 className="text-sm font-bold text-white">Үнэлгээ &amp; хугацаа</h2>
+                <h2 className="text-sm font-bold text-white">{isAjd ? "Төлбөр төлөх" : "Үнэлгээ & хугацаа"}</h2>
               </div>
 
               <div className="space-y-5">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Үнэлгээ оруулна уу? <span className="text-red-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={valuation}
-                      onChange={(e) => {
-                        setValuation(e.target.value);
-                        setTouched(true);
-                      }}
-                      placeholder="0"
-                      className={cn(
-                        "w-full rounded-xl border bg-slate-800/60 px-3 py-3 pl-10 text-right text-lg font-bold text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
-                        touched && !valuationNum ? "border-red-500/50" : "border-slate-700/60"
-                      )}
-                    />
-                    <Calculator className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
-                    <span className="absolute left-10 top-1/2 -translate-y-1/2 text-xs text-slate-500">MNT</span>
+                {!isAjd && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300">
+                      Үнэлгээ оруулна уу? <span className="text-red-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={valuation}
+                        onChange={(e) => {
+                          setValuation(e.target.value);
+                          setTouched(true);
+                        }}
+                        placeholder="0"
+                        className={cn(
+                          "w-full rounded-xl border bg-slate-800/60 px-3 py-3 pl-10 text-right text-lg font-bold text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10",
+                          touched && !valuationNum ? "border-red-500/50" : "border-slate-700/60"
+                        )}
+                      />
+                      <Calculator className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                      <span className="absolute left-10 top-1/2 -translate-y-1/2 text-xs text-slate-500">MNT</span>
+                    </div>
+                    {touched && !valuationNum && <p className="text-xs text-red-400">Шаардлагатай</p>}
                   </div>
-                  {touched && !valuationNum && <p className="text-xs text-red-400">Шаардлагатай</p>}
-                </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -1935,48 +1941,33 @@ export function ContractForm({
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400">
                   <CreditCard className="h-4.5 w-4.5" />
                 </div>
-                <h2 className="text-sm font-bold text-white">Тооцоо</h2>
+                <h2 className="text-sm font-bold text-white">{isAjd ? "Төлбөр төлөх" : "Тооцоо"}</h2>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400">Хураамжийн хувь:</span>
-                  <span className="text-sm font-bold text-indigo-300">{packageId ? `${premiumRate}%` : "0%"}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400">Үндсэн хураамж:</span>
-                  <span className="text-sm font-bold text-white">{formatMNT(basePremium)}</span>
-                </div>
-                {discountNum > 0 && (
-                  <div className="flex items-center justify-between text-emerald-400">
-                    <span className="text-xs">Хөнгөлөлт ({discountNum}%)</span>
-                    <span className="text-sm font-bold">-{formatMNT(discountAmount)}</span>
-                  </div>
-                )}
-                {additionalTotal > 0 && (
+                {!isAjd && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-400">Нэмэлт үнийн мэдээлэл:</span>
-                    <span className="text-sm font-bold text-white">+{formatMNT(additionalTotal)}</span>
+                    <span className="text-xs text-slate-400">Хураамжийн хувь:</span>
+                    <span className="text-sm font-bold text-indigo-300">{packageId ? `${premiumRate}%` : "0%"}</span>
                   </div>
                 )}
-
-                <div className="h-px bg-slate-700/50" />
-
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">Нийт даатгалын хураамж:</span>
+                  <span className="text-xs text-slate-400">Нийт даатгалын хураамж:</span>
                   <span className="text-2xl font-extrabold text-white">{formatMNT(totalPremium)}</span>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-indigo-400" />
-                    <span className="text-xs font-bold text-indigo-300">Таны хураамж (15%)</span>
+              {!isAjd && (
+                <div className="mt-5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-indigo-400" />
+                      <span className="text-xs font-bold text-indigo-300">Таны хураамж (15%)</span>
+                    </div>
+                    <span className="text-xl font-extrabold text-indigo-300">{formatMNT(Math.round(totalPremium * 0.15))}</span>
                   </div>
-                  <span className="text-xl font-extrabold text-indigo-300">{formatMNT(Math.round(totalPremium * 0.15))}</span>
                 </div>
-              </div>
+              )}
 
               <button
                 type="button"
@@ -2002,7 +1993,7 @@ export function ContractForm({
                     additionalTotal,
                     startDate,
                     duration,
-                    status: "draft",
+                    status: isAjd ? "paid" : "draft",
                     createdAt: new Date().toISOString(),
                     insuredName:
                       customerType === "legal"
@@ -2040,7 +2031,7 @@ export function ContractForm({
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
-                Хадгалах
+                {isAjd ? "Төлбөр төлөх" : "Хадгалах"}
               </button>
 
               {!isValid && touched && (
