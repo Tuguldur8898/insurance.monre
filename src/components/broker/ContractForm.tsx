@@ -2026,18 +2026,6 @@ export function ContractForm({
                 </div>
               </div>
 
-              {!isAjd && (
-                <div className="mt-5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-indigo-400" />
-                      <span className="text-xs font-bold text-indigo-300">Таны хураамж (15%)</span>
-                    </div>
-                    <span className="text-xl font-extrabold text-indigo-300">{formatMNT(Math.round(totalPremium * 0.15))}</span>
-                  </div>
-                </div>
-              )}
-
               <button
                 type="button"
                 onClick={handleSave}
