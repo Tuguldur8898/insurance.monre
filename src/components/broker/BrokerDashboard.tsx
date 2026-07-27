@@ -478,13 +478,15 @@ function LeaderboardWidget({
   title,
   subtitle,
   className,
+  data,
 }: {
   title: string;
   subtitle?: string;
   className?: string;
+  data: { label: string; value: number; contracts: number }[];
 }) {
-  const sorted = [...MOCK_EMPLOYEES].sort((a, b) => b.contracts - a.contracts);
-  const maxSales = Math.max(...MOCK_EMPLOYEES.map((e) => e.value));
+  const sorted = [...data].sort((a, b) => b.contracts - a.contracts);
+  const maxSales = Math.max(...data.map((e) => e.value), 1);
 
   return (
     <div className={cn("rounded-2xl border border-slate-700/50 bg-slate-800/40 p-5", className)}>
@@ -635,14 +637,82 @@ export function BrokerDashboard() {
   );
 
   // Demo filter: limit monthly sales view based on selected period
-  const salesByPeriod = useMemo(() => {
-    if (activeFilter === "Өдөр") return MOCK_SALES.slice(6, 7);
-    if (activeFilter === "Сар") return MOCK_SALES.slice(-1);
-    if (activeFilter === "Улирал") return MOCK_SALES.slice(-3);
-    if (activeFilter === "Хагас жил") return MOCK_SALES.slice(-6);
-    if (activeFilter === "Жил") return MOCK_SALES;
-    return MOCK_SALES;
-  }, [activeFilter]);
+  const { salesByPeriod, employeeData, productData, companyData, quarterlyData, partnersData } = useMemo(() => {
+    const year = new Date().getFullYear();
+    const prevYear = year - 1;
+
+    // Monthly sales: current year vs previous year
+    const monthlyCurrent = Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}-р сар`, value: 0, prev: 0 }));
+    contracts.forEach((c) => {
+      const d = new Date(c.createdAt);
+      const m = d.getMonth();
+      if (d.getFullYear() === year) monthlyCurrent[m].value += c.premium;
+      if (d.getFullYear() === prevYear) monthlyCurrent[m].prev += c.premium;
+    });
+
+    // Employee data: since we only track current broker, aggregate as one
+    const brokerName = "Л. Энхуянга";
+    const emp = contracts.reduce(
+      (acc, c) => {
+        acc.value += c.premium;
+        acc.contracts += 1;
+        return acc;
+      },
+      { label: brokerName, value: 0, contracts: 0 }
+    );
+
+    // Product breakdown by category
+    const products: Record<string, number> = {};
+    contracts.forEach((c) => {
+      const key = c.categoryName || "Бусад";
+      products[key] = (products[key] || 0) + c.premium;
+    });
+    const productData = Object.entries(products)
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value);
+
+    // Company / partner breakdown
+    const companies: Record<string, number> = {};
+    contracts.forEach((c) => {
+      const key = c.companyName || "Бусад";
+      companies[key] = (companies[key] || 0) + c.premium;
+    });
+    const companyData = Object.entries(companies)
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value);
+
+    // Quarterly current vs previous
+    const qCurrent = [0, 0, 0, 0];
+    const qPrev = [0, 0, 0, 0];
+    contracts.forEach((c) => {
+      const d = new Date(c.createdAt);
+      const q = Math.floor(d.getMonth() / 3);
+      if (d.getFullYear() === year) qCurrent[q] += c.premium;
+      if (d.getFullYear() === prevYear) qPrev[q] += c.premium;
+    });
+    const quarterlyData = [
+      { label: "1-р улирал", current: qCurrent[0], prev: qPrev[0] },
+      { label: "2-р улирал", current: qCurrent[1], prev: qPrev[1] },
+      { label: "3-р улирал", current: qCurrent[2], prev: qPrev[2] },
+      { label: "4-р улирал", current: qCurrent[3], prev: qPrev[3] },
+    ];
+
+    // Slice based on selected period
+    let salesByPeriod = monthlyCurrent;
+    if (activeFilter === "Өдөр") salesByPeriod = monthlyCurrent.slice(6, 7);
+    else if (activeFilter === "Сар") salesByPeriod = monthlyCurrent.slice(-1);
+    else if (activeFilter === "Улирал") salesByPeriod = monthlyCurrent.slice(-3);
+    else if (activeFilter === "Хагас жил") salesByPeriod = monthlyCurrent.slice(-6);
+
+    return {
+      salesByPeriod,
+      employeeData: emp.value ? [emp] : [],
+      productData: productData.length ? productData : MOCK_PRODUCTS,
+      companyData: companyData.length ? companyData : MOCK_BRANCHES,
+      quarterlyData,
+      partnersData: companyData.length ? companyData : MOCK_PARTNERS,
+    };
+  }, [contracts, activeFilter]);
 
   const toggleGroup = (id: string) => {
     setOpenGroups((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
@@ -893,7 +963,8 @@ export function BrokerDashboard() {
                 />
                 <LeaderboardWidget
                   title="Ажилтны гүйцэтгэл"
-                  subtitle="Хамгийн олон гэрээ &amp; борлуулалт"
+                  subtitle="Хамгийн олон гэрээ & борлуулалт"
+                  data={employeeData}
                 />
               </div>
 
@@ -903,14 +974,14 @@ export function BrokerDashboard() {
                   title="Бүтээгдэхүүний задаргаа"
                   subtitle="Борлуулалт бүтээгдэхүүнээр"
                   defaultType="Pie"
-                  data={MOCK_PRODUCTS}
-                  valueFormatter={(v) => `${v}%`}
+                  data={productData}
+                  valueFormatter={formatMNT}
                 />
                 <ChartWidget
-                  title="Салбарын гүйцэтгэл"
-                  subtitle="Борлуулалт салбар бүрээр"
+                  title="Даатгалын компани"
+                  subtitle="Борлуулалт компани бүрээр"
                   defaultType="Bar"
-                  data={MOCK_BRANCHES}
+                  data={companyData}
                   valueFormatter={formatMNT}
                 />
               </div>
@@ -921,15 +992,15 @@ export function BrokerDashboard() {
                   title="Гүйцэтгэл улираар"
                   subtitle="Энэ жилийн өмнөх жилтэй харьцуулсан"
                   defaultType="Bar"
-                  data={MOCK_QUARTERS}
+                  data={quarterlyData}
                   valueFormatter={formatMNT}
                 />
                 <ChartWidget
                   title="Даатгалын түншүүд"
                   subtitle="Даатгалын компанийн хураамж"
                   defaultType="Pie"
-                  data={MOCK_PARTNERS}
-                  valueFormatter={(v) => `${v}%`}
+                  data={partnersData}
+                  valueFormatter={formatMNT}
                 />
               </div>
 
@@ -939,7 +1010,7 @@ export function BrokerDashboard() {
                   title="Шилдэг борлуулалттай ажилтнууд"
                   subtitle="Багийн гишүүдийн борлуулалт"
                   defaultType="Bar"
-                  data={MOCK_EMPLOYEES}
+                  data={employeeData}
                   keys={["value"]}
                   valueFormatter={formatMNT}
                 />
@@ -947,7 +1018,7 @@ export function BrokerDashboard() {
                   title="Хамгийн олон гэрээ хийсэн ажилтнууд"
                   subtitle="Ажилтны гэрээний тоо"
                   defaultType="Bar"
-                  data={MOCK_EMPLOYEES.map((e) => ({ label: e.label, value: e.contracts }))}
+                  data={employeeData.map((e) => ({ label: e.label, value: e.contracts }))}
                   valueFormatter={(v) => `${v} гэрээ`}
                 />
               </div>
