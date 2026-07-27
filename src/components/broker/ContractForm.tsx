@@ -21,6 +21,8 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { downloadContractDocx } from "@/lib/contract-docx";
+import type { Contract } from "./ContractList";
 
 export const COMPANIES = [
   { id: "monre", name: "Монре даатгал", rate: 9.5 },
@@ -231,28 +233,7 @@ export function ContractForm({
   isAjd = false,
 }: {
   onBack?: () => void;
-  onSave?: (payload: {
-    companyId: string;
-    companyName: string;
-    categoryId: string;
-    categoryName: string;
-    subCategory: string;
-    product: string;
-    packageName?: string;
-    valuation: number;
-    premium: number;
-    brokerFee: number;
-    discountPercent: number;
-    discountAmount: number;
-    additionalTotal: number;
-    startDate: string;
-    duration: string;
-    ownerName?: string;
-    licensePlate?: string;
-    vehicleBrand?: string;
-    vehicleModel?: string;
-    isAjd: boolean;
-  }) => void;
+  onSave?: (contract: Contract) => void;
   isAjd?: boolean;
 }) {
   const [company, setCompany] = useState("");
@@ -291,6 +272,21 @@ export function ContractForm({
   const [vehicleSearchLoading, setVehicleSearchLoading] = useState(false);
   const [vehicleSearchResults, setVehicleSearchResults] = useState(getMockVehicles("УУ00000000"));
   const [vehicleSearchOpen, setVehicleSearchOpen] = useState(false);
+
+  // Contract Word export fields
+  const [insuredName, setInsuredName] = useState("");
+  const [insuredRegister, setInsuredRegister] = useState("");
+  const [insuredAddress, setInsuredAddress] = useState("");
+  const [insuredPhone, setInsuredPhone] = useState("");
+  const [insurerName, setInsurerName] = useState("");
+  const [insurerRegister, setInsurerRegister] = useState("");
+  const [insurerLicense, setInsurerLicense] = useState("");
+  const [insurerAddress, setInsurerAddress] = useState("");
+  const [insurerPhone, setInsurerPhone] = useState("");
+  const [vehiclePurpose, setVehiclePurpose] = useState("");
+  const [vehicleFuel, setVehicleFuel] = useState("");
+  const [vehicleImportYear, setVehicleImportYear] = useState("");
+  const [vehicleEngineCapacity, setVehicleEngineCapacity] = useState("");
 
   // Auto transport subcategory add-ons
   const [discountPercent, setDiscountPercent] = useState("");
@@ -514,6 +510,120 @@ export function ContractForm({
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Insured information */}
+            <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+              <div className="mb-4 flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                  <User className="h-4.5 w-4.5" />
+                </div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Даатгуулагчийн мэдээлэл</h2>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-xs font-semibold text-slate-300">Овог Нэр</label>
+                  <input
+                    type="text"
+                    value={insuredName}
+                    onChange={(e) => setInsuredName(e.target.value)}
+                    placeholder="Бат Эрдэнэ"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">Регистрийн дугаар</label>
+                  <input
+                    type="text"
+                    value={insuredRegister}
+                    onChange={(e) => setInsuredRegister(e.target.value)}
+                    placeholder="УУ99112233"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">Утас</label>
+                  <input
+                    type="text"
+                    value={insuredPhone}
+                    onChange={(e) => setInsuredPhone(e.target.value)}
+                    placeholder="99119911"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-xs font-semibold text-slate-300">Хаяг</label>
+                  <input
+                    type="text"
+                    value={insuredAddress}
+                    onChange={(e) => setInsuredAddress(e.target.value)}
+                    placeholder="Улаанбаатар, Сүхбаатар дүүрэг"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Insurer / broker information */}
+            <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
+              <div className="mb-4 flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
+                  <Building2 className="h-4.5 w-4.5" />
+                </div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Даатгалчийн мэдээлэл</h2>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-xs font-semibold text-slate-300">Овог Нэр</label>
+                  <input
+                    type="text"
+                    value={insurerName}
+                    onChange={(e) => setInsurerName(e.target.value)}
+                    placeholder="Л. Энхуянга"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">Регистрийн дугаар</label>
+                  <input
+                    type="text"
+                    value={insurerRegister}
+                    onChange={(e) => setInsurerRegister(e.target.value)}
+                    placeholder="УУ11223344"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">Жолоочийн үнэмлэхний дугаар</label>
+                  <input
+                    type="text"
+                    value={insurerLicense}
+                    onChange={(e) => setInsurerLicense(e.target.value)}
+                    placeholder="AB123456"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-300">Утас</label>
+                  <input
+                    type="text"
+                    value={insurerPhone}
+                    onChange={(e) => setInsurerPhone(e.target.value)}
+                    placeholder="99119911"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-xs font-semibold text-slate-300">Хаяг</label>
+                  <input
+                    type="text"
+                    value={insurerAddress}
+                    onChange={(e) => setInsurerAddress(e.target.value)}
+                    placeholder="Улаанбаатар"
+                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                  />
+                </div>
+              </div>
             </div>
 
             {isAuto && subCategory !== "Мотоциклийн даатгал" && subCategory !== "" && (
@@ -801,6 +911,47 @@ export function ContractForm({
                           value={vehicleColor}
                           placeholder="Регистрээс дуудна"
                           className="w-full rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Зориулалт</label>
+                        <input
+                          type="text"
+                          value={vehiclePurpose}
+                          onChange={(e) => setVehiclePurpose(e.target.value)}
+                          placeholder="Ачаа тээвэр"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Шатахуун төрөл</label>
+                        <input
+                          type="text"
+                          value={vehicleFuel}
+                          onChange={(e) => setVehicleFuel(e.target.value)}
+                          placeholder="Дизель"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Монголд орж ирсэн он</label>
+                        <input
+                          type="text"
+                          value={vehicleImportYear}
+                          onChange={(e) => setVehicleImportYear(e.target.value)}
+                          placeholder="2020"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-300">Моторын багтаамж</label>
+                        <input
+                          type="text"
+                          value={vehicleEngineCapacity}
+                          onChange={(e) => setVehicleEngineCapacity(e.target.value)}
+                          placeholder="3.0 л"
+                          className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                         />
                       </div>
                     </>
@@ -1164,9 +1315,12 @@ export function ContractForm({
                 onClick={() => {
                   setTouched(true);
                   if (!isValid || !selectedCompany || !selectedCategory) return;
-                  onSave?.({
+                  const contract: Contract = {
+                    id: crypto.randomUUID?.() || `${Date.now()}`,
+                    number: `Г-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
                     companyId: company,
                     companyName: selectedCompany.name,
+                    companyRate: selectedCompany.rate,
                     categoryId: category,
                     categoryName: selectedCategory.name,
                     subCategory,
@@ -1180,12 +1334,32 @@ export function ContractForm({
                     additionalTotal,
                     startDate,
                     duration,
+                    status: "draft",
+                    createdAt: new Date().toISOString(),
+                    insuredName: insuredName || undefined,
+                    insuredRegister: insuredRegister || undefined,
+                    insuredAddress: insuredAddress || undefined,
+                    insuredPhone: insuredPhone || undefined,
+                    insurerName: insurerName || undefined,
+                    insurerRegister: insurerRegister || undefined,
+                    insurerLicense: insurerLicense || undefined,
+                    insurerAddress: insurerAddress || undefined,
+                    insurerPhone: insurerPhone || undefined,
                     ownerName: ownerName || undefined,
                     licensePlate: licensePlate || undefined,
                     vehicleBrand: vehicleBrand || undefined,
                     vehicleModel: vehicleModel || undefined,
+                    vehicleYear: vehicleYear || undefined,
+                    vehicleColor: vehicleColor || undefined,
+                    vinNumber: vinNumber || undefined,
+                    vehiclePurpose: vehiclePurpose || undefined,
+                    vehicleFuel: vehicleFuel || undefined,
+                    vehicleImportYear: vehicleImportYear || undefined,
+                    vehicleEngineCapacity: vehicleEngineCapacity || undefined,
                     isAjd,
-                  });
+                  };
+                  onSave?.(contract);
+                  downloadContractDocx(contract);
                 }}
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
               >

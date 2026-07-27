@@ -552,19 +552,9 @@ export function BrokerDashboard() {
     }
   };
 
-  const addContract = (payload: Omit<Contract, "id" | "number" | "createdAt" | "status">) => {
-    const nextId = contracts.length + 1;
-    const number = `Г-${new Date().getFullYear()}-${String(nextId).padStart(4, "0")}`;
-    const contract: Contract = {
-      ...payload,
-      id: crypto.randomUUID?.() || `${Date.now()}-${nextId}`,
-      number,
-      createdAt: new Date().toISOString(),
-      status: "draft",
-    };
+  const addContract = (contract: Contract) => {
     const next = [contract, ...contracts];
     persistContracts(next);
-    return contract;
   };
 
   const payContract = (id: string) => {
@@ -731,8 +721,8 @@ export function BrokerDashboard() {
             <ContractForm
               isAjd={active === "new-ajd"}
               onBack={() => setActive("dashboard")}
-              onSave={(payload) => {
-                addContract(payload);
+              onSave={(contract) => {
+                addContract(contract);
                 setActive(active === "new-ajd" ? "ajd-list" : "contract-list");
               }}
             />

@@ -17,6 +17,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { downloadContractDocx } from "@/lib/contract-docx";
 
 function formatMNT(n: number) {
   return "₮" + n.toLocaleString("mn-MN");
@@ -27,6 +28,7 @@ export type Contract = {
   number: string;
   companyId: string;
   companyName: string;
+  companyRate: number;
   categoryId: string;
   categoryName: string;
   subCategory: string;
@@ -42,10 +44,29 @@ export type Contract = {
   duration: string;
   status: "draft" | "active" | "paid" | "expired";
   createdAt: string;
+  // Insured
+  insuredName?: string;
+  insuredRegister?: string;
+  insuredAddress?: string;
+  insuredPhone?: string;
+  // Insurer / broker
+  insurerName?: string;
+  insurerRegister?: string;
+  insurerLicense?: string;
+  insurerAddress?: string;
+  insurerPhone?: string;
+  // Vehicle
   ownerName?: string;
   licensePlate?: string;
   vehicleBrand?: string;
   vehicleModel?: string;
+  vehicleYear?: string;
+  vehicleColor?: string;
+  vinNumber?: string;
+  vehiclePurpose?: string;
+  vehicleFuel?: string;
+  vehicleImportYear?: string;
+  vehicleEngineCapacity?: string;
   isAjd: boolean;
 };
 
@@ -271,6 +292,10 @@ export function ContractList({
           </button>
           <button
             type="button"
+            onClick={() => {
+              const latest = filtered[0];
+              if (latest) downloadContractDocx(latest);
+            }}
             className="flex items-center gap-1.5 rounded-lg bg-indigo-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
           >
             <FileDown className="h-3.5 w-3.5" />
@@ -360,6 +385,14 @@ export function ContractList({
                           title="Харах"
                         >
                           <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => downloadContractDocx(c)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                          title="Word татах"
+                        >
+                          <FileDown className="h-4 w-4" />
                         </button>
                         {c.status !== "paid" && onPay && (
                           <button
