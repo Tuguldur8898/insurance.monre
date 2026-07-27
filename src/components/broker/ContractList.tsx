@@ -68,6 +68,9 @@ export type Contract = {
   vehicleImportYear?: string;
   vehicleEngineCapacity?: string;
   isAjd: boolean;
+  coDrivers?: { name: string; reg: string }[];
+  isLimitedCoverage?: boolean;
+  hasTrailer?: boolean;
 };
 
 const PAGE_SIZES = [10, 25, 50, 100];
