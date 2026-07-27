@@ -470,6 +470,64 @@ export function ContractForm({
         ? customerReg && licensePlate
         : legalEntityReg && legalEntityName && legalEntityAddress && legalEntityPhone && licensePlate));
 
+  const handleSave = () => {
+    setTouched(true);
+    if (!isValid || !selectedCompany || !selectedCategory) return;
+    const contract: Contract = {
+      id: crypto.randomUUID?.() || `${Date.now()}`,
+      number: `Г-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+      companyId: company,
+      companyName: selectedCompany.name,
+      companyRate: premiumRate,
+      categoryId: category,
+      categoryName: selectedCategory.name,
+      subCategory,
+      product,
+      packageName: packageId || undefined,
+      valuation: valuationNum,
+      premium: totalPremium,
+      brokerFee: Math.round(totalPremium * 0.15),
+      discountPercent: discountNum,
+      discountAmount,
+      additionalTotal,
+      startDate,
+      duration,
+      status: isAjd ? "paid" : "draft",
+      createdAt: new Date().toISOString(),
+      insuredName:
+        customerType === "legal"
+          ? legalEntityName || "ХХК"
+          : customerName
+            ? `${customerSurname} ${customerName}`.trim()
+            : ownerName || "Бат-Эрдэнэ",
+      insuredRegister: customerType === "legal" ? legalEntityReg || "1234567" : customerReg || "УУ99112233",
+      insuredAddress: customerType === "legal" ? legalEntityAddress || "Улаанбаатар" : "Улаанбаатар",
+      insuredPhone: customerType === "legal" ? legalEntityPhone || "99119911" : customerPhone || "99119911",
+      insurerName: "Л. Энхуянга",
+      insurerRegister: "АА89160234",
+      insurerLicense: licenseNumber || "AB123456",
+      insurerAddress: "Улаанбаатар",
+      insurerPhone: "+976 7777-9000",
+      ownerName: ownerName || undefined,
+      licensePlate: licensePlate || undefined,
+      vehicleBrand: vehicleBrand || undefined,
+      vehicleModel: vehicleModel || undefined,
+      vehicleYear: vehicleYear || undefined,
+      vehicleColor: vehicleColor || undefined,
+      vinNumber: vinNumber || undefined,
+      vehiclePurpose: subCategory || "Авто тээврийн хэрэгсэл",
+      vehicleFuel: vehicleType === "truck" || vehicleType === "heavy_truck" ? "Дизель" : "Бензин",
+      vehicleImportYear: vehicleYear || "2020",
+      vehicleEngineCapacity: engineNumber || "2.0 л",
+      coDrivers: coDrivers.length ? coDrivers : undefined,
+      isLimitedCoverage,
+      hasTrailer,
+      isAjd,
+    };
+    onSave?.(contract);
+    downloadContractDocx(contract);
+  };
+
   return (
     <div className="h-full bg-[#0b0f19] p-4 text-slate-200 lg:p-6">
       <div className="mx-auto max-w-7xl">
@@ -490,7 +548,7 @@ export function ContractForm({
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+        <div className={cn("grid gap-6", isAjd ? "" : "lg:grid-cols-[1fr_420px]")}>
           {/* LEFT COLUMN */}
           <div className="space-y-5">
             {/* Insurance details card */}
@@ -1745,8 +1803,9 @@ export function ContractForm({
             </button>
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div className="space-y-5">
+          {!isAjd && (
+            <div className="space-y-5">
+              {/* RIGHT COLUMN */}
             <div className="rounded-2xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/40 p-5 shadow-xl backdrop-blur-sm">
               <div className="mb-5 flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
@@ -1971,63 +2030,7 @@ export function ContractForm({
 
               <button
                 type="button"
-                onClick={() => {
-                  setTouched(true);
-                  if (!isValid || !selectedCompany || !selectedCategory) return;
-                  const contract: Contract = {
-                    id: crypto.randomUUID?.() || `${Date.now()}`,
-                    number: `Г-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-                    companyId: company,
-                    companyName: selectedCompany.name,
-                    companyRate: premiumRate,
-                    categoryId: category,
-                    categoryName: selectedCategory.name,
-                    subCategory,
-                    product,
-                    packageName: packageId || undefined,
-                    valuation: valuationNum,
-                    premium: totalPremium,
-                    brokerFee: Math.round(totalPremium * 0.15),
-                    discountPercent: discountNum,
-                    discountAmount,
-                    additionalTotal,
-                    startDate,
-                    duration,
-                    status: isAjd ? "paid" : "draft",
-                    createdAt: new Date().toISOString(),
-                    insuredName:
-                      customerType === "legal"
-                        ? legalEntityName || "ХХК"
-                        : customerName
-                          ? `${customerSurname} ${customerName}`.trim()
-                          : ownerName || "Бат-Эрдэнэ",
-                    insuredRegister: customerType === "legal" ? legalEntityReg || "1234567" : customerReg || "УУ99112233",
-                    insuredAddress: customerType === "legal" ? legalEntityAddress || "Улаанбаатар" : "Улаанбаатар",
-                    insuredPhone: customerType === "legal" ? legalEntityPhone || "99119911" : customerPhone || "99119911",
-                    insurerName: "Л. Энхуянга",
-                    insurerRegister: "АА89160234",
-                    insurerLicense: licenseNumber || "AB123456",
-                    insurerAddress: "Улаанбаатар",
-                    insurerPhone: "+976 7777-9000",
-                    ownerName: ownerName || undefined,
-                    licensePlate: licensePlate || undefined,
-                    vehicleBrand: vehicleBrand || undefined,
-                    vehicleModel: vehicleModel || undefined,
-                    vehicleYear: vehicleYear || undefined,
-                    vehicleColor: vehicleColor || undefined,
-                    vinNumber: vinNumber || undefined,
-                    vehiclePurpose: subCategory || "Авто тээврийн хэрэгсэл",
-                    vehicleFuel: vehicleType === "truck" || vehicleType === "heavy_truck" ? "Дизель" : "Бензин",
-                    vehicleImportYear: vehicleYear || "2020",
-                    vehicleEngineCapacity: engineNumber || "2.0 л",
-                    coDrivers: coDrivers.length ? coDrivers : undefined,
-                    isLimitedCoverage,
-                    hasTrailer,
-                    isAjd,
-                  };
-                  onSave?.(contract);
-                  downloadContractDocx(contract);
-                }}
+                onClick={handleSave}
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
@@ -2042,6 +2045,26 @@ export function ContractForm({
               )}
             </div>
           </div>
+          )}
+
+          {isAjd && (
+            <div className="sticky bottom-0 z-30 rounded-2xl border border-slate-700/50 bg-[#0f1321]/90 p-4 shadow-xl backdrop-blur-md">
+              <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+                <div>
+                  <p className="text-xs text-slate-400">Нийт төлбөр</p>
+                  <p className="text-xl font-extrabold text-white">{formatMNT(totalPremium)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Төлбөр төлөх
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
