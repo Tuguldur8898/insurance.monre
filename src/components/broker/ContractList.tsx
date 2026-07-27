@@ -391,21 +391,21 @@ export function ContractList({
                           type="button"
                           onClick={() => downloadContractDocx(c)}
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 transition-all hover:bg-blue-500 hover:text-white"
-                          title="Татах"
+                          title="Гэрээ татах"
                         >
                           <Download className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 transition-all hover:bg-amber-500 hover:text-white"
-                          title="Засах"
+                          title="Гэрээ шинэчлэх"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400 transition-all hover:bg-sky-500 hover:text-white"
-                          title="Дэлгэрэнгүй"
+                          title="Улсын дугаар засах"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -419,7 +419,7 @@ export function ContractList({
                         <button
                           type="button"
                           className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/15 text-teal-400 transition-all hover:bg-teal-500 hover:text-white"
-                          title="Баримт"
+                          title="Буцаан олголт"
                         >
                           <FileText className="h-4 w-4" />
                         </button>
@@ -428,7 +428,7 @@ export function ContractList({
                             type="button"
                             onClick={() => onDelete(c.id)}
                             className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-all hover:bg-red-500 hover:text-white"
-                            title="Устгах"
+                            title="Гэрээ цуцлах"
                           >
                             <X className="h-4 w-4" />
                           </button>
