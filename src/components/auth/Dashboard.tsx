@@ -25,6 +25,9 @@ import {
   MapPin,
   Users,
   AtSign,
+  Plus,
+  Trash2,
+  Pencil,
 } from "lucide-react";
 import { SignaturePanel } from "./SignaturePanel";
 import { DocumentsPanel } from "./DocumentsPanel";
@@ -51,7 +54,22 @@ type CPUser = {
 };
 
 type TabId = "personal" | "company" | "sign" | "docs";
-type ModalId = "contact" | "username" | "password" | null;
+type ModalId = "contact" | "username" | "password" | "organization" | null;
+
+type Organization = {
+  id: string;
+  name: string;
+  shortName?: string;
+  regNumber?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  aimag?: string;
+  sum?: string;
+  bag?: string;
+  address?: string;
+  createdAt: string;
+};
 
 const TABS: { id: TabId; label: string; icon: typeof User }[] = [
   { id: "personal", label: "Хувийн мэдээлэл", icon: User },
@@ -136,6 +154,96 @@ export function Dashboard() {
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  const [organizations, setOrganizations] = useState<Organization[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem("ins-monre-organizations");
+      return raw ? (JSON.parse(raw) as Organization[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+
+  const [orgName, setOrgName] = useState("");
+  const [orgShortName, setOrgShortName] = useState("");
+  const [orgRegNumber, setOrgRegNumber] = useState("");
+  const [orgEmail, setOrgEmail] = useState("");
+  const [orgPhone, setOrgPhone] = useState("");
+  const [orgCountry, setOrgCountry] = useState("Монгол");
+  const [orgAimag, setOrgAimag] = useState("");
+  const [orgSum, setOrgSum] = useState("");
+  const [orgBag, setOrgBag] = useState("");
+  const [orgAddress, setOrgAddress] = useState("");
+
+  const persistOrganizations = (next: Organization[]) => {
+    setOrganizations(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ins-monre-organizations", JSON.stringify(next));
+    }
+  };
+
+  const openOrgModal = (org?: Organization) => {
+    if (org) {
+      setEditingOrg(org);
+      setOrgName(org.name);
+      setOrgShortName(org.shortName || "");
+      setOrgRegNumber(org.regNumber || "");
+      setOrgEmail(org.email || "");
+      setOrgPhone(org.phone || "");
+      setOrgCountry(org.country || "Монгол");
+      setOrgAimag(org.aimag || "");
+      setOrgSum(org.sum || "");
+      setOrgBag(org.bag || "");
+      setOrgAddress(org.address || "");
+    } else {
+      setEditingOrg(null);
+      setOrgName("");
+      setOrgShortName("");
+      setOrgRegNumber("");
+      setOrgEmail("");
+      setOrgPhone("");
+      setOrgCountry("Монгол");
+      setOrgAimag("");
+      setOrgSum("");
+      setOrgBag("");
+      setOrgAddress("");
+    }
+    setModal("organization");
+    setModalError("");
+  };
+
+  const saveOrganization = () => {
+    if (!orgName.trim()) {
+      setModalError("Байгууллагын нэр оруулна уу");
+      return;
+    }
+    const payload: Organization = {
+      id: editingOrg?.id || crypto.randomUUID?.() || `${Date.now()}`,
+      name: orgName.trim(),
+      shortName: orgShortName.trim() || undefined,
+      regNumber: orgRegNumber.trim() || undefined,
+      email: orgEmail.trim() || undefined,
+      phone: orgPhone.trim() || undefined,
+      country: orgCountry.trim() || undefined,
+      aimag: orgAimag.trim() || undefined,
+      sum: orgSum.trim() || undefined,
+      bag: orgBag.trim() || undefined,
+      address: orgAddress.trim() || undefined,
+      createdAt: editingOrg?.createdAt || new Date().toISOString(),
+    };
+    const next = editingOrg
+      ? organizations.map((o) => (o.id === editingOrg.id ? payload : o))
+      : [payload, ...organizations];
+    persistOrganizations(next);
+    setModal(null);
+  };
+
+  const deleteOrganization = (id: string) => {
+    if (!confirm("Энэ байгууллагыг устгах уу?")) return;
+    persistOrganizations(organizations.filter((o) => o.id !== id));
+  };
 
   const getToken = () => localStorage.getItem("token") ?? "";
 
@@ -514,58 +622,117 @@ export function Dashboard() {
 
               {tab === "company" && (
                 <section className="flex flex-col gap-6">
-                  {/* Company header */}
+                  {/* Organization management header */}
                   <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-7">
                     <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand/15 blur-3xl" aria-hidden="true" />
-                    <div className="relative flex items-center gap-5">
-                      <span className="relative">
-                        <span className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-sky to-brand opacity-60 blur-md" aria-hidden="true" />
-                        <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-sky/40 bg-gradient-to-br from-frost to-navy">
-                          <Building2 className="h-7 w-7 text-sky" />
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-5">
+                        <span className="relative">
+                          <span className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-sky to-brand opacity-60 blur-md" aria-hidden="true" />
+                          <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-sky/40 bg-gradient-to-br from-frost to-navy">
+                            <Building2 className="h-7 w-7 text-sky" />
+                          </span>
                         </span>
-                      </span>
-                      <div>
-                        <h1 className="text-2xl font-extrabold tracking-tight text-white">
-                          {user.companyName ?? "Байгууллагын мэдээлэл"}
-                        </h1>
-                        <p className="mt-1 text-sm text-slate-400">Байгууллагын бүртгэлийн мэдээлэл</p>
+                        <div>
+                          <h1 className="text-2xl font-extrabold tracking-tight text-white">Байгууллагын удирдлага</h1>
+                          <p className="mt-1 text-sm text-slate-400">Шинэ байгууллага бүртгэх, засах, устгах</p>
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => openOrgModal()}
+                        className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-xs font-bold text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.02]"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Шинэ байгууллага
+                      </button>
                     </div>
                   </div>
 
+                  {/* Organizations list */}
                   <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
                     <h2 className="mb-5 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
                       <span className="h-4 w-1 rounded-full bg-gradient-to-b from-sky to-brand" aria-hidden="true" />
-                      Ерөнхий мэдээлэл
+                      Бүртгэгдсэн байгууллагууд ({organizations.length})
                     </h2>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <Field label="Нэр" value={user.companyName} icon={Building2} />
-                      <Field label="Товч нэр" value={cfStr("companyShortName")} icon={Building2} />
-                      <Field label="Регистрийн дугаар" value={user.companyRegistrationNumber} icon={FileText} />
-                      <Field label="Улс" value={cfStr("country")} icon={MapPin} />
-                      <Field label="Имэйл" value={user.email} icon={Mail} />
-                      <Field label="Утас" value={user.phone} icon={Phone} />
-                    </div>
-                  </div>
 
-                  <div className="rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-transparent p-6">
-                    <h2 className="mb-5 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-slate-300">
-                      <span className="h-4 w-1 rounded-full bg-gradient-to-b from-sky to-brand" aria-hidden="true" />
-                      Хаяг байршил
-                    </h2>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <Field label="Аймаг / Нийслэл" value={cfStr("aimag")} icon={MapPin} />
-                      <Field label="Сум / Дүүрэг" value={cfStr("sum")} icon={MapPin} />
-                      <Field label="Баг / Хороо" value={cfStr("bag")} icon={MapPin} />
-                      <Field label="Хаяг" value={cfStr("address")} icon={MapPin} />
-                    </div>
+                    {organizations.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-10 text-center">
+                        <Building2 className="h-10 w-10 text-slate-600" />
+                        <p className="text-sm font-medium text-slate-400">Байгууллага бүртгэгдээгүй байна</p>
+                        <button
+                          type="button"
+                          onClick={() => openOrgModal()}
+                          className="mt-1 rounded-full bg-brand px-4 py-2 text-xs font-bold text-white transition-all hover:bg-brand-dark"
+                        >
+                          Эхний байгууллага бүртгэх
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4">
+                        {organizations.map((org) => (
+                          <div
+                            key={org.id}
+                            className="flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-colors hover:border-white/[0.12] sm:flex-row sm:items-start sm:justify-between"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky/20 to-brand/20 text-sky">
+                                  <Building2 className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-white">{org.name}</p>
+                                  {org.shortName && <p className="text-[11px] text-slate-500">{org.shortName}</p>}
+                                </div>
+                              </div>
+                              <div className="mt-4 grid gap-y-2 gap-x-4 text-xs sm:grid-cols-2">
+                                {org.regNumber && (
+                                  <div className="flex items-center gap-1.5 text-slate-400">
+                                    <FileText className="h-3 w-3" />
+                                    <span>{org.regNumber}</span>
+                                  </div>
+                                )}
+                                {org.email && (
+                                  <div className="flex items-center gap-1.5 text-slate-400">
+                                    <Mail className="h-3 w-3" />
+                                    <span>{org.email}</span>
+                                  </div>
+                                )}
+                                {org.phone && (
+                                  <div className="flex items-center gap-1.5 text-slate-400">
+                                    <Phone className="h-3 w-3" />
+                                    <span>{org.phone}</span>
+                                  </div>
+                                )}
+                                {org.address && (
+                                  <div className="flex items-center gap-1.5 text-slate-400">
+                                    <MapPin className="h-3 w-3" />
+                                    <span className="truncate">{[org.aimag, org.sum, org.bag, org.address].filter(Boolean).join(", ")}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => openOrgModal(org)}
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-colors hover:border-sky/30 hover:text-sky"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteOrganization(org.id)}
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-colors hover:border-red-400/30 hover:text-red-400"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-
-                  {!user.companyName && (
-                    <p className="rounded-2xl border border-sky/30 bg-sky/10 px-5 py-4 text-sm leading-relaxed text-sky">
-                      Байгууллагын мэдээлэл хараахан бүртгэгдээгүй байна. +976 7777-9000 дугаарт холбогдож мэдээллээ бүртгүүлнэ үү.
-                    </p>
-                  )}
                 </section>
               )}
 
@@ -643,6 +810,7 @@ export function Dashboard() {
                   {modal === "contact" && "Хувийн мэдээлэл засах"}
                   {modal === "username" && "Нэвтрэх нэр өөрчлөх"}
                   {modal === "password" && "Нууц үг өөрчлөх"}
+                  {modal === "organization" && (editingOrg ? "Байгууллага засах" : "Шинэ байгууллага бүртгэх")}
                 </h3>
                 <button
                   type="button"
@@ -675,6 +843,21 @@ export function Dashboard() {
                     <input className={inputCls} type="password" placeholder="Одоогийн нууц үг" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} autoComplete="current-password" />
                     <input className={inputCls} type="password" placeholder="Шинэ нууц үг" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
                     <ModalButton saving={saving} onClick={savePassword} label="Солих" />
+                  </>
+                )}
+                {modal === "organization" && (
+                  <>
+                    <input className={inputCls} placeholder="Байгууллагын нэр *" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
+                    <input className={inputCls} placeholder="Товч нэр" value={orgShortName} onChange={(e) => setOrgShortName(e.target.value)} />
+                    <input className={inputCls} placeholder="Регистрийн дугаар" value={orgRegNumber} onChange={(e) => setOrgRegNumber(e.target.value)} />
+                    <input className={inputCls} placeholder="Имэйл" value={orgEmail} onChange={(e) => setOrgEmail(e.target.value)} type="email" />
+                    <input className={inputCls} placeholder="Утас" value={orgPhone} onChange={(e) => setOrgPhone(e.target.value)} inputMode="tel" />
+                    <input className={inputCls} placeholder="Улс" value={orgCountry} onChange={(e) => setOrgCountry(e.target.value)} />
+                    <input className={inputCls} placeholder="Аймаг / Нийслэл" value={orgAimag} onChange={(e) => setOrgAimag(e.target.value)} />
+                    <input className={inputCls} placeholder="Сум / Дүүрэг" value={orgSum} onChange={(e) => setOrgSum(e.target.value)} />
+                    <input className={inputCls} placeholder="Баг / Хороо" value={orgBag} onChange={(e) => setOrgBag(e.target.value)} />
+                    <input className={inputCls} placeholder="Дэлгэрэнгүй хаяг" value={orgAddress} onChange={(e) => setOrgAddress(e.target.value)} />
+                    <ModalButton saving={saving} onClick={saveOrganization} label={editingOrg ? "Хадгалах" : "Бүртгэх"} />
                   </>
                 )}
                 {modalError && (
