@@ -567,6 +567,73 @@ export function BrokerDashboard() {
     persistContracts(next);
   };
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  const filteredContracts = useMemo(() => {
+    if (activeFilter === "Тусгай") {
+      return contracts.filter((c) => {
+        const date = c.createdAt.slice(0, 10);
+        return date >= customStart && date <= customEnd;
+      });
+    }
+    if (activeFilter === "Өдөр") {
+      return contracts.filter((c) => c.createdAt.slice(0, 10) === todayStr);
+    }
+    if (activeFilter === "Сар") {
+      const prefix = todayStr.slice(0, 7);
+      return contracts.filter((c) => c.createdAt.slice(0, 7) === prefix);
+    }
+    if (activeFilter === "Улирал") {
+      const now = new Date();
+      const year = now.getFullYear();
+      const quarter = Math.floor(now.getMonth() / 3);
+      return contracts.filter((c) => {
+        const d = new Date(c.createdAt);
+        return d.getFullYear() === year && Math.floor(d.getMonth() / 3) === quarter;
+      });
+    }
+    if (activeFilter === "Хагас жил") {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      sixMonthsAgo.setHours(0, 0, 0, 0);
+      return contracts.filter((c) => new Date(c.createdAt) >= sixMonthsAgo);
+    }
+    // "Жил" or default
+    const year = new Date().getFullYear();
+    return contracts.filter((c) => new Date(c.createdAt).getFullYear() === year);
+  }, [contracts, activeFilter, customStart, customEnd, todayStr]);
+
+  const totalSales = filteredContracts.reduce((sum, c) => sum + c.premium, 0);
+  const contractCount = filteredContracts.length;
+  const activeCompanies = new Set(contracts.map((c) => c.companyId)).size;
+
+  const DASHBOARD_STATS = useMemo(
+    () => [
+      {
+        label: "Нийт борлуулалт",
+        value: formatMNT(totalSales),
+        change: "+0%",
+        up: true,
+        sub: activeFilter === "Өдөр" ? "өнөөдөр" : activeFilter === "Сар" ? "энэ сар" : activeFilter,
+      },
+      {
+        label: "Гэрээний тоо",
+        value: String(contractCount),
+        change: "+0%",
+        up: true,
+        sub: "гэрээ",
+      },
+      {
+        label: "Идэвхтэй даатгалын компани",
+        value: String(activeCompanies || COMPANIES.length),
+        change: "+0",
+        up: true,
+        sub: "даатгагч",
+      },
+    ],
+    [totalSales, contractCount, activeCompanies, activeFilter]
+  );
+
   // Demo filter: limit monthly sales view based on selected period
   const salesByPeriod = useMemo(() => {
     if (activeFilter === "Өдөр") return MOCK_SALES.slice(6, 7);
@@ -809,7 +876,7 @@ export function BrokerDashboard() {
 
               {/* Stats */}
               <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {STATS.map((stat) => (
+                {DASHBOARD_STATS.map((stat) => (
                   <StatCard key={stat.label} stat={stat} />
                 ))}
               </div>
