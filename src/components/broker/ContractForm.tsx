@@ -22,7 +22,7 @@ import {
   Clock,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, isValidLicensePlate, formatLicensePlateInput } from "@/lib/utils";
 import { downloadContractDocx } from "@/lib/contract-docx";
 import type { Contract } from "./ContractList";
 import { PackageCompare, PACKAGES } from "./PackageCompare";
@@ -133,18 +133,18 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
 
 const MOCK_VEHICLE_REGISTRY: Record<string, VehicleInfo[]> = {
   УУ00000000: [
-    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "УБА-1234", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", typeLabel: "Джип/SUV", seats: "7", color: "Хар", category: "A", ownerSurname: "Лхагваочир", ownerName: "Энхуянга", ownerPhone: "94660906", ownerReg: "УШ02290621" },
-    { brand: "Lexus", model: "LX570", year: "2020", plate: "УББ-5678", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", typeLabel: "Джип/SUV", seats: "8", color: "Цагаан", category: "A", ownerSurname: "Бат", ownerName: "Эрдэнэ", ownerPhone: "99119911", ownerReg: "УУ11223344" },
-    { brand: "Hyundai", model: "Sonata", year: "2017", plate: "УБС-9012", vin: "KMHEC41DDBA000001", engine: "G4KJ-000000", type: "sedan", typeLabel: "Седан", seats: "5", color: "Мөнгөлөг", category: "B", ownerSurname: "Ганбат", ownerName: "Оюун", ownerPhone: "88112233", ownerReg: "УУ99887766" },
+    { brand: "Toyota", model: "Land Cruiser 200", year: "2019", plate: "1234УБА", vin: "JT3DB03E0B0000001", engine: "1VD-000000", type: "suv", typeLabel: "Джип/SUV", seats: "7", color: "Хар", category: "A", ownerSurname: "Лхагваочир", ownerName: "Энхуянга", ownerPhone: "94660906", ownerReg: "УШ02290621" },
+    { brand: "Lexus", model: "LX570", year: "2020", plate: "5678УББ", vin: "JTJHY00B0B4000001", engine: "3UR-000000", type: "suv", typeLabel: "Джип/SUV", seats: "8", color: "Цагаан", category: "A", ownerSurname: "Бат", ownerName: "Эрдэнэ", ownerPhone: "99119911", ownerReg: "УУ11223344" },
+    { brand: "Hyundai", model: "Sonata", year: "2017", plate: "9012УБС", vin: "KMHEC41DDBA000001", engine: "G4KJ-000000", type: "sedan", typeLabel: "Седан", seats: "5", color: "Мөнгөлөг", category: "B", ownerSurname: "Ганбат", ownerName: "Оюун", ownerPhone: "88112233", ownerReg: "УУ99887766" },
   ],
   УУ88888888: [
-    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "УХА-9999", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", typeLabel: "Джип/SUV", seats: "5", color: "Улаан", category: "A", ownerSurname: "Дорж", ownerName: "Баяр", ownerPhone: "99001122", ownerReg: "УУ55443322" },
+    { brand: "Hyundai", model: "Santa Fe", year: "2018", plate: "9999УХА", vin: "KMHSH81DDBU000001", engine: "D4HB-000000", type: "suv", typeLabel: "Джип/SUV", seats: "5", color: "Улаан", category: "A", ownerSurname: "Дорж", ownerName: "Баяр", ownerPhone: "99001122", ownerReg: "УУ55443322" },
   ],
   АА11111111: [
-    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "АА-1111", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", typeLabel: "Ачааны тэрэг", seats: "2", color: "Цэнхэр", category: "C", ownerSurname: "Болд", ownerName: "Эрдэнэ", ownerPhone: "95556677", ownerReg: "АА99887766" },
+    { brand: "Mercedes-Benz", model: "Actros 1845", year: "2021", plate: "1111ААА", vin: "WDB9634231L000001", engine: "OM471-000000", type: "truck", typeLabel: "Ачааны тэрэг", seats: "2", color: "Цэнхэр", category: "C", ownerSurname: "Болд", ownerName: "Эрдэнэ", ownerPhone: "95556677", ownerReg: "АА99887766" },
   ],
   ББ22222222: [
-    { brand: "Toyota", model: "Hiace", year: "2019", plate: "ББ-2222", vin: "JTFLA11H0KB000001", engine: "2TR-000000", type: "minivan", typeLabel: "Микроавтобус", seats: "14", color: "Саарал", category: "B", ownerSurname: "Баатар", ownerName: "Сүх", ownerPhone: "99113344", ownerReg: "ББ11223344" },
+    { brand: "Toyota", model: "Hiace", year: "2019", plate: "2222БББ", vin: "JTFLA11H0KB000001", engine: "2TR-000000", type: "minivan", typeLabel: "Микроавтобус", seats: "14", color: "Саарал", category: "B", ownerSurname: "Баатар", ownerName: "Сүх", ownerPhone: "99113344", ownerReg: "ББ11223344" },
   ],
   ХХ00000000: [
     { brand: "MAN", model: "TGS 33.440", year: "2020", plate: "ХҮ-0000", vin: "WMA06SZZ5GP000001", engine: "D2676-000000", type: "heavy_truck", typeLabel: "Хүнд даацын машин", seats: "2", color: "Улаан", category: "E", ownerSurname: "Сүх", ownerName: "Мөнх", ownerPhone: "99887766", ownerReg: "ХХ11223344" },
@@ -316,7 +316,7 @@ function getMockCustomers(reg: string): CustomerInfo[] {
 }
 
 const TEST_REGISTRATION_NUMBERS = ["УШ02290621", "УУ11223344", "УУ99887766", "УУ00000000", "УУ88888888", "АА11111111", "ББ22222222", "ХХ00000000", "ХХ11111111", "УБ12345678", "ОР55555555", "ДХ77777777"];
-const TEST_PLATE_NUMBERS = ["УБА-1234", "УББ-5678", "УБС-9012", "УХА-9999", "АА-1111", "ББ-2222", "ХҮ-0000", "ХҮ-1111"];
+const TEST_PLATE_NUMBERS = ["1234УБА", "5678УББ", "9012УБС", "9999УХА", "1111ААА", "2222БББ", "0000ХҮ", "1111ХҮ"];
 
 const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", typeLabel: "", seats: "", color: "" };
 
@@ -568,8 +568,8 @@ export function ContractForm({
     valuationNum > 0 &&
     (!isAuto ||
       (customerType === "individual"
-        ? customerReg && licensePlate
-        : legalEntityReg && legalEntityName && legalEntityAddress && legalEntityPhone && licensePlate));
+        ? customerReg && isValidLicensePlate(licensePlate)
+        : legalEntityReg && legalEntityName && legalEntityAddress && legalEntityPhone && isValidLicensePlate(licensePlate)));
 
   const generateContractNumber = () => {
     const now = new Date();
@@ -1143,18 +1143,23 @@ export function ContractForm({
                           type="text"
                           value={licensePlate}
                           onChange={(e) => {
-                            setLicensePlate(e.target.value);
+                            setLicensePlate(formatLicensePlateInput(e.target.value));
                             setVehicleSearchOpen(false);
                             setVehicleSearchError(false);
                           }}
-                          placeholder="УБА-1234"
-                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                          placeholder="1234UBA"
+                            className={cn(
+                              "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:ring-4",
+                              touched && licensePlate && !isValidLicensePlate(licensePlate)
+                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/10"
+                                : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/10"
+                            )}
                           />
                           <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                         </div>
                         <button
                           type="button"
-                          disabled={vehicleSearchLoading}
+                          disabled={vehicleSearchLoading || !isValidLicensePlate(licensePlate)}
                           onClick={() => {
                             if (!licensePlate) return;
                             setVehicleSearchLoading(true);
@@ -1177,6 +1182,9 @@ export function ContractForm({
                           )}
                         </button>
                       </div>
+                      {touched && licensePlate && !isValidLicensePlate(licensePlate) && (
+                        <p className="text-xs text-red-400">Формат: 4 тоо + 3 үсэг (жишээ: 1234UBA)</p>
+                      )}
                       <p className="text-[10px] text-slate-500">
                         Тестийн: {TEST_PLATE_NUMBERS.slice(0, 4).join(", ")}
                       </p>
@@ -1578,17 +1586,22 @@ export function ContractForm({
                             type="text"
                             value={licensePlate}
                             onChange={(e) => {
-                              setLicensePlate(e.target.value);
+                              setLicensePlate(formatLicensePlateInput(e.target.value));
                               setVehicleSearchOpen(false);
                             }}
-                            placeholder="УБА-1234"
-                            className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                            placeholder="1234UBA"
+                            className={cn(
+                              "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:ring-4",
+                              touched && licensePlate && !isValidLicensePlate(licensePlate)
+                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/10"
+                                : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/10"
+                            )}
                           />
                           <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                         </div>
                         <button
                           type="button"
-                          disabled={vehicleSearchLoading}
+                          disabled={vehicleSearchLoading || !isValidLicensePlate(licensePlate)}
                           onClick={() => {
                             if (!licensePlate) return;
                             setVehicleSearchLoading(true);
@@ -1608,6 +1621,9 @@ export function ContractForm({
                           )}
                         </button>
                       </div>
+                      {touched && licensePlate && !isValidLicensePlate(licensePlate) && (
+                        <p className="text-xs text-red-400">Формат: 4 тоо + 3 үсэг (жишээ: 1234UBA)</p>
+                      )}
 
                       {vehicleSearchOpen && (
                         <div className="relative z-20 mt-2">

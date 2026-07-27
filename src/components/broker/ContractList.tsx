@@ -22,7 +22,7 @@ import {
   Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, isValidLicensePlate, formatLicensePlateInput } from "@/lib/utils";
 import { downloadContractDocx } from "@/lib/contract-docx";
 
 function formatMNT(n: number) {
@@ -574,10 +574,18 @@ export function ContractList({
                   <input
                     type="text"
                     value={plateInput}
-                    onChange={(e) => setPlateInput(e.target.value)}
-                    placeholder="УБА-1234"
-                    className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                    onChange={(e) => setPlateInput(formatLicensePlateInput(e.target.value))}
+                    placeholder="1234UBA"
+                    className={cn(
+                      "w-full rounded-xl border bg-slate-800/60 px-3 py-2.5 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:ring-2",
+                      plateInput && !isValidLicensePlate(plateInput)
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/10"
+                        : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/10"
+                    )}
                   />
+                  {plateInput && !isValidLicensePlate(plateInput) && (
+                    <p className="text-xs text-red-400">Формат: 4 тоо + 3 үсэг (жишээ: 1234UBA)</p>
+                  )}
                 </div>
               </div>
 
@@ -591,11 +599,12 @@ export function ContractList({
                 </button>
                 <button
                   type="button"
+                  disabled={!isValidLicensePlate(plateInput)}
                   onClick={() => {
                     onUpdate?.({ ...plateContract, licensePlate: plateInput });
                     setPlateModalOpen(false);
                   }}
-                  className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600"
+                  className="rounded-lg bg-indigo-500 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Хадгалах
                 </button>
@@ -683,6 +692,14 @@ export function ContractList({
                     {imagePreviews.map((src, idx) => (
                       <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-700/60 bg-slate-900/40">
                         <img src={src} alt={`Зураг ${idx + 1}`} className="h-full w-full object-cover" />
+                        <a
+                          href={src}
+                          download={`contract-image-${idx + 1}.png`}
+                          className="absolute bottom-1.5 left-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/80 text-white opacity-0 transition-opacity hover:bg-indigo-500 group-hover:opacity-100"
+                          title="Татах"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </a>
                         <button
                           type="button"
                           onClick={() => setImagePreviews((prev) => prev.filter((_, i) => i !== idx))}
