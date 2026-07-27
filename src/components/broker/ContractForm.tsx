@@ -293,15 +293,19 @@ export function ContractForm({
     return sum(equipmentList) + sum(godList) + sum(ajdList) + sum(customFieldsList);
   }, [equipmentList, godList, ajdList, customFieldsList]);
 
+  const packageRate = packageId === "Багц 1" ? 1 : packageId === "Багц 2" ? 0.8 : 0;
+  const years = duration === "1 Жил" ? 1 : duration === "2 Жил" ? 2 : duration === "3 Жил" ? 3 : 1;
+  const premiumRate = packageRate * years;
+
   const basePremium = useMemo(() => {
-    if (!selectedCompany || !valuationNum) return 0;
-    return Math.round((valuationNum * selectedCompany.rate) / 100);
-  }, [valuationNum, selectedCompany]);
+    if (!selectedCompany || !valuationNum || !packageId) return 0;
+    return Math.round((valuationNum * premiumRate) / 100);
+  }, [valuationNum, premiumRate, packageId, selectedCompany]);
 
   const discountAmount = Math.round((basePremium * discountNum) / 100);
   const totalPremium = basePremium - discountAmount + additionalTotal;
 
-  const isValid = company && category && subCategory && product && valuationNum > 0;
+  const isValid = company && category && subCategory && product && packageId && valuationNum > 0;
 
   return (
     <div className="h-full bg-[#0b0f19] p-4 text-slate-200 lg:p-6">
@@ -1091,7 +1095,7 @@ export function ContractForm({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-400">Хураамжийн хувь:</span>
-                  <span className="text-sm font-bold text-indigo-300">{selectedCompany ? `${selectedCompany.rate}%` : "0%"}</span>
+                  <span className="text-sm font-bold text-indigo-300">{packageId ? `${premiumRate}%` : "0%"}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-400">Үндсэн хураамж:</span>
@@ -1138,7 +1142,7 @@ export function ContractForm({
                     number: `Г-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
                     companyId: company,
                     companyName: selectedCompany.name,
-                    companyRate: selectedCompany.rate,
+                    companyRate: premiumRate,
                     categoryId: category,
                     categoryName: selectedCategory.name,
                     subCategory,
