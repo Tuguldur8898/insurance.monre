@@ -295,12 +295,12 @@ export function ContractForm({
 
   const packageRate = packageId === "Багц 1" ? 1 : packageId === "Багц 2" ? 0.8 : 0;
   const years = duration === "1 Жил" ? 1 : duration === "2 Жил" ? 2 : duration === "3 Жил" ? 3 : 1;
-  const premiumRate = packageRate * years;
+  const premiumRate = packageRate;
 
   const basePremium = useMemo(() => {
     if (!selectedCompany || !valuationNum || !packageId) return 0;
-    return Math.round((valuationNum * premiumRate) / 100);
-  }, [valuationNum, premiumRate, packageId, selectedCompany]);
+    return Math.round((valuationNum * premiumRate * years) / 100);
+  }, [valuationNum, premiumRate, years, packageId, selectedCompany]);
 
   const discountAmount = Math.round((basePremium * discountNum) / 100);
   const totalPremium = basePremium - discountAmount + additionalTotal;
