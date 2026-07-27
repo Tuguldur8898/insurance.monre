@@ -54,7 +54,7 @@ type CPUser = {
 };
 
 type TabId = "personal" | "company" | "sign" | "docs";
-type ModalId = "contact" | "username" | "password" | "organization" | null;
+type ModalId = "contact" | "username" | "password" | "organization" | "employee" | null;
 
 type Organization = {
   id: string;
@@ -68,6 +68,17 @@ type Organization = {
   sum?: string;
   bag?: string;
   address?: string;
+  createdAt: string;
+};
+
+type Employee = {
+  id: string;
+  orgId: string;
+  name: string;
+  phone: string;
+  email?: string;
+  role: "admin" | "broker";
+  password?: string;
   createdAt: string;
 };
 
@@ -165,6 +176,24 @@ export function Dashboard() {
     }
   });
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  const [employees, setEmployees] = useState<Employee[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem("ins-monre-employees");
+      return raw ? (JSON.parse(raw) as Employee[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+
+  const [empName, setEmpName] = useState("");
+  const [empPhone, setEmpPhone] = useState("");
+  const [empEmail, setEmpEmail] = useState("");
+  const [empRole, setEmpRole] = useState<"admin" | "broker">("broker");
+  const [empPassword, setEmpPassword] = useState("");
 
   const [orgName, setOrgName] = useState("");
   const [orgShortName, setOrgShortName] = useState("");
@@ -176,6 +205,61 @@ export function Dashboard() {
   const [orgSum, setOrgSum] = useState("");
   const [orgBag, setOrgBag] = useState("");
   const [orgAddress, setOrgAddress] = useState("");
+
+  const persistEmployees = (next: Employee[]) => {
+    setEmployees(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ins-monre-employees", JSON.stringify(next));
+    }
+  };
+
+  const openEmployeeModal = (orgId: string, employee?: Employee) => {
+    setSelectedOrgId(orgId);
+    if (employee) {
+      setEditingEmployee(employee);
+      setEmpName(employee.name);
+      setEmpPhone(employee.phone);
+      setEmpEmail(employee.email || "");
+      setEmpRole(employee.role);
+      setEmpPassword(employee.password || "");
+    } else {
+      setEditingEmployee(null);
+      setEmpName("");
+      setEmpPhone("");
+      setEmpEmail("");
+      setEmpRole("broker");
+      setEmpPassword("");
+    }
+    setModal("employee");
+    setModalError("");
+  };
+
+  const saveEmployee = () => {
+    if (!empName.trim() || !empPhone.trim() || !empPassword.trim() || !selectedOrgId) {
+      setModalError("Нэр, утас, нууц үг бүгдийг оруулна уу");
+      return;
+    }
+    const payload: Employee = {
+      id: editingEmployee?.id || crypto.randomUUID?.() || `${Date.now()}`,
+      orgId: selectedOrgId,
+      name: empName.trim(),
+      phone: empPhone.trim(),
+      email: empEmail.trim() || undefined,
+      role: empRole,
+      password: empPassword.trim(),
+      createdAt: editingEmployee?.createdAt || new Date().toISOString(),
+    };
+    const next = editingEmployee
+      ? employees.map((e) => (e.id === editingEmployee.id ? payload : e))
+      : [payload, ...employees];
+    persistEmployees(next);
+    setModal(null);
+  };
+
+  const deleteEmployee = (id: string) => {
+    if (!confirm("Энэ ажилтаныг устгах уу?")) return;
+    persistEmployees(employees.filter((e) => e.id !== id));
+  };
 
   const persistOrganizations = (next: Organization[]) => {
     setOrganizations(next);
@@ -670,66 +754,137 @@ export function Dashboard() {
                       </div>
                     ) : (
                       <div className="grid gap-4">
-                        {organizations.map((org) => (
-                          <div
-                            key={org.id}
-                            className="flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-colors hover:border-white/[0.12] sm:flex-row sm:items-start sm:justify-between"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky/20 to-brand/20 text-sky">
-                                  <Building2 className="h-5 w-5" />
+                        {organizations.map((org) => {
+                          const orgEmployees = employees.filter((e) => e.orgId === org.id);
+                          const expanded = selectedOrgId === org.id;
+                          return (
+                            <div
+                              key={org.id}
+                              className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-colors hover:border-white/[0.12]"
+                            >
+                              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky/20 to-brand/20 text-sky">
+                                      <Building2 className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-bold text-white">{org.name}</p>
+                                      {org.shortName && <p className="text-[11px] text-slate-500">{org.shortName}</p>}
+                                    </div>
+                                  </div>
+                                  <div className="mt-4 grid gap-y-2 gap-x-4 text-xs sm:grid-cols-2">
+                                    {org.regNumber && (
+                                      <div className="flex items-center gap-1.5 text-slate-400">
+                                        <FileText className="h-3 w-3" />
+                                        <span>{org.regNumber}</span>
+                                      </div>
+                                    )}
+                                    {org.email && (
+                                      <div className="flex items-center gap-1.5 text-slate-400">
+                                        <Mail className="h-3 w-3" />
+                                        <span>{org.email}</span>
+                                      </div>
+                                    )}
+                                    {org.phone && (
+                                      <div className="flex items-center gap-1.5 text-slate-400">
+                                        <Phone className="h-3 w-3" />
+                                        <span>{org.phone}</span>
+                                      </div>
+                                    )}
+                                    {org.address && (
+                                      <div className="flex items-center gap-1.5 text-slate-400">
+                                        <MapPin className="h-3 w-3" />
+                                        <span className="truncate">{[org.aimag, org.sum, org.bag, org.address].filter(Boolean).join(", ")}</span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="text-sm font-bold text-white">{org.name}</p>
-                                  {org.shortName && <p className="text-[11px] text-slate-500">{org.shortName}</p>}
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedOrgId(expanded ? null : org.id)}
+                                    className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-sky/30 hover:text-sky"
+                                  >
+                                    <Users className="h-3.5 w-3.5" />
+                                    Ажилтнууд ({orgEmployees.length})
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openOrgModal(org)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-colors hover:border-sky/30 hover:text-sky"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteOrganization(org.id)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-colors hover:border-red-400/30 hover:text-red-400"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
                                 </div>
                               </div>
-                              <div className="mt-4 grid gap-y-2 gap-x-4 text-xs sm:grid-cols-2">
-                                {org.regNumber && (
-                                  <div className="flex items-center gap-1.5 text-slate-400">
-                                    <FileText className="h-3 w-3" />
-                                    <span>{org.regNumber}</span>
+
+                              {expanded && (
+                                <div className="mt-5 border-t border-white/[0.07] pt-5">
+                                  <div className="mb-4 flex items-center justify-between">
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Ажилтнууд</h3>
+                                    <button
+                                      type="button"
+                                      onClick={() => openEmployeeModal(org.id)}
+                                      className="flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-[10px] font-bold text-white transition-all hover:bg-brand-dark"
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                      Ажилтан нэмэх
+                                    </button>
                                   </div>
-                                )}
-                                {org.email && (
-                                  <div className="flex items-center gap-1.5 text-slate-400">
-                                    <Mail className="h-3 w-3" />
-                                    <span>{org.email}</span>
-                                  </div>
-                                )}
-                                {org.phone && (
-                                  <div className="flex items-center gap-1.5 text-slate-400">
-                                    <Phone className="h-3 w-3" />
-                                    <span>{org.phone}</span>
-                                  </div>
-                                )}
-                                {org.address && (
-                                  <div className="flex items-center gap-1.5 text-slate-400">
-                                    <MapPin className="h-3 w-3" />
-                                    <span className="truncate">{[org.aimag, org.sum, org.bag, org.address].filter(Boolean).join(", ")}</span>
-                                  </div>
-                                )}
-                              </div>
+                                  {orgEmployees.length === 0 ? (
+                                    <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-6 text-center text-xs text-slate-500">Ажилтан бүртгэгдээгүй байна</p>
+                                  ) : (
+                                    <div className="grid gap-2">
+                                      {orgEmployees.map((emp) => (
+                                        <div
+                                          key={emp.id}
+                                          className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                                        >
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                              <p className="text-sm font-semibold text-white">{emp.name}</p>
+                                              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold", emp.role === "admin" ? "bg-amber-500/10 text-amber-400" : "bg-sky/10 text-sky")}>
+                                                {emp.role === "admin" ? "Админ" : "Брокер"}
+                                              </span>
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-slate-500">
+                                              <span>{emp.phone}</span>
+                                              {emp.email && <span>{emp.email}</span>}
+                                            </div>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <button
+                                              type="button"
+                                              onClick={() => openEmployeeModal(org.id, emp)}
+                                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:border-sky/30 hover:text-sky"
+                                            >
+                                              <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => deleteEmployee(emp.id)}
+                                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:border-red-400/30 hover:text-red-400"
+                                            >
+                                              <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => openOrgModal(org)}
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-colors hover:border-sky/30 hover:text-sky"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => deleteOrganization(org.id)}
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-colors hover:border-red-400/30 hover:text-red-400"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -811,6 +966,7 @@ export function Dashboard() {
                   {modal === "username" && "Нэвтрэх нэр өөрчлөх"}
                   {modal === "password" && "Нууц үг өөрчлөх"}
                   {modal === "organization" && (editingOrg ? "Байгууллага засах" : "Шинэ байгууллага бүртгэх")}
+                  {modal === "employee" && (editingEmployee ? "Ажилтан засах" : "Шинэ ажилтан нэмэх")}
                 </h3>
                 <button
                   type="button"
@@ -858,6 +1014,23 @@ export function Dashboard() {
                     <input className={inputCls} placeholder="Баг / Хороо" value={orgBag} onChange={(e) => setOrgBag(e.target.value)} />
                     <input className={inputCls} placeholder="Дэлгэрэнгүй хаяг" value={orgAddress} onChange={(e) => setOrgAddress(e.target.value)} />
                     <ModalButton saving={saving} onClick={saveOrganization} label={editingOrg ? "Хадгалах" : "Бүртгэх"} />
+                  </>
+                )}
+                {modal === "employee" && (
+                  <>
+                    <input className={inputCls} placeholder="Ажилтны нэр *" value={empName} onChange={(e) => setEmpName(e.target.value)} />
+                    <input className={inputCls} placeholder="Утас (нэвтрэх нэр) *" value={empPhone} onChange={(e) => setEmpPhone(e.target.value)} inputMode="tel" />
+                    <input className={inputCls} placeholder="Имэйл" value={empEmail} onChange={(e) => setEmpEmail(e.target.value)} type="email" />
+                    <select
+                      value={empRole}
+                      onChange={(e) => setEmpRole(e.target.value as "admin" | "broker")}
+                      className={inputCls}
+                    >
+                      <option value="broker">Брокер</option>
+                      <option value="admin">Байгууллагын админ</option>
+                    </select>
+                    <input className={inputCls} type="password" placeholder="Нууц үг *" value={empPassword} onChange={(e) => setEmpPassword(e.target.value)} autoComplete="new-password" />
+                    <ModalButton saving={saving} onClick={saveEmployee} label={editingEmployee ? "Хадгалах" : "Нэмэх"} />
                   </>
                 )}
                 {modalError && (
