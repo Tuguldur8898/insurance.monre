@@ -550,6 +550,30 @@ export function BrokerDashboard() {
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
   const [pendingPaymentContract, setPendingPaymentContract] = useState<Contract | null>(null);
 
+  const [brokerOrgs, setBrokerOrgs] = useState<{ id: string; name: string; shortName?: string }[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem("ins-monre-organizations");
+      const parsed = raw ? (JSON.parse(raw) as { id: string; name: string; shortName?: string }[]) : [];
+      return parsed;
+    } catch {
+      return [];
+    }
+  });
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem("ins-monre-selected-org");
+    } catch {
+      return null;
+    }
+  });
+  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
+
+  const selectedOrg = brokerOrgs.find((o) => o.id === selectedOrgId) || brokerOrgs[0];
+  const orgDisplayName = selectedOrg?.name || "Алтансан актив ББСБ";
+  const orgShortName = selectedOrg?.shortName || orgDisplayName;
+
   const persistContracts = (next: Contract[]) => {
     setContracts(next);
     if (typeof window !== "undefined") {
@@ -809,10 +833,46 @@ export function BrokerDashboard() {
           )}
         >
           <div className={cn("mb-4 px-4", collapsed && "md:hidden")}>
-            <div className="flex items-center gap-2 rounded-lg bg-indigo-500/10 px-3 py-2">
-              <Building2 className="h-4 w-4 text-indigo-400" />
-              <span className="text-xs font-bold text-indigo-300">Алтансан актив ББСБ</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => setOrgDropdownOpen((o) => !o)}
+              className="flex w-full items-center justify-between rounded-lg bg-indigo-500/10 px-3 py-2 transition-colors hover:bg-indigo-500/20"
+            >
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Building2 className="h-4 w-4 shrink-0 text-indigo-400" />
+                <span className="truncate text-xs font-bold text-indigo-300">{orgDisplayName}</span>
+              </div>
+              <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-indigo-400 transition-transform", orgDropdownOpen && "rotate-180")} />
+            </button>
+
+            {orgDropdownOpen && (
+              <div className="mt-2 space-y-1 rounded-lg border border-slate-700/50 bg-slate-900/80 p-1.5">
+                {brokerOrgs.length === 0 ? (
+                  <p className="px-2 py-1.5 text-[10px] text-slate-500">Байгууллага бүртгэгдээгүй</p>
+                ) : (
+                  brokerOrgs.map((org) => (
+                    <button
+                      key={org.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedOrgId(org.id);
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("ins-monre-selected-org", org.id);
+                        }
+                        setOrgDropdownOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors",
+                        selectedOrgId === org.id ? "bg-indigo-500/20 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      )}
+                    >
+                      <Building2 className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{org.name}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-1 flex-col gap-1 px-3">
@@ -930,7 +990,7 @@ export function BrokerDashboard() {
                     Өдрийн мэнд, Л. Энхуянга
                   </h1>
                   <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-                    <span className="text-indigo-400">Алтансан актив ББСБ</span>
+                    <span className="text-indigo-400">{orgDisplayName}</span>
                     <span>·</span>
                     <span className="inline-flex items-center gap-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
