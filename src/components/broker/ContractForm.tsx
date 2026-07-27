@@ -233,7 +233,18 @@ function getMockVehiclesByPlate(plate: string): VehicleInfo[] {
   ];
 }
 
+const MOCK_CUSTOMER_REGISTRY: Record<string, CustomerInfo> = {
+  УШ02290621: { reg: "УШ02290621", surname: "Лхагваочир", name: "Энхуянга", phone: "94660906" },
+  УУ11223344: { reg: "УУ11223344", surname: "Бат", name: "Эрдэнэ", phone: "99119911" },
+  УУ99887766: { reg: "УУ99887766", surname: "Ганбат", name: "Оюун", phone: "88112233" },
+};
+
 function getMockCustomers(reg: string): CustomerInfo[] {
+  const normalized = reg.trim().toUpperCase();
+  // Exact match in dedicated customer registry
+  if (MOCK_CUSTOMER_REGISTRY[normalized]) {
+    return [MOCK_CUSTOMER_REGISTRY[normalized]];
+  }
   // Exact match in known registry vehicles by ownerReg
   const matches: CustomerInfo[] = [];
   Object.values(MOCK_VEHICLE_REGISTRY).forEach((vehicles) => {
@@ -259,7 +270,7 @@ function getMockCustomers(reg: string): CustomerInfo[] {
   return [{ reg, surname, name, phone }];
 }
 
-const TEST_REGISTRATION_NUMBERS = ["УУ00000000", "УУ88888888", "АА11111111", "ББ22222222", "ХХ00000000", "ХХ11111111", "УБ12345678", "ОР55555555", "ДХ77777777"];
+const TEST_REGISTRATION_NUMBERS = ["УШ02290621", "УУ11223344", "УУ99887766", "УУ00000000", "УУ88888888", "АА11111111", "ББ22222222", "ХХ00000000", "ХХ11111111", "УБ12345678", "ОР55555555", "ДХ77777777"];
 const TEST_PLATE_NUMBERS = ["УБА-1234", "УББ-5678", "УБС-9012", "УХА-9999", "АА-1111", "ББ-2222", "ХҮ-0000", "ХҮ-1111"];
 
 const DEFAULT_VEHICLE = { brand: "", model: "", year: "", plate: "", vin: "", engine: "", type: "", typeLabel: "", seats: "", color: "" };
@@ -695,6 +706,9 @@ export function ContractForm({
                         )}
                       </button>
                     </div>
+                    <p className="text-[10px] text-slate-500">
+                      Тестийн РД: {TEST_REGISTRATION_NUMBERS.slice(0, 6).join(", ")}...
+                    </p>
 
                     {customerSearchOpen && (
                       <div className="relative z-20 mt-2">
