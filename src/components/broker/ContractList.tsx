@@ -15,6 +15,11 @@ import {
   Calendar,
   Filter,
   Inbox,
+  Pencil,
+  Image,
+  FileText,
+  X,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { downloadContractDocx } from "@/lib/contract-docx";
@@ -381,40 +386,51 @@ export function ContractList({
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
-                          title="Харах"
+                          onClick={() => downloadContractDocx(c)}
+                          className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 transition-all hover:bg-blue-500 hover:text-white"
+                          title="Татах"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 transition-all hover:bg-amber-500 hover:text-white"
+                          title="Засах"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400 transition-all hover:bg-sky-500 hover:text-white"
+                          title="Дэлгэрэнгүй"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
-                          onClick={() => downloadContractDocx(c)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
-                          title="Word татах"
+                          className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 transition-all hover:bg-emerald-500 hover:text-white"
+                          title="Зураг"
                         >
-                          <FileDown className="h-4 w-4" />
+                          <Image className="h-4 w-4" />
                         </button>
-                        {c.status !== "paid" && onPay && (
-                          <button
-                            type="button"
-                            onClick={() => onPay(c.id)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-violet-400 transition-colors hover:bg-violet-500/10"
-                            title="Төлөх"
-                          >
-                            <Receipt className="h-4 w-4" />
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/15 text-teal-400 transition-all hover:bg-teal-500 hover:text-white"
+                          title="Баримт"
+                        >
+                          <FileText className="h-4 w-4" />
+                        </button>
                         {onDelete && (
                           <button
                             type="button"
                             onClick={() => onDelete(c.id)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 transition-colors hover:bg-red-500/10"
+                            className="group relative flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15 text-red-400 transition-all hover:bg-red-500 hover:text-white"
                             title="Устгах"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <X className="h-4 w-4" />
                           </button>
                         )}
                       </div>
