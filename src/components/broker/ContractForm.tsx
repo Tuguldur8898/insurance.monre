@@ -995,19 +995,20 @@ export function ContractForm({
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-300">
-                        Улсын дугаар <span className="text-red-400">*</span>
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            value={licensePlate}
-                            onChange={(e) => {
-                              setLicensePlate(e.target.value);
-                              setVehicleSearchOpen(false);
-                            }}
-                            placeholder="УБА-1234"
+                    <label className="text-xs font-semibold text-slate-300">
+                      Улсын дугаар <span className="text-red-400">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={licensePlate}
+                          onChange={(e) => {
+                            setLicensePlate(e.target.value);
+                            setVehicleSearchOpen(false);
+                            setVehicleSearchError(false);
+                          }}
+                          placeholder="УБА-1234"
                             className="w-full rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5 pl-9 text-sm font-bold uppercase text-white placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                           />
                           <FileDigit className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -1544,7 +1545,7 @@ export function ContractForm({
 
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-300">
-                      Үнсэн дугаар <span className="text-red-400">*</span>
+                      Улсын дугаар <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1612,7 +1613,7 @@ export function ContractForm({
                     subCategory === "Хүнд даацын тээврийн хэрэгслийн даатгал") && (
                     <>
                       <div className="space-y-2 sm:col-span-2">
-                        <label className="text-xs font-semibold text-slate-300">Даатгуулах машины улиан дугаар</label>
+                        <label className="text-xs font-semibold text-slate-300">Даатгуулах машины улсын дугаар</label>
                         <input
                           type="text"
                           value={licensePlate}
